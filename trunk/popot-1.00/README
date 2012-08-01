@@ -1,0 +1,24 @@
+===============================================================================
+                      Popot : C++ POPulation based Optimization Toolbox
+                                 (c) Jeremy Fix 2011-2012
+===============================================================================
+
+Popot is a C++ library implementing various population based optimization algorithms. It is provided with several examples.
+
+
+I/ Installation
+---------------
+
+Please read INSTALL.
+
+II/ Documentation
+-----------------
+
+The documentation is available from the doc/ directory.
+The doxygen documentation is also available online on the github repository.
+
+III/ How to contribute
+----------------------
+
+Sending feedbacks on bugs/improvements
+Suggesting/Implementing new algorithms, ..
