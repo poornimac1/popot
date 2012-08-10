@@ -11,7 +11,7 @@ typedef popot::rng::JKissRNG RNG_GENERATOR;
 
 // Define our problem
 // here Rosenbrock in 30 dimensions (see problems.h)
-typedef popot::problems::SPSO2011::F2<30> Problem;
+typedef popot::problems::Rosenbrock<30> Problem;
 
 // Define our initializers for the position and velocity
 typedef popot::PSO::initializer::PositionUniformRandom PositionInit;
