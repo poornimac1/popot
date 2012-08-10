@@ -2,7 +2,7 @@
 include_directories (${CMAKE_SOURCE_DIR}/src)
 
 # Define the libs used to compile the examples
-set(LIBS_FOR_EXAMPLE popot)
+set(LIBS_FOR_EXAMPLE popot ${GSL_LIBRARIES})
 
 # Define our examples to compile
 set(USAGE_EXAMPLES example-000 example-001 example-002 example-003)

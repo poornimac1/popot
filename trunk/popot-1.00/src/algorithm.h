@@ -50,9 +50,13 @@ namespace popot
       public:
 	int epoch;
 
+	int nb_new_neigh;
+
       public:
 	Base(void)
 	  {
+	    nb_new_neigh = 0;
+
 	    swarm_size = TOPOLOGY::size();
 
 	    // Declare our particles
@@ -152,20 +156,20 @@ namespace popot
 
 	  // Update the best particle the whole swarm ever had
 	  // in case the fitnesses are all the same, the best particle is choosen randomly among the particles
-	  double old_best_fitness = best_particle.getFitness();
-
-	  //bool fitnesses_all_the_same = true;
-	  best_particle = *(neighborhoods[0]->getBest());
-	  for(unsigned int i = 1 ; i < neighborhoods.size() ; ++i)
+	  bool regenerate_neighborhood = true;
+	  for(unsigned int i = 0 ; i < neighborhoods.size() ; ++i)
 	    if(neighborhoods[i]->getBest()->compare(&best_particle) < 0)
-	      best_particle = *(neighborhoods[i]->getBest());
+	      {
+		best_particle = *(neighborhoods[i]->getBest());
+		regenerate_neighborhood = false;
+	      }
 
-	  double new_best_fitness = best_particle.getFitness();
-	  if(new_best_fitness >= old_best_fitness)
+	  if(regenerate_neighborhood)
 	    {
 	      // We consider that there is no improvement in the best particle
 	      // and ask the topology if it wants to regenerate its topology
 	      TOPOLOGY::regenerateNeighborhoods(particles, neighborhoods, neighborhood_membership);
+	      nb_new_neigh ++;
 	    }
 
 	  epoch++;

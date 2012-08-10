@@ -101,6 +101,20 @@ namespace popot
       }
     };
 
+    class BestParticleNotInitialized: public Any
+    {
+
+    public:
+      BestParticleNotInitialized() : Any() {}
+      virtual std::string what(void)
+      {
+	std::ostringstream s;
+	s << "Exception : best particle not initialized, call findBest before updateBest ! ";
+	return s.str();
+      }
+    };
+
+
 
   }; // class Exception
 } // namespace popot

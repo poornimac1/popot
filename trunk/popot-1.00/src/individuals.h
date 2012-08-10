@@ -73,6 +73,7 @@ namespace popot
     virtual ~Vector(void)
       {
 	delete[] values;
+	values = 0;
       }
 
 
@@ -113,48 +114,6 @@ namespace popot
     {
       return values;
     }
-
-    /**
-     * Sum of two vectors
-     */
-    Vector operator+ (const Vector& b) const
-    {
-      // No need to check the dimensions
-      // they would be of different types
-      Vector res;
-      for(int i = 0 ; i < SIZE ; ++i)
-	res.setValueAt(i, getValueAt(i) + b.getValueAt(i));
-      return res;
-    }
-
-    /**
-     * In-place Sum of two vectors
-     */  
-    Vector& operator+=(const Vector& b)
-      {
-	for(int i = 0 ; i < SIZE ; ++i)
-	  setValueAt(i, getValueAt(i) + b.getValueAt(i));
-	return *this;
-      }
-      
-    /**
-     * Right Multiplication by a constant
-     */ 
-    Vector operator* (double b) const
-      {
-	Vector res;
-	for(int i = 0 ; i < SIZE ; ++i)
-	  res.setValueAt(i, b * getValueAt(i));
-	return res;
-      }
-      
-    /**
-     * Left-Multiplication by a constant
-     */ 
-    friend Vector operator*(double a, const Vector&b) 
-      {
-	return b * a;
-      }
 
     /**
      * Method for displaying a vector, fills in the stream
@@ -230,14 +189,10 @@ namespace popot
 	   */
 	  virtual void initPosition()
 	  {
-	    double bounds[2];
-	    for(int i = 0 ; i < _dimension ; ++i)
-	      {
-		bounds[0] = PROBLEM::get_lbound(i);
-		bounds[1] = PROBLEM::get_ubound(i);
-		// The position is initialized within the bounds
-		setPosition(i, POSITION_INITIALIZER::init(bounds));
-	      }
+	    POSITION_INITIALIZER::init(PROBLEM::get_lbound, 
+				       PROBLEM::get_ubound,
+				       _dimension,
+				       this->getValuesPtr());
 	  }
 
 	  /**
@@ -245,20 +200,14 @@ namespace popot
 	   */
 	  double getPosition(int i)
 	  {
-	    if(i >= 0 && i < _dimension)
-	      return this->getValueAt(i);
-	    else
-	      throw popot::Exception::IndexOutOfRange(i, _dimension);
+	    return this->getValueAt(i);
 	  }
 	  /**
 	   * Setter on the position
 	   */
 	  void setPosition(int i, double val)
 	  {
-	    if(i >= 0 && i < _dimension)
-	      this->setValueAt(i, val);
-	    else
-	      throw popot::Exception::IndexOutOfRange(i, _dimension);
+	    this->setValueAt(i, val);
 	  }
 
 	  /**
@@ -364,6 +313,17 @@ namespace popot
 	      _neighborhood = new NeighborhoodType();
 	    }
 
+	  Particle(const Particle& other)
+	    {
+	      _velocity = new double[TSuper::_dimension];
+	      for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		_velocity[i] = other.getVelocity(i);
+
+	      _neighborhood = new NeighborhoodType();
+	      for(int i = 0 ; i < other.getNeighborhood()->size() ; ++i)
+		_neighborhood->add(other.getNeighborhood()->get(i));
+	    }
+
 	  virtual ~Particle(void)
 	    {
 	      delete[] _velocity;
@@ -444,14 +404,6 @@ namespace popot
 		    this->setVelocity(i,0);
 		  }
 	      }
-	  }
-
-	  /**
-	   * Bounds the velocity of the particle
-	   */
-	  virtual void boundVelocity(void)
-	  {
-	    return;
 	  }
 
 	  /**
@@ -644,9 +596,13 @@ namespace popot
        * These come from the Standard PSO 2011 
        */
       template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+      class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+	//class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionHalton<PROBLEM::nb_parameters>, popot::PSO::initializer::VelocitySPSO2011 >
+
+	// 
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  //typedef Particle<PROBLEM, popot::PSO::initializer::PositionHalton<PROBLEM::nb_parameters> , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
 
 	  double * xpi;
 	  double * p1;
@@ -761,7 +717,7 @@ namespace popot
 	  /**
 	   * Bounds the velocity and position of the particle
 	   */
-	  /*
+	  
 	  virtual void confine(void)
 	  {
 	    // In case the position is out of the bounds
@@ -780,7 +736,7 @@ namespace popot
 		  }
 	      }
 	  }
-	  */
+	  
 
 	};
 

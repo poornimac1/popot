@@ -15,23 +15,40 @@ namespace popot
       class PositionZero
       {
       public:
-	static double init(void * params)
+	static void init(double (*lowerBound)(int), double (*upperBound)(int), int size, double * positions)
 	{
 	  // params = [min, max]
 	  // returns 0
-	  return 0.0;
+	  for(int i = 0 ; i < size ; ++i)
+	    positions[i] = 0.0;
 	}
       };
 
       class PositionUniformRandom
       {
       public:
-	static double init(void * params)
+	static void init(double (*lowerBound)(int), double (*upperBound)(int), int size, double * positions)
 	{
-	  // params = [min, max]
-	  // returns U(min, max)
-	  double * bounds = (double*) params;
-	  return popot::math::uniform_random(bounds[0], bounds[1]);
+	  for(int i = 0 ; i < size ; ++i)
+	    positions[i] = popot::math::uniform_random(lowerBound(i),upperBound(i));
+	}
+      };
+
+      template< int D>
+      class PositionHalton
+      {
+      public:
+	static void init(double (*lowerBound)(int), double (*upperBound)(int), int size, double * positions)
+	{
+	  if(D != size)
+	    std::cerr << "WARNING : Using Halton<" << D << "> for generating " << size << " dimension quasi random numbers " << std::endl;
+
+	  // Get the halton sequence, in [0,1]
+	  popot::rng::Halton<D>::rng_rand(positions);
+	  
+	  // Scale it into min, max
+	  for(int i = 0 ; i < size ; ++i)
+	    positions[i] = lowerBound(i)+ (upperBound(i)-lowerBound(i))* positions[i];
 	}
       };
 

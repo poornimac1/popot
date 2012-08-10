@@ -233,7 +233,7 @@ namespace popot
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        */
       template<int SIZE, int K, typename PARTICLE>
-        class Random : public Base<SIZE, PARTICLE>
+        class RandomInformants : public Base<SIZE, PARTICLE>
       {
       public:
 	static void fillNeighborhoods(PARTICLE * particles,
@@ -295,10 +295,6 @@ namespace popot
 	  // Column j indicates which particle informs particle j
 	  // therefore, line i indicates which particles the particle i informs
 
-	  // Set the connection matrix to 0 everywhere
-	  for(int i = 0 ; i < SIZE*SIZE ; ++i)
-	    who_informs_whom[i] = 0.0;
-
 	  // A particle informs itself
 	  for(int i = 0 ; i < SIZE ; ++i)
 	    who_informs_whom[i*SIZE + i] = 1.0;
@@ -310,6 +306,8 @@ namespace popot
 		  {
 		    if(popot::math::uniform_random(0.0,1.0) < p)
 		      who_informs_whom[k*SIZE + i] = 1.0; // k informs i
+		    else
+		      who_informs_whom[k*SIZE + i] = 0.0;
 		  }
 	    }
 

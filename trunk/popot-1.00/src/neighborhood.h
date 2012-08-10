@@ -35,7 +35,10 @@ namespace popot
 	  BestType *_best_particle;
 
         public:
-	  Neighborhood(void){};
+	  Neighborhood(void){
+	    _best_particle = 0;
+	  };
+
 	  virtual ~Neighborhood(void){
 	    clear();
 	  };
@@ -79,6 +82,9 @@ namespace popot
 
 	  void updateBest(InNeighborhoodType * p)
 	  {
+	    if(_best_particle == 0)
+	      throw popot::Exception::BestParticleNotInitialized();
+
 	    if(p->getBestPosition()->compare(_best_particle) < 0)
 	      _best_particle = p->getBestPosition();
 	  }

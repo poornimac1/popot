@@ -731,7 +731,7 @@ namespace popot
 	      sq_x += pow(params[i],2.0);
 	      cos_x *= cos(params[i]/sqrt(double(i+1)));
 	    }
-	  fit = 1.0 + 1.0/4000.0 * sq_x - cos_x;
+	  fit = sq_x/4000.0 - cos_x + 1.0;
 	  return fit;
 	}
       };
@@ -855,7 +855,8 @@ namespace popot
 	  count++;
 	  double fit = 0.0;
 	  for(int i = 0 ; i < nb_parameters ; ++i)
-	    fit += pow(params[i],2.0) + 10.0*(1.0 - cos(2.0*M_PI*params[i]));
+	    fit += params[i]*params[i] - 10.0*cos(2.0*M_PI*params[i]);
+	  fit += 10.0 * nb_parameters;
 	  return fit;
 	}
       };

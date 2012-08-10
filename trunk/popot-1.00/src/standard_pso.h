@@ -44,7 +44,7 @@ namespace popot
 	struct Topology
 	{
 	  static const int swarm_size = SwarmSize<PROBLEM>::swarm_size;
-	  typedef popot::PSO::topology::AdaptiveRandom< swarm_size , 3, typename Particle<PROBLEM>::Type> Type;
+	  typedef popot::PSO::topology::RandomInformants< swarm_size , 3, typename Particle<PROBLEM>::Type> Type;
 	};
 
       class PSO_params
@@ -164,7 +164,7 @@ namespace popot
       class PSO_params
       {
       public:
-	static int evaluation_mode() { return popot::PSO::algorithm::SYNCHRONOUS_EVALUATION;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
       class Stop_Criteria

@@ -9,14 +9,14 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 #include "popot.h"
 
 // Define our problem
-typedef popot::problems::SPSO2011::F1<30> Problem;
+typedef popot::problems::SPSO2011::F3<30> Problem;
 
 // Define our algorithm, here SPSO 2011
 //typedef popot::PSO::SPSO2006::PSO<Problem>::Type PSO;
 //typedef popot::PSO::SPSO2007::PSO<Problem>::Type PSO;
 typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
 
-#define N_RUNS 100
+#define N_RUNS 1000
 
 // **************************************** //
 // ************** Main ******************** //
@@ -43,10 +43,14 @@ int main(int argc, char* argv[]) {
   double total_time;
   total_time = 0;
   
+  int new_neigh = 0;
+
   for(int i = 0 ; i < N_RUNS ; ++i)
     {
       // Some initialization of static fields
       Problem::init();
+
+      popot::rng::Halton<Problem::nb_parameters>::init();
 
       // Let's create our swarm
       PSO* pso = new PSO();
@@ -63,11 +67,13 @@ int main(int argc, char* argv[]) {
       total_time += (after.tv_sec + after.tv_usec * 1E-6) - (before.tv_sec + before.tv_usec * 1E-6);
 
       // Some display
-      std::cout << "Run " << i << " f = " << std::scientific <<  pso->getBest()->getFitness() << " with " << Problem::count << " function evaluations" << std::endl;
+      std::cout << "Run " << i << " f = " << std::scientific <<  pso->getBest()->getFitness() << " with " << Problem::count << " function evaluations " << pso->nb_new_neigh << " new neigh" <<  std::endl;
 
       // Count a fail if the fitness is larger tha
       if(Problem::has_failed(pso->getBest()->getFitness()))
 	nb_fails++;
+
+      new_neigh += pso->nb_new_neigh;
 
       // Let's keep track of the best fitness and number of function evaluations
       logProgressMean += -log(pso->getBest()->getFitness());
@@ -81,6 +87,8 @@ int main(int argc, char* argv[]) {
       // Clean up the memory before starting a new trial
       delete pso;
       Problem::free();
+
+      popot::rng::Halton<Problem::nb_parameters>::init();
     }
 
   logProgressMean /= double(N_RUNS);
@@ -90,10 +98,12 @@ int main(int argc, char* argv[]) {
   std::cout << "Error (mean) : " << fitnesses.mean() << std::endl;
   std::cout << "Std. dev. : " << fitnesses.variance() << std::endl;
   std::cout << "Log_progress (mean) : " << logProgressMean << std::endl;
-  std::cout << "Failure(s) " << nb_fails << " Success rate = " << std::fixed << double(N_RUNS - nb_fails)*100.0 / N_RUNS << " %" << std::endl;
+  std::cout << "Failure(s) " << nb_fails << " Success rate = " << std::fixed << double(1.0 - double(nb_fails)/N_RUNS)*100.0 << " %" << std::endl;
   std::cout << "Best min value : " << std::scientific << fitnesses.min() << std::endl;
   std::cout << "Position of the extremum : " << best_particle << std::endl;
   std::cout << "errMax : " << fitnesses.max() << std::endl;
   std::cout << "Mean time per run : " << total_time / N_RUNS << " s." << std::endl;
+
+  std::cout << "New neigh : " << new_neigh << " ; mean =" << double(new_neigh)/N_RUNS << std::endl;
 
 }
