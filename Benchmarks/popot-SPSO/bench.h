@@ -262,17 +262,49 @@ namespace BenchmarkProblems
   public:
     static const int nb_parameters = 2;
     static int count;
-    static void init(void);
-    static void free(void);
-    static double get_lbound(int index);
-    static double get_ubound(int index);
+    static void init(void)
+    {
+      count = 0;
+    }
+    static void free(void){}
+    static double get_lbound(int index){return -100;}
+    static double get_ubound(int index){return 100;}
 	
-    static std::string name(void);
-    static bool has_failed(double fitness);
-    static bool stop(double fitness, int epoch);
+    static std::string name(void){return "Tripod";}
+    static bool has_failed(double fitness){return fitness > 1e-4;}
+    static bool stop(double fitness, int epoch)
+    {
+      return (fitness <= 1e-4) || (count >= 1e4);
+    }
     static int sign(double x);
-    static double evaluate(void * x);
+    {
+      if(x > 0)
+	return 1;
+      else
+	return -1;
+    }
+    static double evaluate(void * x)
+    {
+      double * params = (double*) x;
+      count++;
+      double s11 = (1.0 - sign(params[0]))/2.0;
+      double s12 = (1.0 + sign(params[0]))/2.0;
+      double s21 = (1.0 - sign(params[1]))/2.0;
+      double s22 = (1.0 + sign(params[1]))/2.0;
+
+      double f;
+      //f = s21 * (fabs (params[0]) - params[1]); // Solution on (0,0)
+      f = s21 * (fabs (params[0]) +fabs(params[1]+50)); // Solution on (0,-50)  
+      f = f + s22 * (s11 * (1 + fabs (params[0] + 50) +
+			    fabs (params[1] - 50)) + s12 * (2 +
+							    fabs (params[0] - 50) +
+							    fabs (params[1] - 50)));
+      //std::cout << "Evaluatation at " << params[0] << ";" << params[1] << " -> " << f << std::endl;
+
+      return fabs(f);
+    }
   };
+  int F4::count;
 
   /**
    * F5 : N-dimensional Ackley function
