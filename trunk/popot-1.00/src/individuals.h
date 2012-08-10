@@ -893,7 +893,7 @@ namespace popot
 	  void init(void)
 	  {
 	    for(int i = 0 ; i < PROBLEM::nb_parameters ; ++i)
-	      setValueAt(i, popot::math::uniform_random(PROBLEM::get_lbound(i), PROBLEM::get_ubound(i)));
+	      this->setValueAt(i, popot::math::uniform_random(PROBLEM::get_lbound(i), PROBLEM::get_ubound(i)));
 
 	    computeFitness();
 
