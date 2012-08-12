@@ -267,11 +267,23 @@ namespace BenchmarkProblems
       count = 0;
     }
     static void free(void){}
-    static double get_lbound(int index){return -100;}
-    static double get_ubound(int index){return 100;}
+    static double get_lbound(int index)
+    {
+      return -100;
+    }
+    static double get_ubound(int index)
+    {
+      return 100;
+    }
 	
-    static std::string name(void){return "Tripod";}
-    static bool has_failed(double fitness){return fitness > 1e-4;}
+    static std::string name(void)
+    {
+      return "Tripod";
+    }
+    static bool has_failed(double fitness)
+    {
+      return fitness > 1e-4;
+    }
     static bool stop(double fitness, int epoch)
     {
       return (fitness <= 1e-4) || (count >= 1e4);
