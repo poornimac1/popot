@@ -1,0 +1,79 @@
+F0
+ Eval. (mean)= 7811.680000
+ Error (mean) = 9.202646e-03
+ Std. dev. 6.473586e-04
+ Log_progress (mean) = 4.690914
+ Failure(s) 0  Success rate = 100.00%
+ Best min value = 6.25215623803702501976e-03
+ errMax : 0.000000
+
+F1
+ Eval. (mean)= 8264.160000
+ Error (mean) = 4.769657e-02
+ Std. dev. 1.953121e-03
+ Log_progress (mean) = 3.043768
+ Failure(s) 1  Success rate = 99.90%
+ Best min value = 3.88201432954335956538e-02
+ errMax : 0.000000
+
+F2
+ Eval. (mean)= 16064.880000
+ Error (mean) = 1.026556e+02
+ Std. dev. 2.873882e+01
+ Log_progress (mean) = -4.612900
+ Failure(s) 78  Success rate = 92.20%
+ Best min value = 8.03110699967418213419e+01
+ errMax : 0.000000
+
+F3
+ Eval. (mean)= 24873.200000
+ Error (mean) = 5.087519e+01
+ Std. dev. 6.708803e+00
+ Log_progress (mean) = -3.923331
+ Failure(s) 96  Success rate = 90.40%
+ Best min value = 4.20050522427133614656e+01
+ errMax : 0.000000
+
+F4
+ Eval. (mean)= 6619.720000
+ Error (mean) = 3.640219e-01
+ Std. dev. 6.094475e-01
+ Log_progress (mean) = 6.498971
+ Failure(s) 360  Success rate = 64.00%
+ Best min value = 2.72669117642508162906e-06
+ errMax : 0.000000
+
+F5
+ Eval. (mean)= 80000.000000
+ Error (mean) = 1.182533e+00
+ Std. dev. 8.235525e-01
+ Log_progress (mean) = 8.198782
+ Failure(s) 1000  Success rate = 0.00%
+ Best min value = 7.54951656745106447488e-15
+ errMax : 0.000000
+
+F7
+ Eval. (mean)= 40000.000000
+ Error (mean) = 1.358982e+01
+ Std. dev. 8.916325e+00
+ Log_progress (mean) = -2.429050
+ Failure(s) 1000  Success rate = 0.00%
+ Best min value = 1.60490858858190987846e+00
+ errMax : 0.000000
+
+F8
+ Eval. (mean)= 100000.000000
+ Error (mean) = 1.486924e+00
+ Std. dev. 1.346479e+00
+ Log_progress (mean) = 0.040067
+ Failure(s) 1000  Success rate = 0.00%
+ Best min value = 6.73427140897219639326e-03
+
+F9
+ Eval. (mean)= 40000.000000
+ Error (mean) = 9.215071e+02
+ Std. dev. 9.009532e+02
+ Log_progress (mean) = -6.405695
+ Failure(s) 1000  Success rate = 0.00%
+ Best min value = 2.98554831442521937390e+01
+ errMax : 0.000000

@@ -1,0 +1,17 @@
+ Function 2 
+ Eval. (mean)= 13404.640000
+ Error (mean) = 9.913374e+01
+ Std. dev. 1.176588e+01
+ Log_progress (mean) = -4.591842
+ Failure(s) 46  Success rate = 95.40%
+ Best min value = 8.15523040939964687368e+01
+ errMax : 890786392.594997
+
+ Function 3 
+ Eval. (mean)= 31055.560000
+ Error (mean) = 4.985982e+01
+ Std. dev. 3.449623e+00
+ Log_progress (mean) = -3.907324
+ Failure(s) 52  Success rate = 94.80%
+ Best min value = 4.25970792535906070952e+01
+ errMax : 722.650099
