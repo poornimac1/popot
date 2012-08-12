@@ -288,13 +288,15 @@ namespace BenchmarkProblems
     {
       return (fitness <= 1e-4) || (count >= 1e4);
     }
-    static int sign(double x);
+
+    static int sign(double x)
     {
       if(x > 0)
 	return 1;
       else
 	return -1;
     }
+
     static double evaluate(void * x)
     {
       double * params = (double*) x;

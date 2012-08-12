@@ -5,7 +5,7 @@ includedir=@includedir@
 
 Name: Popot
 Description: C++ POPulation based Optimization Toolbox
-Requires: 
+Requires: gsl
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lpopot
 Cflags: -I${includedir}/popot
