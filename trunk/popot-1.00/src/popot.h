@@ -60,7 +60,7 @@
  * (this is called the social component). Different variations have been introduced but the basic concept remains the same.<br/>
  *
  * In the implementation of this library, a swarm is a parametrized object. It can be parametrized by numerical parameters (such as cognitive or social factors)
- * the type of particle, the type of neighborhood, etc... and the problem to solve. The algorithms are defined here as <STRONG>minimization algorithms</STRONG>. Therefore, the problem (see swarm::problems namespace for example) provides
+ * the type of particle, the type of neighborhood, etc... and the problem to solve. The algorithms are defined here as <STRONG>minimization algorithms</STRONG>. Therefore, the problem (see popot::problems namespace for example) provides
  * a function to minimize.
  *
  * Generally, to use the library you need to define :
@@ -72,7 +72,7 @@
  * However, there are already some standard versions of PSO implemented : SPSO2011 and SPSO2006
  * \section sec_problems Problems
  *
- * Different benchmark problems are already coded in the swarm::problems namespace :
+ * Different benchmark problems are already coded in the popot::problems namespace :
  * - N-dimensional swarm::problems::Ackley function
  * - N-dimensional swarm::problems::Griewank function
  * - N-dimensional swarm::problems::Sphere function
@@ -83,20 +83,18 @@
  * - N-dimensional swarm::problems::Schwefel function
  * - N-dimensional swarm::problems::Salomon function
  * - 2 dimensional swarm::problems::Dropwave function
+ * - ....
  *
  * You can obviously define your own problem. Just check problem.h and the examples to see how one can define its own custom problem.
  *
  * \section sec_particles Particle types
  *
- * Different particles are defined, provided in the swarm::particle namespace :
+ * Different particles are defined, provided in the popot::PSO::particle namespace :
  * - Standard particle 2006
  * - Standard particle 2011
- * - Non stochastic traditional particle : swarm::particle::NonStochasticTraditionalParticle
- * - Stochastic traditional particle : swarm::particle::TraditionalParticle
- * - Particle with dynamic constriction : swarm::particle::DynamicConstrictionParticle
  * - Barebone particle : swarm::particle::BareboneParticle
  * - Modified barebone particle : swarm::particle::ModifiedBareboneParticle
- *
+ * 
  * \subsection non_stochastic_traditional_particle Non stochastic traditional particle
  * This standard PSO relies on the following particle's position and velocity update :<BR>
  * \f{eqnarray*}{
@@ -125,21 +123,21 @@
  *
  * The particles communicate with the particles within their neighborhood. The neighborhood is used to define who informs whom, 
  * involved in updating the velocity of the particles. Different topologies are implemented :
- * - Full connectivity (swarm::topology::Full) : the best swarm's position, for each particle, is computed within the \f$N\f$ other particles
- * - Ring connectivity (swarm::topology::Ring) : the best swarm's position, for each particle, is computed within the 2 closest neighbours (left and right) and the best position of the particle itself
- * - VonNeuman (swarm::topology::VonNeuman): the best swarm's position, for each particle, is computed within the 4 closest neighboors (north, east, west, south) and itself. The particles are somehow placed on a 2D grid.
- * - Random
- * - Probabilistic (SPSO 2011)
+ * - Full connectivity (popot::PSO::topology::Full) : the best swarm's position, for each particle, is computed within the \f$N\f$ other particles
+ * - Ring connectivity (popot::PSO::topology::Ring) : the best swarm's position, for each particle, is computed within the 2 closest neighbours (left and right) and the best position of the particle itself
+ * - VonNeuman (popot::PSO::topology::VonNeuman): the best swarm's position, for each particle, is computed within the 4 closest neighboors (north, east, west, south) and itself. The particles are somehow placed on a 2D grid.
+ * - RandomInformants (popot::PSO::topology::RandomInformants) each particle informs K other particles
+ * - Probabilistic informants (popot::PSO::topology::AdaptiveRandom) : each particle informs each other particle with a given probability 
  *
- * Each particle hosts a swarm::neighborhood::Neighborhood which is set from the defined topology. A neighborhood can be recomputed for e.g. when there is no improvement of the best position ever found by the algorithm.
+ * Each particle hosts a popot::PSO::neighborhood::Neighborhood which is set from the defined topology. A neighborhood can be recomputed for e.g. when there is no improvement of the best position ever found by the algorithm.
  *
- * Shown below are illustrations of the three topologies for a swarm with 9 particles (see example-002.cc).
+ * Shown below are illustrations of three topologies for a swarm with 9 particles (see example-002.cc).
  *
  * \image html "graph_full.png" "Full connectivity" \image html "graph_ring.png" "Ring connectivity" \image html "graph_vonneuman.png" "VonNeuman connectivity"
  *
  * \section sec_algorithms Algorithms
  *
- * So far, a single algorithm is implemented, see swarm::algorithm::PSO .
+ * So far, a single algorithm is implemented, see popot::PSO::algorithm::Base .
  *
  * \section papers_sec Some relevant papers
  * - Shi, Y. H., Eberhart, R. C., (1998).<STRONG>Parameter Selection in Particle Swarm Optimization</STRONG> , The 7th Annual Conference on Evolutionary Programming, San Diego, USA. (introduced the inertia factor)
