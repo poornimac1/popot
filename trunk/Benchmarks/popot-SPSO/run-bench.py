@@ -11,7 +11,7 @@ for alg in Algo:
     os.system('rm -f res_'+alg+'.data; touch res_'+alg+'.data');
     for rn in rng:
         for pb in Pbs:
-            mystr = 'g++ -o bench bench.cc -D\'GCC_RNG=popot::rng::'+rn+'\' -D\'GCC_PB=popot::problems::SPSO2011::'+pb+'\' -D\'GCC_ALGO=popot::PSO::'+alg+'::PSO<Problem>::Type\' `pkg-config --libs --cflags popot` -O3'
+            mystr = 'g++ -o bench bench.cc -D\'GCC_RNG=popot::rng::'+rn+'\' -D\'GCC_PB=BenchmarkProblems::'+pb+'\' -D\'GCC_ALGO=popot::PSO::'+alg+'::PSO<Problem>::Type\' `pkg-config --libs --cflags popot` -O3'
             print mystr
             os.system(mystr)
             os.system('./bench >> res_'+alg+'.data')
