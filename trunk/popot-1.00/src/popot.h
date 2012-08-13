@@ -64,25 +64,25 @@
  * a function to minimize.
  *
  * Generally, to use the library you need to define :
- * - A problem (see e.g. swarm::problems) which provides a function to minimize
- * - A particle type (see e.g. swarm::particle) which takes a problem as a parameter and some parameters (for example the cognitive and social factors)
- * - A topology (see e.g. swarm::topology) which defines the network through which the particles communicate
- * - An algorithm (see e.g. swarm::algorithm) which defines the different steps to update the state of the particles. It requires a particle type, a toplogy and a stopping criteria
+ * - A problem (see e.g. popot::problems) which provides a function to minimize
+ * - A particle type (see e.g. popot::PSO::particle) which takes a problem as a parameter and some parameters (for example the cognitive and social factors)
+ * - A topology (see e.g. popot::PSO::topology) which defines the network through which the particles communicate
+ * - An algorithm (see e.g. popot::PSO::algorithm) which defines the different steps to update the state of the particles. It requires a particle type, a toplogy and a stopping criteria
  *
  * However, there are already some standard versions of PSO implemented : SPSO2011 and SPSO2006
  * \section sec_problems Problems
  *
  * Different benchmark problems are already coded in the popot::problems namespace :
- * - N-dimensional swarm::problems::Ackley function
- * - N-dimensional swarm::problems::Griewank function
- * - N-dimensional swarm::problems::Sphere function
- * - N-dimensional swarm::problems::QuarticNoise function
- * - N-dimensional swarm::problems::Rastrigin function
- * - N-dimensional swarm::problems::Rosenbrock function
- * - N-dimensional swarm::problems::Schwefel1_2 function
- * - N-dimensional swarm::problems::Schwefel function
- * - N-dimensional swarm::problems::Salomon function
- * - 2 dimensional swarm::problems::Dropwave function
+ * - N-dimensional popot::problems::Ackley function
+ * - N-dimensional popot::problems::Griewank function
+ * - N-dimensional popot::problems::Sphere function
+ * - N-dimensional popot::problems::QuarticNoise function
+ * - N-dimensional popot::problems::Rastrigin function
+ * - N-dimensional popot::problems::Rosenbrock function
+ * - N-dimensional popot::problems::Schwefel1_2 function
+ * - N-dimensional popot::problems::Schwefel function
+ * - N-dimensional popot::problems::Salomon function
+ * - 2 dimensional popot::problems::Dropwave function
  * - ....
  *
  * You can obviously define your own problem. Just check problem.h and the examples to see how one can define its own custom problem.
@@ -90,10 +90,10 @@
  * \section sec_particles Particle types
  *
  * Different particles are defined, provided in the popot::PSO::particle namespace :
- * - Standard particle 2006
- * - Standard particle 2011
- * - Barebone particle : swarm::particle::BareboneParticle
- * - Modified barebone particle : swarm::particle::ModifiedBareboneParticle
+ * - Standard particle 2006 : popot::PSO::particle::SPSO2006Particle
+ * - Standard particle 2011 : popot::PSO::particle::SPSO2011Particle
+ * - Barebone particle : popot::PSO::particle::BareboneParticle
+ * - Modified barebone particle : popot::PSO::particle::ModifiedBareboneParticle
  * 
  * \subsection non_stochastic_traditional_particle Non stochastic traditional particle
  * This standard PSO relies on the following particle's position and velocity update :<BR>
@@ -154,6 +154,7 @@
  * \example example-001.cc
  * \example example-002.cc
  * \example example-003.cc
+ * \example example-004.cc
  */
 
 
