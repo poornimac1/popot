@@ -113,7 +113,94 @@ void save_particle_positions(int epoch, PSO & p)
     
   outfile_plot.close();
 
+}
 
+void save_connectivity(int epoch, PSO&p)
+{
+  popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
+  
+  // Connectivity matrix : m[i*width+j] : particule i informs particule j
+  int* connectivity_matrix = new int[p.getSize()*p.getSize()];
+  for(int i = 0 ; i < p.getSize()*p.getSize() ; ++i)
+    connectivity_matrix[i] = 0;
+
+  std::vector<int>* neigh;
+  for(int i = 0 ; i < p.getSize() ; ++i)
+    {
+      neigh = &(p.getNeighborhoodMembership()->at(i));
+      for(int j = 0 ; j < neigh->size() ; ++ j)
+	{
+	  connectivity_matrix[neigh->at(j) * p.getSize() + i] = 1;
+	}
+    }
+
+
+
+  // Generate the Graphviz file
+  std::ostringstream filename;
+  std::ostringstream root_filename;
+  root_filename << std::setw(5) << std::setfill('0') 
+		<< epoch 
+		<< std::setfill(' ');
+  
+  filename << "PlotExample2D/" << root_filename.str()
+		<< ".dot";
+  std::ofstream outfile(filename.str().c_str());
+
+  // Define the nodes :
+  outfile << "digraph \"connectivity\" { " << std::endl;
+  double x, y;
+  for(int i = 0 ; i < p.getSize() ; ++i)
+    {
+      x = 5.0 * cos(2.0 * M_PI * i / p.getSize());
+      y = 5.0 * sin(2.0 * M_PI * i / p.getSize());
+      outfile << "PART_" << i << "[pos=\""<< x << "," << y << "!\", label=\""<<i << "\"];" << std::endl;
+    }
+  // Define the connections
+  for(int i = 0 ; i < p.getSize() ; ++i)
+    {
+      if(connectivity_matrix[i*p.getSize() + i])
+	{
+	  outfile << "PART_" << i << " -> PART_" << i << ";" << std::endl;
+	}
+
+      for(int j = 0 ; j < i ; ++j)
+	{
+	  // If i informs j
+	  if(connectivity_matrix[i*p.getSize() + j] && connectivity_matrix[j*p.getSize() + i])
+	    {
+	      outfile << "PART_" << i << " -> PART_" << j << " [dir=both];" << std::endl;
+	    }
+	  else if(connectivity_matrix[i*p.getSize() + j])
+	    {
+	      outfile << "PART_" << i << " -> PART_" << j <<";" << std::endl;
+	    }
+	  else if(connectivity_matrix[j*p.getSize() + i])
+	    {
+	      outfile << "PART_" << j << " -> PART_" << i <<";" << std::endl;
+	    }
+	}
+      outfile << std::endl;
+    }
+
+  outfile << "}" << std::endl;
+
+
+  outfile.close();
+
+
+  outfile.open("file.connec");
+  for(int i = 0 ; i < p.getSize() ; ++i)
+    {
+      for(int j = 0 ; j < p.getSize() ; ++j)
+	{
+	  outfile << connectivity_matrix[i*p.getSize() + j] << " ";
+	}
+      outfile << std::endl;
+    }
+  outfile.close();
+
+  delete[] connectivity_matrix;
 }
 
 // **************************************** //
@@ -148,6 +235,7 @@ int main(int argc, char* argv[]) {
   for(int i = 0 ; i < 100 ; ++i)
     {
       save_particle_positions(i, pso);
+      save_connectivity(i,pso);
       outfile << pso.getBest()->getFitness() << std::endl;
       pso.step();
 
