@@ -1,19 +1,17 @@
 PLOT_SCRIPTS = $(wildcard *.plot)
 GIF_FROM_PLOT=$(patsubst %.plot, %.gif, $(PLOT_SCRIPTS))
-PDF_FROM_PLOT = $(patsubst %.plot, %.pdf, $(PLOT_SCRIPTS))
+CONNEC_SCRIPTS = $(wildcard *.dot)
+GIF_FROM_CONNEC=$(patsubst %.dot, %.gif_connec, $(CONNEC_SCRIPTS))
 MOVIE=movie.avi
 ANIMATION=movie.gif
+ANIMATION_CONNECTIONS=movie_connections.gif
 
 %.gif : %.plot
 	@gnuplot $<
 	@echo $@ "generated."
 
-%.fig : %.plot
-	@gnuplot $<
-	@echo $@ "generated."
-
-%.pdf : %.fig
-	@fig2dev -L pdf $< $@
+%.gif_connec : %.dot
+	@neato -Tgif $< > $@
 	@echo $@ "generated."
 
 clean:
@@ -25,4 +23,7 @@ $(MOVIE):$(GIF_FROM_PLOT)
 $(ANIMATION):$(GIF_FROM_PLOT)
 	convert -resize 50% -delay 5 -loop 0 0*.gif $(ANIMATION)
 
-all:$(ANIMATION)
+$(ANIMATION_CONNECTIONS):$(GIF_FROM_CONNEC)
+	convert -resize 25% -delay 5 -loop 0 0*.gif_connec $(ANIMATION_CONNECTIONS)
+
+all:$(ANIMATION) $(ANIMATION_CONNECTIONS)
