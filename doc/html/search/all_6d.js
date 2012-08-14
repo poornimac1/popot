@@ -6,6 +6,6 @@ var searchData=
   ['memorynotallocated',['MemoryNotAllocated',['../classpopot_1_1Exception_1_1MemoryNotAllocated.html#a4998f6713654a5ef8b488881513cf876',1,'popot::Exception::MemoryNotAllocated']]],
   ['memorynotallocated',['MemoryNotAllocated',['../classpopot_1_1Exception_1_1MemoryNotAllocated.html',1,'popot::Exception']]],
   ['min',['min',['../classpopot_1_1tools_1_1FIFO.html#a8c1153ea891b83cbeb145a83af1f5a15',1,'popot::tools::FIFO']]],
-  ['modifiedbareboneparticle',['ModifiedBareboneParticle',['../classpopot_1_1PSO_1_1particle_1_1ModifiedBareboneParticle.html#a9adbf42439ebc4f75449bd030248ffbd',1,'popot::PSO::particle::ModifiedBareboneParticle::ModifiedBareboneParticle(void)'],['../classpopot_1_1PSO_1_1particle_1_1ModifiedBareboneParticle.html#a9adbf42439ebc4f75449bd030248ffbd',1,'popot::PSO::particle::ModifiedBareboneParticle::ModifiedBareboneParticle(void)']]],
+  ['modifiedbareboneparticle',['ModifiedBareboneParticle',['../classpopot_1_1PSO_1_1particle_1_1ModifiedBareboneParticle.html#a9adbf42439ebc4f75449bd030248ffbd',1,'popot::PSO::particle::ModifiedBareboneParticle']]],
   ['modifiedbareboneparticle',['ModifiedBareboneParticle',['../classpopot_1_1PSO_1_1particle_1_1ModifiedBareboneParticle.html',1,'popot::PSO::particle']]]
 ];

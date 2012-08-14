@@ -6,6 +6,6 @@ var searchData=
   ['neighborhood',['Neighborhood',['../classpopot_1_1PSO_1_1neighborhood_1_1Neighborhood.html#a896f54b8f11b747d4c1fc4663e680fe8',1,'popot::PSO::neighborhood::Neighborhood']]],
   ['neighborhood',['Neighborhood',['../classpopot_1_1PSO_1_1neighborhood_1_1Neighborhood.html',1,'popot::PSO::neighborhood']]],
   ['neighborhood_2eh',['neighborhood.h',['../neighborhood_8h.html',1,'']]],
-  ['neighborhoodtype',['NeighborhoodType',['../classpopot_1_1PSO_1_1algorithm_1_1Base.html#a2b15f8846ee2870ae46d8f10be3c34cb',1,'popot::PSO::algorithm::Base::NeighborhoodType()'],['../classpopot_1_1PSO_1_1particle_1_1Particle.html#a1dedd4438ac056130591246996c254ca',1,'popot::PSO::particle::Particle::NeighborhoodType()'],['../classpopot_1_1PSO_1_1particle_1_1Particle.html#a1dedd4438ac056130591246996c254ca',1,'popot::PSO::particle::Particle::NeighborhoodType()']]],
+  ['neighborhoodtype',['NeighborhoodType',['../classpopot_1_1PSO_1_1algorithm_1_1Base.html#a2b15f8846ee2870ae46d8f10be3c34cb',1,'popot::PSO::algorithm::Base::NeighborhoodType()'],['../classpopot_1_1PSO_1_1particle_1_1Particle.html#a1dedd4438ac056130591246996c254ca',1,'popot::PSO::particle::Particle::NeighborhoodType()']]],
   ['normal',['normal',['../namespacepopot_1_1math.html#a379cb433fc4a216e75252d7278c161a7',1,'popot::math']]]
 ];
