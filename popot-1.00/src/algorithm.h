@@ -91,6 +91,14 @@ namespace popot
 	  }
 
 	/**
+	 * Returns the size of the swarm
+	 */
+	int getSize(void)
+	{
+	  return swarm_size;
+	}
+
+	/**
 	 * One step of the swarm
 	 */
 	void step(void)
