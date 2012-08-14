@@ -39,28 +39,28 @@ void presave_function_values()
   z_max = Problem::evaluate(params);
   for(int i = 0 ; i < N ; ++i)
     {
-    for(int j = 0 ; j < N ; ++j)
-      {
-	params[0] = x_min + (x_max - x_min) * i / double(N-1);
-	params[1] = y_min + (y_max - y_min) * j / double(N-1);
-	z_tmp = Problem::evaluate(params);
-	z_min = z_min < z_tmp ? z_min : z_tmp;
-	z_max = z_max > z_tmp ? z_max : z_tmp;	
-      }
+      for(int j = 0 ; j < N ; ++j)
+	{
+	  params[0] = x_min + (x_max - x_min) * i / double(N-1);
+	  params[1] = y_min + (y_max - y_min) * j / double(N-1);
+	  z_tmp = Problem::evaluate(params);
+	  z_min = z_min < z_tmp ? z_min : z_tmp;
+	  z_max = z_max > z_tmp ? z_max : z_tmp;	
+	}
     }
   std::cout << "Function min = " << z_min << " ;  max = " << z_max << std::endl;
   
   for(int i = 0 ; i < N ; ++i)
     {
-    for(int j = 0 ; j < N ; ++j)
-      {
-	params[0] = x_min + (x_max - x_min) * i / double(N-1);
-	params[1] = y_min + (y_max - y_min) * j / double(N-1);
-	outfile << params[0] << " " 
-		<< params[1] << " "
-		<< (Problem::evaluate(params)-z_min)/(z_max - z_min) << std::endl;
-      }
-    outfile << std::endl;
+      for(int j = 0 ; j < N ; ++j)
+	{
+	  params[0] = x_min + (x_max - x_min) * i / double(N-1);
+	  params[1] = y_min + (y_max - y_min) * j / double(N-1);
+	  outfile << params[0] << " " 
+		  << params[1] << " "
+		  << (Problem::evaluate(params)-z_min)/(z_max - z_min) << std::endl;
+	}
+      outfile << std::endl;
     }
   outfile.close();
 
@@ -101,7 +101,7 @@ void save_particle_positions(int epoch, PSO & p)
   '-' with points notitle pt 7 ps 1.5 lc rgb \"red\""<< std::endl;
 
 
-    // Put the position of the particles with z-value = ...
+  // Put the position of the particles with z-value = ...
   popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
 
   for(it = &((p.getParticles())[0]) , it_end = it + p.getSize(); it != it_end ; ++it)
@@ -111,7 +111,7 @@ void save_particle_positions(int epoch, PSO & p)
 		   << "1" << std::endl;
     }
     
-    outfile_plot.close();
+  outfile_plot.close();
 
 
 }
@@ -126,42 +126,47 @@ int main(int argc, char* argv[]) {
   // to a specific seed so that we keep the same initial conditions
   //srand(0);
 
-    // Initialize our problem
-    // this actually allocates memory and initializes the boundaries
-    Problem::init();
-    popot::rng::Halton<Problem::nb_parameters>::init();
+  // Initialize our problem
+  // this actually allocates memory and initializes the boundaries
+  Problem::init();
+  popot::rng::Halton<Problem::nb_parameters>::init();
 
-    // Let's create our swarm
-    PSO pso;
+  std::ofstream outfile("PlotExample2D/fitness.data");
+  
+  // Let's create our swarm
+  PSO pso;
 
-    // Print the fitness of our particles
-    printf("Before learning : \n");
-    pso.print(1);
-    std::cout << std::endl;
+  // Print the fitness of our particles
+  printf("Before learning : \n");
+  pso.print(1);
+  std::cout << std::endl;
 
-    presave_function_values();
+  presave_function_values();
 
-    // We now iterate the algorithm
-    // We can iterate step by step
-    for(int i = 0 ; i < 100 ; ++i)
+  // We now iterate the algorithm
+  // We can iterate step by step
+  for(int i = 0 ; i < 100 ; ++i)
     {
       save_particle_positions(i, pso);
-        pso.step();
+      outfile << pso.getBest()->getFitness() << std::endl;
+      pso.step();
 
-        std::cout << '\r' << std::setw(6) << std::setfill('0') << i << " " << pso.getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
+      std::cout << '\r' << std::setw(6) << std::setfill('0') << i << " " << pso.getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
     }
-    // Or run the algorithm until the stopping criteria is met
-    //pso.run();
-    std::cout << "epoch : " << pso.epoch << std::endl;
-    std::cout << "\n" << std::endl;
+  outfile.close();
 
-    // And display the best fitness we got
-    printf("After learning : \n");
-    pso.print(1);
+  // Or run the algorithm until the stopping criteria is met
+  std::cout << "epoch : " << pso.epoch << std::endl;
+  std::cout << "\n" << std::endl;
 
-    std::cout << " To get an animated gif of the behavior of the PSO, and if you used the source package, go into PlotExample2D and type make all . It requires convert and gnuplot" << std::endl;
+  // And display the best fitness we got
+  printf("After learning : \n");
+  pso.print(1);
 
-    // Free the memory used by the problem (e.g. the bounds)
-    Problem::free();
-    popot::rng::Halton<Problem::nb_parameters>::free();
+  std::cout << " To get an animated gif of the behavior of the PSO, and if you used the source package, go into PlotExample2D and type make all . It requires convert and gnuplot" << std::endl;
+  std::cout << " The fitnesses are saved in PlotExample2D/fitness.data" << std::endl;
+
+  // Free the memory used by the problem (e.g. the bounds)
+  Problem::free();
+  popot::rng::Halton<Problem::nb_parameters>::free();
 }
