@@ -1,0 +1,167 @@
+// In this example, we use a standard PSO on a predefined problem
+
+// Compile with :
+// g++ -o example-2D example-2D.cc `pkg-config --libs --cflags popot` -O3
+
+#include "rng_generators.h"
+typedef popot::rng::JKissRNG RNG_GENERATOR;
+
+#include <stdio.h>
+#include <cmath>
+#include "popot.h"
+
+// Define our problem
+// Here we use a predefined parametrized problem
+typedef popot::problems::Rastrigin<2> Problem;
+
+// We use SPSO 2011
+typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
+
+
+void presave_function_values()
+{
+  std::ofstream outfile("PlotExample2D/function_values.data");
+  
+  int N = 200;
+  double params[2];
+
+  double x_min, x_max, y_min, y_max;
+  x_min = Problem::get_lbound(0);
+  x_max = Problem::get_ubound(0);
+  y_min = Problem::get_lbound(1);
+  y_max = Problem::get_ubound(1);
+
+  double z_min, z_max, z_tmp;
+
+  params[0] = x_min;
+  params[1] = y_min;
+  z_min = Problem::evaluate(params);
+  z_max = Problem::evaluate(params);
+  for(int i = 0 ; i < N ; ++i)
+    {
+    for(int j = 0 ; j < N ; ++j)
+      {
+	params[0] = x_min + (x_max - x_min) * i / double(N-1);
+	params[1] = y_min + (y_max - y_min) * j / double(N-1);
+	z_tmp = Problem::evaluate(params);
+	z_min = z_min < z_tmp ? z_min : z_tmp;
+	z_max = z_max > z_tmp ? z_max : z_tmp;	
+      }
+    }
+  std::cout << "Function min = " << z_min << " ;  max = " << z_max << std::endl;
+  
+  for(int i = 0 ; i < N ; ++i)
+    {
+    for(int j = 0 ; j < N ; ++j)
+      {
+	params[0] = x_min + (x_max - x_min) * i / double(N-1);
+	params[1] = y_min + (y_max - y_min) * j / double(N-1);
+	outfile << params[0] << " " 
+		<< params[1] << " "
+		<< (Problem::evaluate(params)-z_min)/(z_max - z_min) << std::endl;
+      }
+    outfile << std::endl;
+    }
+  outfile.close();
+
+}
+
+void save_particle_positions(int epoch, PSO & p)
+{
+  std::ostringstream filename_plot;
+  std::ofstream outfile_plot;
+  
+  std::ostringstream root_filename;
+  root_filename << std::setw(5) << std::setfill('0') 
+		<< epoch 
+		<< std::setfill(' ');
+  
+  filename_plot << "PlotExample2D/" << root_filename.str()
+		<< ".plot";
+
+  outfile_plot.open(filename_plot.str().c_str());
+
+  outfile_plot << "set term gif" << std::endl
+	       << "set output \"" << root_filename.str() << ".gif\"" << std::endl
+	       << "set size ratio 1" << std::endl
+	       << "set xrange [" << Problem::get_lbound(0) << ":" 
+	       << Problem::get_ubound(0) << "];"<< std::endl
+	       << "set yrange [" << Problem::get_lbound(1) << ":" 
+	       << Problem::get_ubound(1) << "];"<< std::endl
+	       << "set zrange [0:1];"<< std::endl
+	       << "set cbrange [0:1];"<< std::endl
+	       << "set title \"PSO on Rastrigin " << epoch << "\";" << std::endl
+	       << "set palette defined ( 0 \"white\", 1 \"black\");"<< std::endl
+	       << "set xlabel \"x\";"<< std::endl
+	       << "set ylabel \"y\";" << std::endl
+	       << "set cblabel \"z\";"<< std::endl
+	       << "set view map;"<< std::endl
+	       << "set pm3d at s;"<< std::endl
+	       << "splot 'function_values.data' with pm3d notitle, \
+  '-' with points notitle pt 7 ps 1.5 lc rgb \"red\""<< std::endl;
+
+
+    // Put the position of the particles with z-value = ...
+  popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
+
+  for(it = &((p.getParticles())[0]) , it_end = it + p.getSize(); it != it_end ; ++it)
+    {
+      outfile_plot << it->getPosition(0) << " " 
+		   << it->getPosition(1) << " " 
+		   << "1" << std::endl;
+    }
+    
+    outfile_plot.close();
+
+
+}
+
+// **************************************** //
+// ************** Main ******************** //
+// **************************************** //
+
+int main(int argc, char* argv[]) {
+
+  // Initialize the random number generator 
+  // to a specific seed so that we keep the same initial conditions
+  //srand(0);
+
+    // Initialize our problem
+    // this actually allocates memory and initializes the boundaries
+    Problem::init();
+    popot::rng::Halton<Problem::nb_parameters>::init();
+
+    // Let's create our swarm
+    PSO pso;
+
+    // Print the fitness of our particles
+    printf("Before learning : \n");
+    pso.print(1);
+    std::cout << std::endl;
+
+    presave_function_values();
+
+    // We now iterate the algorithm
+    // We can iterate step by step
+    for(int i = 0 ; i < 100 ; ++i)
+    {
+      save_particle_positions(i, pso);
+        pso.step();
+
+        std::cout << '\r' << std::setw(6) << std::setfill('0') << i << " " << pso.getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
+    }
+    // Or run the algorithm until the stopping criteria is met
+    //pso.run();
+    std::cout << "epoch : " << pso.epoch << std::endl;
+    std::cout << "\n" << std::endl;
+
+    // And display the best fitness we got
+    printf("After learning : \n");
+    pso.print(1);
+
+    std::cout << " To get an animated gif of the behavior of the PSO, and if you used the source package, go into PlotExample2D and type make all . It requires convert and gnuplot" << std::endl;
+
+    // Free the memory used by the problem (e.g. the bounds)
+    Problem::free();
+    popot::rng::Halton<Problem::nb_parameters>::free();
+}
