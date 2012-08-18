@@ -260,6 +260,12 @@ namespace popot
 	    }
 	}
 
+	
+	std::map< int , std::vector<int> >* getNeighborhoodMembership(void)
+	  {
+	    return &neighborhood_membership;
+	  }
+
 	/**
 	 * Generate a graph of the connections between the particles using DOT
 	 */
