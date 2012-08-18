@@ -15,7 +15,7 @@ ANIMATION_CONNECTIONS=movie_connections.gif
 	@echo $@ "generated."
 
 clean:
-	rm -f *.data *.plot *.gif *~ *.pdf 
+	rm -f *.data *.plot *.gif *~ *.pdf *.dot *.gif_connec 
 
 $(MOVIE):$(GIF_FROM_PLOT)
 	ffmpeg -i %05d.gif -b 1M $(MOVIE)
