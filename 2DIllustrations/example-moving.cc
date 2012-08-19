@@ -41,7 +41,7 @@ public:
 int Problem::epoch = 0;
 
 // We use SPSO 2011
-typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
+typedef popot::PSO::StochasticSPSO2011::PSO<Problem>::Type PSO;
 
 
 void save_function_values(int epoch)
@@ -131,7 +131,7 @@ void save_particle_positions(int epoch, PSO & p)
 
 
   // Put the position of the particles with z-value = ...
-  popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
+  popot::PSO::StochasticSPSO2011::Particle<Problem>::Type* it, *it_end;
 
   for(it = &((p.getParticles())[0]) , it_end = it + p.getSize(); it != it_end ; ++it)
     {
