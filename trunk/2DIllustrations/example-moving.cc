@@ -22,16 +22,20 @@ public:
   static double get_lbound(int index) { return -10;}
   static double get_ubound(int index) { return 10;}
 
+  static void step()
+  {
+    epoch ++;
+  }
+
   static double evaluate(void * params)
   {
     double * dparams = (double*) params;
-    epoch ++;
     // A single moving bump making a turn in 100 steps
-    double x0 = 5.0 * cos(epoch * 2.0 * M_PI / 100.);
-    double x1 = 5.0 * sin(epoch * 2.0 * M_PI / 100.);
+    double x0 = 5.0 * cos(double(epoch) * 2.0 * M_PI / 100.);
+    double x1 = 5.0 * sin(double(epoch) * 2.0 * M_PI / 100.);
     double d2 = (dparams[0] - x0)*(dparams[0] -x0)
       + (dparams[1] - x1) * (dparams[1] - x1);
-    return exp(-d2/(2.0 * 5.0 * 5.0)); 
+    return 1.0 - exp(-d2/(2.0 * 5.0 * 5.0)); 
   }
 };
 int Problem::epoch = 0;
@@ -73,7 +77,7 @@ void save_function_values(int epoch)
 	  z_max = z_max > z_tmp ? z_max : z_tmp;	
 	}
     }
-  std::cout << "Function min = " << z_min << " ;  max = " << z_max << std::endl;
+  //std::cout << "Function min = " << z_min << " ;  max = " << z_max << std::endl;
   
   for(int i = 0 ; i < N ; ++i)
     {
@@ -122,7 +126,7 @@ void save_particle_positions(int epoch, PSO & p)
 	       << "set cblabel \"z\";"<< std::endl
 	       << "set view map;"<< std::endl
 	       << "set pm3d at s;"<< std::endl
-	       << "splot 'function_values.data' with pm3d notitle, \
+	       << "splot 'function_values" << std::setw(5) << std::setfill('0') << epoch << ".data' with pm3d notitle, \
   '-' with points notitle pt 7 ps 1.5 lc rgb \"red\""<< std::endl;
 
 
@@ -252,19 +256,27 @@ int main(int argc, char* argv[]) {
   pso.print(1);
   std::cout << std::endl;
 
-  
+  double * bestpos = new double[2];
 
   // We now iterate the algorithm
   // We can iterate step by step
-  for(int i = 0 ; i < 1000 ; ++i)
+  for(int i = 0 ; i < 200 ; ++i)
     {
       save_function_values(i);
       save_particle_positions(i, pso);
       //save_connectivity(i,pso);
-      outfile << pso.getBest()->getFitness() << std::endl;
+      
+      bestpos[0] = pso.getBest()->getPosition(0);
+      bestpos[1] = pso.getBest()->getPosition(1);
+      outfile << pso.getBest()->getFitness() << " " << Problem::evaluate(bestpos) << std::endl;
+
+      
       pso.step();
 
-      std::cout << '\r' << std::setw(6) << std::setfill('0') << i << " " << pso.getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
+      std::cout << '\r' << std::setw(6) << std::setfill('0') << i << " " << pso.getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << Problem::evaluate(bestpos) << std::flush;
+
+      Problem::step();
+      
     }
   outfile.close();
 
