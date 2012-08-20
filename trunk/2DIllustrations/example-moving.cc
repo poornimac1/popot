@@ -25,6 +25,8 @@ public:
   static void step()
   {
     epoch ++;
+    if(epoch == 200)
+      epoch = 50;
   }
 
   static double evaluate(void * params)
@@ -260,7 +262,7 @@ int main(int argc, char* argv[]) {
 
   // We now iterate the algorithm
   // We can iterate step by step
-  for(int i = 0 ; i < 200 ; ++i)
+  for(int i = 0 ; i < 400 ; ++i)
     {
       save_function_values(i);
       save_particle_positions(i, pso);
