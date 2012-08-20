@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>popot-1.00: example-001.cc</title>
+<title>popot-1.10: example-001.cc</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">popot-1.00
+   <div id="projectname">popot-1.10
    </div>
   </td>
  </tr>
@@ -118,7 +118,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line">  <span class="comment">// We now run our algorithm</span></div>
 <div class="line">  pso-&gt;run(1);</div>
 <div class="line"></div>
-<div class="line">  </div>
+<div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;Nb steps : &quot;</span> &lt;&lt; pso-&gt;epoch &lt;&lt; <span class="stringliteral">&quot; ; nb neigh : &quot;</span> &lt;&lt; pso-&gt;nb_new_neigh &lt;&lt; std::endl;</div>
+<div class="line"></div>
 <div class="line">  <span class="keyword">delete</span> pso;</div>
 <div class="line">  Problem::free();</div>
 <div class="line"></div>

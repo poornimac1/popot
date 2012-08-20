@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>popot-1.00: /home/lexaxif/Developpement/Google/svn-popot/trunk/popot-1.00/src/topology.h Source File</title>
+<title>popot-1.10: /home/fix_jer/Developpement/Google/svn-popot/trunk/popot-1.10/src/topology.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,7 +21,7 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">popot-1.00
+   <div id="projectname">popot-1.10
    </div>
   </td>
  </tr>
@@ -343,58 +343,101 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        }</div>
 <div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;      };</div>
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;      <span class="keyword">template</span>&lt;<span class="keywordtype">int</span> SIZE, <span class="keywordtype">int</span> K, <span class="keyword">typename</span> PARTICLE&gt;</div>
-<div class="line"><a name="l00284"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html">  284</a></span>&#160;        <span class="keyword">class </span><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html" title="Some probabilistic connectivity so that most of the particles will have K informants the topology is ...">AdaptiveRandom</a> : <span class="keyword">public</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html">Base</a>&lt;SIZE, PARTICLE&gt;</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;      {</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;      <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00287"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">  287</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">fillNeighborhoods</a>(PARTICLE * particles,</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;                                      std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;                                      std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;        {</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;          <span class="keywordtype">double</span> p = 1.0 - pow(1.0 - 1.0/SIZE,K);</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;          <span class="comment">// Generate the connection matrix</span></div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;          <span class="keywordtype">int</span> *who_informs_whom = <span class="keyword">new</span> <span class="keywordtype">int</span>[SIZE * SIZE];</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;          <span class="comment">// Column j indicates which particle informs particle j</span></div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;          <span class="comment">// therefore, line i indicates which particles the particle i informs</span></div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;          <span class="comment">// A particle informs itself</span></div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;      <span class="keyword">template</span>&lt;<span class="keywordtype">int</span> SIZE, <span class="keywordtype">int</span> K, <span class="keyword">typename</span> PARTICLE&gt;</div>
+<div class="line"><a name="l00279"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html">  279</a></span>&#160;        <span class="keyword">class </span><a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html">FixedRandomInformants</a> : <span class="keyword">public</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html">Base</a>&lt;SIZE, PARTICLE&gt;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;      {</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;      <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00282"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html#a5b72ec8da6613cdf5b8f32bdc843df2c">  282</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html#a5b72ec8da6613cdf5b8f32bdc843df2c">fillNeighborhoods</a>(PARTICLE * particles,</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                                      std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                                      std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        {</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;          <span class="comment">// Generate the connection matrix</span></div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;          <span class="keywordtype">int</span> *who_informs_whom = <span class="keyword">new</span> <span class="keywordtype">int</span>[SIZE * SIZE];</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;          <span class="comment">// Column j indicates which particle informs particle j</span></div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;          <span class="comment">// therefore, line i indicates which particles the particle i informs</span></div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;          <span class="comment">// Set the connection matrix to 0 everywhere</span></div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE*SIZE ; ++i)</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;            who_informs_whom[i] = 0.0;</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;          <span class="comment">// A particle informs itself</span></div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE ; ++i)</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;            who_informs_whom[i*SIZE + i] = 1.0;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;</div>
 <div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE ; ++i)</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            who_informs_whom[i*SIZE + i] = 1.0;</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE ; ++i)</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            {</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;              <span class="keywordflow">for</span>(<span class="keywordtype">int</span> k = 0 ; k &lt; SIZE ; ++k)</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;                <span class="keywordflow">if</span>( k != i)</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;                  {</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;                    <span class="keywordflow">if</span>(<a class="code" href="namespacepopot_1_1math.html#aff66c3835eec2f4653b273e25e8c841b">popot::math::uniform_random</a>(0.0,1.0) &lt; p)</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;                      who_informs_whom[k*SIZE + i] = 1.0; <span class="comment">// k informs i</span></div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;                    <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;                      who_informs_whom[k*SIZE + i] = 0.0;</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;                  }</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            }</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;          <span class="comment">// Given the connectivity matrix, we now connect the particles</span></div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a72ea3376ec52453c7d09d1fbc405c6f6">Base&lt;SIZE, PARTICLE&gt;::getNeighborhoodList</a>(particles, neighborhoods);</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a2a55c74218b525dcd79600450cac451b">Base&lt;SIZE, PARTICLE&gt;::connectParticles</a>(particles, neighbordhood_membership, who_informs_whom);</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;          <span class="keyword">delete</span>[] who_informs_whom;</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        }</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            {</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;              <span class="comment">// For line i, we draw uniformely with replacement K-1 particles this particle will inform</span></div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;              <span class="keywordflow">for</span>(<span class="keywordtype">int</span> k = 0 ; k &lt; K-1 ; ++k)</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;                who_informs_whom[i*SIZE + <a class="code" href="namespacepopot_1_1math.html#aa928311374a0ce22928a61a324b53fac">popot::math::uniform_integer</a>(0, SIZE-1)] = 1.0; </div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            }</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;          <span class="comment">// Given the connectivity matrix, we now connect the particles</span></div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a72ea3376ec52453c7d09d1fbc405c6f6">Base&lt;SIZE, PARTICLE&gt;::getNeighborhoodList</a>(particles, neighborhoods);</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a2a55c74218b525dcd79600450cac451b">Base&lt;SIZE, PARTICLE&gt;::connectParticles</a>(particles, neighbordhood_membership, who_informs_whom);</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;          <span class="keyword">delete</span>[] who_informs_whom;</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;        }</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;</div>
+<div class="line"><a name="l00313"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html#a0a9184326d3c687af3e319eab549d493">  313</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1FixedRandomInformants.html#a0a9184326d3c687af3e319eab549d493">regenerateNeighborhoods</a>( PARTICLE *particles,</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;                                            std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;                                            std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        {</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;        }</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;      };</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;</div>
 <div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;</div>
-<div class="line"><a name="l00321"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#af2b9d59db8c1a2c2c81c2d1dd36eb4c7">  321</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#af2b9d59db8c1a2c2c81c2d1dd36eb4c7">regenerateNeighborhoods</a>(PARTICLE *particles,</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;                                            std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;                                            std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        {</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">fillNeighborhoods</a>(particles,neighborhoods,neighbordhood_membership);</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;        }</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;      };</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    } <span class="comment">// topology</span></div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;  } <span class="comment">// PSO</span></div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;} <span class="comment">// popot</span></div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;<span class="preprocessor">#endif // POPOT_TOPOLOGY_H</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;      <span class="keyword">template</span>&lt;<span class="keywordtype">int</span> SIZE, <span class="keywordtype">int</span> K, <span class="keyword">typename</span> PARTICLE&gt;</div>
+<div class="line"><a name="l00327"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html">  327</a></span>&#160;        <span class="keyword">class </span><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html" title="Some probabilistic connectivity so that most of the particles will have K informants the topology is ...">AdaptiveRandom</a> : <span class="keyword">public</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html">Base</a>&lt;SIZE, PARTICLE&gt;</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;      {</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;      <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00330"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">  330</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">fillNeighborhoods</a>(PARTICLE * particles,</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;                                      std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                                      std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        {</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;          <span class="keywordtype">double</span> p = 1.0 - pow(1.0 - 1.0/SIZE,K);</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;          <span class="comment">// Generate the connection matrix</span></div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;          <span class="keywordtype">int</span> *who_informs_whom = <span class="keyword">new</span> <span class="keywordtype">int</span>[SIZE * SIZE];</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;          <span class="comment">// Column j indicates which particle informs particle j</span></div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;          <span class="comment">// therefore, line i indicates which particles the particle i informs</span></div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;          <span class="comment">// A particle informs itself</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE ; ++i)</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            who_informs_whom[i*SIZE + i] = 1.0;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0 ; i &lt; SIZE ; ++i)</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;            {</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;              <span class="keywordflow">for</span>(<span class="keywordtype">int</span> k = 0 ; k &lt; SIZE ; ++k)</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                <span class="keywordflow">if</span>( k != i)</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;                  {</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;                    <span class="keywordflow">if</span>(<a class="code" href="namespacepopot_1_1math.html#aff66c3835eec2f4653b273e25e8c841b">popot::math::uniform_random</a>(0.0,1.0) &lt; p)</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;                      who_informs_whom[k*SIZE + i] = 1.0; <span class="comment">// k informs i</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;                    <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                      who_informs_whom[k*SIZE + i] = 0.0;</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                  }</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;            }</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;          <span class="comment">// Given the connectivity matrix, we now connect the particles</span></div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a72ea3376ec52453c7d09d1fbc405c6f6">Base&lt;SIZE, PARTICLE&gt;::getNeighborhoodList</a>(particles, neighborhoods);</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1Base.html#a2a55c74218b525dcd79600450cac451b">Base&lt;SIZE, PARTICLE&gt;::connectParticles</a>(particles, neighbordhood_membership, who_informs_whom);</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;          <span class="keyword">delete</span>[] who_informs_whom;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;        }</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;</div>
+<div class="line"><a name="l00364"></a><span class="lineno"><a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#af2b9d59db8c1a2c2c81c2d1dd36eb4c7">  364</a></span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#af2b9d59db8c1a2c2c81c2d1dd36eb4c7">regenerateNeighborhoods</a>(PARTICLE *particles,</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;                                            std::vector&lt; typename PARTICLE::NeighborhoodType *&gt; &amp;neighborhoods,</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;                                            std::map&lt; <span class="keywordtype">int</span>, std::vector&lt;int&gt; &gt; &amp;neighbordhood_membership)</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        {</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;          <a class="code" href="classpopot_1_1PSO_1_1topology_1_1AdaptiveRandom.html#a80f4162338e9e784cb03c8d2de2e5f20">fillNeighborhoods</a>(particles,neighborhoods,neighbordhood_membership);</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;        }</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      };</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    } <span class="comment">// topology</span></div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;  } <span class="comment">// PSO</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;} <span class="comment">// popot</span></div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="preprocessor">#endif // POPOT_TOPOLOGY_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

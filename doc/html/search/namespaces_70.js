@@ -18,6 +18,8 @@ var searchData=
   ['spso2006',['SPSO2006',['../namespacepopot_1_1PSO_1_1SPSO2006.html',1,'popot::PSO']]],
   ['spso2007',['SPSO2007',['../namespacepopot_1_1PSO_1_1SPSO2007.html',1,'popot::PSO']]],
   ['spso2011',['SPSO2011',['../namespacepopot_1_1PSO_1_1SPSO2011.html',1,'popot::PSO']]],
+  ['stochasticspso2006',['StochasticSPSO2006',['../namespacepopot_1_1PSO_1_1StochasticSPSO2006.html',1,'popot::PSO']]],
+  ['stochasticspso2011',['StochasticSPSO2011',['../namespacepopot_1_1PSO_1_1StochasticSPSO2011.html',1,'popot::PSO']]],
   ['tools',['tools',['../namespacepopot_1_1tools.html',1,'popot']]],
   ['topology',['topology',['../namespacepopot_1_1PSO_1_1topology.html',1,'popot::PSO']]]
 ];
