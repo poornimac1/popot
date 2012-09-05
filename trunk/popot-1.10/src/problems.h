@@ -77,12 +77,12 @@ namespace popot
 
       static double get_lbound(int index)
       {
-	return 32.0;
+	return -32.0;
       }
 
       static double get_ubound(int index)
       {
-	return -32.0;
+	return 32.0;
       }
 
       static bool stop(double fitness, int epoch)

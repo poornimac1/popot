@@ -54,7 +54,7 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/popot.pc
 
 add_subdirectory (src)
 add_subdirectory (examples)
-add_subdirectory (doc)
+#add_subdirectory (doc)
 
 
 ###################################

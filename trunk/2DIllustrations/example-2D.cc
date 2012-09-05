@@ -102,7 +102,7 @@ void save_particle_positions(int epoch, PSO & p)
 
 
   // Put the position of the particles with z-value = ...
-  popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
+  PSO::ParticleType* it, *it_end;
 
   for(it = &((p.getParticles())[0]) , it_end = it + p.getSize(); it != it_end ; ++it)
     {
@@ -117,7 +117,7 @@ void save_particle_positions(int epoch, PSO & p)
 
 void save_connectivity(int epoch, PSO&p)
 {
-  popot::PSO::SPSO2011::Particle<Problem>::Type* it, *it_end;
+  PSO::ParticleType* it, *it_end;
   
   // Connectivity matrix : m[i*width+j] : particule i informs particule j
   int* connectivity_matrix = new int[p.getSize()*p.getSize()];

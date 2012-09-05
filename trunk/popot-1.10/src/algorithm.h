@@ -37,6 +37,7 @@ namespace popot
       {
       public:
 	typedef typename PARTICLE::BestType BestType;
+	typedef PARTICLE  ParticleType;
 	typedef typename PARTICLE::NeighborhoodType NeighborhoodType;
 
       private:
