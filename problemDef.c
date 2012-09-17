@@ -82,7 +82,7 @@ struct problem problemDef(int functionCode)
 	  pb.SS.q.q[d] = 0;	      
 	}
       pb.epsilon = 100; //0.05; //.0001;		
-      pb.evalMax =10; //200000; //2.e6;  // 40000 
+      pb.evalMax =20; //200000; //2.e6;  // 40000 
       pb.objective= 0;
 
 
