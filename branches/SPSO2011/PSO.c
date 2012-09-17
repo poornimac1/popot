@@ -151,7 +151,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
   while (noStop == 0) 
     {	
-
+      printf("################################################### %i #########################\n",iter);
       iter=iter+1;
       /*
       // Display the swarm		
@@ -519,16 +519,24 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
       if (error < errorPrev)	// Improvement of the global best
 	{		
-	  initLinks = 0;							
+	  initLinks = 0;
+	  printf("Keeping the old neighbours : %f < %f \n",error, errorPrev);
 	}
       else			// No global improvement
 	{			
-	  initLinks = 1;	// Information links will be	reinitialized	
+	  initLinks = 1;	// Information links will be	reinitialized
+	  printf("NEW neighbours !!!!!!!!!!!: %f !< %f \n",error, errorPrev);	
 	}
 
       errorPrev = error;
     end:
 
+      if(iter >= 5)
+	noStop = 1;
+      else
+	noStop = 0;
+
+      /*
       if (error > pb.epsilon && R.nEval < pb.evalMax)
 	{
 	  noStop = 0;	// Won't stop
@@ -537,7 +545,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	{
 	  noStop = 1;	// Will stop
 	}
-
+      */
 
     } // End of "while nostop ...
 
