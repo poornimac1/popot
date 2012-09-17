@@ -1,0 +1,20 @@
+position : 
+   fitness f
+   size size
+   int x[Dmax]
+
+Swarm:
+best : rank of the best ! (i.e. pointer)
+position P[S_MAX] : previous best
+S : swarm size
+V[s_max] : velocities
+position X[s_max] : Positions
+
+result :
+nEval : number of evaluations
+SW : final swarm
+
+R.SW.X[s].f : fitness of particle s
+R.SW.X[s]   : current position (with its fitness)
+R.SW.P[s]   : best position  (with fitness)
+R.SW.P[s].f : best fitness
