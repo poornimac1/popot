@@ -18,6 +18,9 @@ Maurice.Clerc@WriteMe.com
 // =================================================
 int main () 
 { 
+  srand(0);
+  nb_alea_calls = 0;
+
 	struct position bestBest; // Best position over all runs
 	int d;			// Current dimension
 	double D;
@@ -279,7 +282,7 @@ randRank=0; randChaos=0.02;
 		 printf("\n time %ld",seconds);
 		seed_rand_kiss(time(NULL)); 
 */
- srand(0);
+
 	switch(randCase) // "Warm up" the RNG for pseudo-random numbers
 	{
 		default:
@@ -291,6 +294,7 @@ randRank=0; randChaos=0.02;
 		break;
 	}
 //nCycle=4; 
+
 		for (run = 0; run < runMax; run++)  
 		{
 			if(param.BW[0]==0) param.S=Smean; // Constant swarm size
@@ -302,6 +306,10 @@ randRank=0; randChaos=0.02;
 			// (for a "global best" PSO, directly set param.p=1)
 			
 			printf("\n Swarm size %i", param.S);
+
+			printf("\n Random number before running the PSO : %f \n", alea(0,1,param.BW[2]));
+			printf("nb_ calls : %i \n", nb_alea_calls);
+
 			result = PSO (param, pb);
 			error = result.error;
 

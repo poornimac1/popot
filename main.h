@@ -128,6 +128,7 @@ struct result
 // --------------- Sub-programs (lexicographic order)
 
 // In alea.c
+int nb_alea_calls;
 double alea (double a, double b, int option);
 void aleaIndex(int index[], int S,int option);
 int alea_integer (int a, int b,int option);
