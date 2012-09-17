@@ -3,7 +3,7 @@
 
 // We first define the generator of random numbers
 #include "rng_generators.h"
-typedef popot::rng::JKissRNG RNG_GENERATOR;
+typedef popot::rng::CRNG RNG_GENERATOR;
 
 // And then include our headers (these make use of the RNG_GENERATOR, so we must include 
 // them after the definition of RNG_GENERATOR

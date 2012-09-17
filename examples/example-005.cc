@@ -21,11 +21,11 @@ public:
 };
 
 // Let's define our particle
-typedef popot::PSO::particle::SPSO2006Particle<Problem, ParticleParams> Particle;
+typedef popot::PSO::particle::BenchSPSO2006Particle<Problem, ParticleParams> Particle;
 
 
 // The topology
-typedef popot::PSO::topology::RandomInformants<5, 3, Particle> Topology;
+typedef popot::PSO::topology::AdaptiveRandom<5, 3, Particle> Topology;
 
 // For the algorithm type, we need to mention
 // if we use synchronous or asynchronous evaluation
@@ -57,7 +57,7 @@ typedef popot::PSO::algorithm::Base<PSO_Params, Particle, Topology, StopCriteria
 
 int main(int argc, char* argv[]) {
 
-  RNG_GENERATOR::rng_srand();
+  RNG_GENERATOR::rng_srand(0);
   RNG_GENERATOR::rng_warm_up();
   
   // To keep track of the best particle ever found
@@ -66,8 +66,16 @@ int main(int argc, char* argv[]) {
   Problem::init();
   
   // Let's create our swarm
+
+
+
+  std::cout << "Random before creating : " << popot::math::uniform_random(0,1) << std::endl;
+  RNG_GENERATOR::print();
+
   PSO pso;
-  
+  pso.print(0);
+
+
   // We now run our algorithm
   for(int i = 0 ; i< 2; ++i)
     {

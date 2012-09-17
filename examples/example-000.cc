@@ -1,7 +1,7 @@
 // In this example, we check the validity of the random number generators
 
 #include "rng_generators.h"
-typedef popot::rng::JKissRNG RNG_GENERATOR;
+typedef popot::rng::CRNG RNG_GENERATOR;
 
 #include "popot.h"
 

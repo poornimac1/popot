@@ -32,6 +32,10 @@ namespace popot
 	  for(int i = 0 ; i < size ; ++i)
 	    positions[i] = popot::math::uniform_random(lowerBound(i),upperBound(i));
 	}
+	static double init(double lbound, double ubound)
+	{
+	  return popot::math::uniform_random(lbound,ubound);
+	}
       };
 
       template< int D>
