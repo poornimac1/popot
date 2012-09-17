@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 
 
   // We now run our algorithm
-  for(int i = 0 ; i< 2; ++i)
+  for(int i = 0 ; i<= 6; ++i)
     {
       std::cout << "########## Step " << i << "##############" << std::endl;
       pso.step();

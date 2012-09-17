@@ -185,12 +185,15 @@ namespace popot
 
 	  if(best_particle.getFitness() >= old_fitness)
 	    {
+	      std::cout << "REGENERATING NEW NEIGHBORHOODS !!!!!!!!!!!!!!!!! " << best_particle.getFitness() << ">= " << old_fitness << std::endl;
 	      // We consider that there is no improvement in the best particle
 	      // and ask the topology if it wants to regenerate its topology
 	      TOPOLOGY::regenerateNeighborhoods(particles, neighborhoods, neighborhood_membership);
 	      nb_new_neigh ++;
 	    }
-
+	  else
+	    std::cout << "Keeping old NEIGHBORHOOD !!!!!! " << best_particle.getFitness() << " < " << old_fitness << std::endl;
+	  
 	  epoch++;
 	}
 
