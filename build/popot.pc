@@ -1,0 +1,6 @@
+Name: Popot
+Description: C++ POPulation based Optimization Toolbox
+Requires: gsl
+Version: 1.20
+Libs: -L/usr/local/lib -lpopot
+Cflags: -I/usr/local/include/popot
