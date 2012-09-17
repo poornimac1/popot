@@ -34,6 +34,9 @@ struct result PSO (struct param param, struct problem pb)
   Gr.size=pb.SS.D;
   // -----------------------------------------------------
   // INITIALISATION
+
+printf("Nb of calls to alea before initialization: %i\n", nb_alea_calls);
+
   p=param.p; // Probability threshold for random topology
   R.SW.S = param.S; // Size of the current swarm
   randCase=param.BW[2]; 
@@ -49,9 +52,12 @@ struct result PSO (struct param param, struct problem pb)
 
   if(pb.SS.normalise>0) {xMin=0; xMax=pb.SS.normalise;} // [0,normalise]^D
 
+
+
   switch(randCase)
     {
     default:
+      printf("Default %i \n", R.SW.S*pb.SS.D);
       for (s = 0; s < R.SW.S; s++)   
 	{
 		
@@ -67,6 +73,7 @@ struct result PSO (struct param param, struct problem pb)
 	
     case 1:
     case 2:
+      printf("qrand \n");
       qRand=quasiRand(pb.SS.D,R.SW.S,randCase);
 	
       for (s = 0; s < R.SW.S; s++)   
@@ -80,7 +87,7 @@ struct result PSO (struct param param, struct problem pb)
 	}	
       break;
     }
-
+printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
   // Take quantisation into account
   if(pb.SS.quantisation==1)
@@ -140,6 +147,8 @@ struct result PSO (struct param param, struct problem pb)
   // Each particle informs itself
   for (m = 0; m < R.SW.S; m++) LINKS[m][m] = 1;	
 
+  printf("Nb of calls to alea before while: %i\n", nb_alea_calls);
+
   while (noStop == 0) 
     {	
 
@@ -164,6 +173,7 @@ struct result PSO (struct param param, struct problem pb)
 	  break;
 		
 	case 1:
+	  printf("Random numbering of the particles !! \n");
 	  aleaIndex(index, R.SW.S,randCase); // Random numbering of the particles
 	  break;
 
@@ -237,7 +247,8 @@ struct result PSO (struct param param, struct problem pb)
         }
       printf("PSO stats : \n");
       printf("Nb new links : %i \n", nb_new_links);
-
+      printf("Alea before the loop over the particles : %f\n", alea(0,1,randCase));
+      printf("Nb of calls to alea : %i\n", nb_alea_calls);
 
       // Loop on particles
       for (s0 = 0; s0 < R.SW.S; s0++)	// For each particle ...

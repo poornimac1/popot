@@ -198,7 +198,7 @@ namespace popot
 	  /**
 	   * Getter on the position
 	   */
-	  double getPosition(int i)
+	  double getPosition(int i) const
 	  {
 	    return this->getValueAt(i);
 	  }
@@ -365,7 +365,7 @@ namespace popot
 	  /**
 	   * Getter on the velocity
 	   */
-	  double getVelocity(int i)
+	  double getVelocity(int i) const
 	  {
 	    if(i >= 0 && i < TSuper::_dimension)
 	      return _velocity[i];
@@ -455,8 +455,13 @@ namespace popot
 
 	  virtual void print(std::ostream & os) const
 	  {
-	    TSuper::print(os);
-	    os << "; Best position : " << _best_position;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i));
+	      }
+	    printf("\n");
+	    //TSuper::print(os);
+	    //os << "; Best position : " << _best_position;
 	  }
 
 	};
@@ -482,6 +487,76 @@ namespace popot
 	  virtual ~SPSO2006Particle(void)
 	    {
 	    }
+
+	  /**
+	   * Update the position of the particle
+	   */
+	  virtual void updatePosition(void)
+	  {
+	    // Here it is simply : p_{k+1} = p_k + v_k
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
+	  }
+
+	  /**
+	   * Updates the velocity of the particle
+	   */
+	  virtual void updateVelocity(void)
+	  {
+	    // The update of the velocity is done according to the equation :
+	    // v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
+	    // with :
+	    // r_p, r_g two random real numbers in [0.0,1.0]
+	    // w, c1, c2 : user defined parameters
+	    // best_p : the best position the particle ever had
+	    // best_g : the best position the neighborhood ever had
+	    double r1,r2;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
+		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
+		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
+				  + r1 * (this->getBestPosition()->getPosition(i) - this->getPosition(i))
+				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
+	      }
+	  }
+	};
+
+      template< typename PROBLEM, typename PARTICLE_PARAMS>
+	class BenchSPSO2006Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+	{
+	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  typedef popot::PSO::initializer::PositionUniformRandom POSITION_INITIALIZER;
+	  typedef popot::PSO::initializer::VelocitySPSO2011 VELOCITY_INITIALIZER;
+	public:
+
+	BenchSPSO2006Particle(void) : TSuper()
+	    {
+	    }
+
+	  /**
+	   * Destructor
+	   */
+	  virtual ~BenchSPSO2006Particle(void)
+	    {
+	    }
+
+	  virtual void init(void)
+	  {
+	    double params[3];
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		this->setPosition(i,POSITION_INITIALIZER::init(PROBLEM::get_lbound(i),PROBLEM::get_ubound(i)));
+
+		params[0] = PROBLEM::get_lbound(i);
+		params[1] = PROBLEM::get_ubound(i);
+		params[2] = this->getPosition(i);
+		this->setVelocity(i, VELOCITY_INITIALIZER::init(params));
+	      }
+
+	    // Set the best particle to the current position
+	    this->_best_position = *this;
+	  }
 
 	  /**
 	   * Update the position of the particle

@@ -30,7 +30,7 @@
 
 // We first define the generator of random numbers
 #include "rng_generators.h"
-typedef popot::rng::JKissRNG RNG_GENERATOR;
+typedef popot::rng::CRNG RNG_GENERATOR;
 
 #include "popot.h"
 

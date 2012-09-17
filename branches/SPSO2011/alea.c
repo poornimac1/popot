@@ -71,6 +71,8 @@ double alea (double a, double b, int option)
 
 	nbRand++;
 	 r=a+r*(b-a);
+	 nb_alea_calls ++;
+	 //printf("Call to alea : %f %f -> %f \n", a, b , r);
 	return r; 
 }
 

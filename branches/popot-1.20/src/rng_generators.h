@@ -159,6 +159,7 @@ namespace popot
     public:
 
       static const unsigned long RNG_RAND_MAX = RAND_MAX;
+      static int nb_calls;
 
       static void rng_srand()
       {
@@ -171,6 +172,7 @@ namespace popot
       static void rng_srand(unsigned long seed)
       {
 	srand(seed);
+	nb_calls = 0;
       }
 
       static void rng_warm_up(void)
@@ -181,10 +183,16 @@ namespace popot
 
       static unsigned long rng_rand(void)
       {
+	nb_calls++;
 	return rand();
       }
-    };
 
+      static void print(void)
+      {
+	std::cout << "Nb calls : " << nb_calls << std::endl;
+      }
+    };
+    int CRNG::nb_calls;
 
     /**
      * Halton quasi random sequence generator
