@@ -47,6 +47,29 @@ namespace popot
       return mean + std * x;
     }
 
+    double normal_spso2011(double mean, double std)
+    {
+      // We generate a sample following a normal distribution
+      // with the Box-Muller method
+      // u and v are randomly generated in ] 0 ; 1]
+      double x1,x2,w, y1;
+      do
+	{
+	  x1 = 2.0 * uniform_random(0,1) - 1.0;
+	  x2 = 2.0 * uniform_random(0,1) - 1.0;
+	  w = x1*x1+x2*x2;
+	} 
+      while(w >= 1.0);
+
+      w = sqrt (-2.0 * log (w) / w);
+      y1 = x1 * w;
+      
+      if(uniform_random(0,1)<0.5) 
+	y1=-y1; 
+      y1 = y1 * std + mean;
+      return y1;  
+    }
+
     /**
      * Returns a random value in [|min; max|]
      * uniformely sampled

@@ -1,4 +1,4 @@
-# Install script for directory: /opt/GoogleCode/popot/branches/popot-1.20
+# Install script for directory: /home/fix_jer/Developpement/Google/popot/branches/popot-1.20
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -35,13 +35,13 @@ ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   list(APPEND CPACK_ABSOLUTE_DESTINATION_FILES
    "/usr/local/lib/pkgconfig/popot.pc")
-FILE(INSTALL DESTINATION "/usr/local/lib/pkgconfig" TYPE FILE FILES "/opt/GoogleCode/popot/branches/popot-1.20/build/popot.pc")
+FILE(INSTALL DESTINATION "/usr/local/lib/pkgconfig" TYPE FILE FILES "/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/popot.pc")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  INCLUDE("/opt/GoogleCode/popot/branches/popot-1.20/build/src/cmake_install.cmake")
-  INCLUDE("/opt/GoogleCode/popot/branches/popot-1.20/build/examples/cmake_install.cmake")
+  INCLUDE("/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/src/cmake_install.cmake")
+  INCLUDE("/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/examples/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 
@@ -51,7 +51,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/opt/GoogleCode/popot/branches/popot-1.20/build/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/opt/GoogleCode/popot/branches/popot-1.20/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)

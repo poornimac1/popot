@@ -120,7 +120,7 @@ map
 neighborhood.h
 ../src/neighborhood.h
 
-/opt/GoogleCode/popot/branches/popot-1.20/examples/example-003.cc
+/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/examples/example-003.cc
 stdio.h
 -
 cmath
@@ -128,7 +128,7 @@ cmath
 list
 -
 rng_generators.h
-/opt/GoogleCode/popot/branches/popot-1.20/examples/rng_generators.h
+/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/examples/rng_generators.h
 popot.h
-/opt/GoogleCode/popot/branches/popot-1.20/examples/popot.h
+/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/examples/popot.h
 

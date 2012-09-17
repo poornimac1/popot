@@ -223,17 +223,18 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      break;
 	    }
 	}
-      /*
+
+      printf("Links : \n");
       // Display the links
       for(s=0;s<R.SW.S;s++)
-      {
-      printf("\n");
-      for(m=0;m<R.SW.S;m++)
-      {
-      printf("%i ",LINKS[s][m]);		
-      }
-      }	
-      */
+	{
+	  printf("\n");
+	  for(m=0;m<R.SW.S;m++)
+	    {
+	      printf("%i ",LINKS[s][m]);		
+	    }
+	}	
+      
 
 
       // Print the initial positions
@@ -268,7 +269,17 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		g = m;
 	    }	
 
+	  printf("Position of the best informant :");
+	  for(d = 0 ; d < pb.SS.D ; d++)
+	    printf("%f ", R.SW.P[g].x[d]);
+	  printf("\n");
+
 	  //.. compute the new velocity, and move
+
+	  printf("Old velocity : ");
+	  for (d = 0; d < pb.SS.D; d++) 
+	    printf("%f ", R.SW.V[s].v[d]);
+	  printf("\n");
 
 	  // Exploration tendency
 	  for (d = 0; d < pb.SS.D; d++)
@@ -284,6 +295,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		
 	  if(g!=s) // If the particle is not its own local best, prepare g-x
 	    {
+	      printf("The particle is not its own local best \n");
 	      for (d = 0; d < pb.SS.D; d++) 
 		{
 		  GX.v[d]= R.SW.P[g].x[d] - R.SW.X[s].x[d];
@@ -292,6 +304,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  else // this is the best particle. Define another random "previous best" 
 	    // May be used or not, though (see below)
 	    {
+	      printf("The particle IISSSS its own local best \n");
 	      //	if(param.BW[1]==1) // WARNING: un-comment this line largely modify the performances
 	      // of list-based option BW[2]=4. Not the same lists are valid
 	      {			
@@ -305,6 +318,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
 	  // Gravity centre Gr
 	  w1=1; w2=1; w3=1; 
+	  printf("BW[1] = %i ; nb calls : %i \n", param.BW[1], nb_alea_calls);
 	  switch(param.BW[1])
 	    {
 	    default:if(g==s) w3=0; break; // Pure standard
@@ -343,6 +357,9 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  zz=w1+w2+w3;
 	  w1=w1/zz; w2=w2/zz; w3=w3/zz;
 
+
+	  printf("nb calls before Gr : %i \n", nb_alea_calls);
+
 	  for (d = 0; d < pb.SS.D; d++) 
 	    {
 	      Gr.x[d]=w1*R.SW.X[s].x[d] + w2*(R.SW.X[s].x[d] + param.c*PX.v[d]);
@@ -376,6 +393,8 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      V1.v[d]= Gr.x[d]-R.SW.X[s].x[d]; // Vector X-G
 	    }
 
+	  printf("Nb of calls to alea before rad: %i\n", nb_alea_calls);
+
 	  // Random point around
 	  switch(param.BW[1])
 	    {
@@ -386,6 +405,8 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      rad=(param.c-1)*distanceL(R.SW.X[s],R.SW.P[s],2);
 	      break;
 	    }
+	  printf("Nb of calls to alea before alea sphere: %i\n", nb_alea_calls);
+	  printf("Rad = %f \n", rad);
 
 	  V2=alea_sphere(pb.SS.D,rad,param.distrib, param.mean,param.sigma,randCase); 
 
@@ -394,13 +415,21 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	    {
 	      R.SW.V[s].v[d]=R.SW.V[s].v[d]+V1.v[d] + V2.v[d]; // New "velocity"
 	    }
-
+	  printf("New velocity : ");
+	  for (d = 0; d < pb.SS.D; d++) 
+	    printf("%f ", R.SW.V[s].v[d]);
+	  printf("\n");
+	  printf("nb calls after new velocity: %i \n", nb_alea_calls);
 	  // New position
 
 	  for (d = 0; d < pb.SS.D; d++) 
 	    {	
 	      R.SW.X[s].x[d] = R.SW.X[s].x[d] + R.SW.V[s].v[d];			
 	    }
+	  printf("New Position : ");
+	  for (d = 0; d < pb.SS.D; d++) 
+	    printf("%f ", R.SW.X[s].x[d]);
+	  printf("\n");
 
 	  if (R.nEval >= pb.evalMax)  goto end;
 
@@ -408,6 +437,8 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
 	  if(pb.SS.quantisation==1)
 	    R.SW.X[s] = quantis (R.SW.X[s], pb.SS);
+
+	  printf("Confinment ?\n");
 
 	  // Confinement			
 	  out=0;
@@ -479,6 +510,8 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		}
 	      fprintf(f_trace,"\n");
 	    }	
+	  printf("\n");
+
 	}			// End of "for (s0=0 ...  "	
 
       // Check if finished

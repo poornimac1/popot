@@ -455,6 +455,7 @@ namespace popot
 
 	  virtual void print(std::ostream & os) const
 	  {
+	    printf("%f - ", this->getFitness());
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      {
 		printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i));
@@ -553,6 +554,8 @@ namespace popot
 		params[2] = this->getPosition(i);
 		this->setVelocity(i, VELOCITY_INITIALIZER::init(params));
 	      }
+
+	    this->evaluateFitness();
 
 	    // Set the best particle to the current position
 	    this->_best_position = *this;
@@ -811,6 +814,215 @@ namespace popot
 	  
 
 	};
+
+
+
+
+
+      template< typename PROBLEM, typename PARTICLE_PARAMS>
+	class BenchSPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+ 
+	{
+	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  typedef popot::PSO::initializer::PositionUniformRandom POSITION_INITIALIZER;
+	  typedef popot::PSO::initializer::VelocitySPSO2011 VELOCITY_INITIALIZER;
+
+	  double * xpi;
+	  double * p1;
+	  double * p2;
+	  double * gr;
+	public:
+
+	BenchSPSO2011Particle(void) : TSuper()
+	    {
+	      xpi = new double[TSuper::_dimension];
+	      p1 = new double[TSuper::_dimension];
+	      p2 = new double[TSuper::_dimension];
+	      gr = new double[TSuper::_dimension];
+	    }
+
+	  /**
+	   * Destructor
+	   */
+	  virtual ~BenchSPSO2011Particle(void)
+	    {
+	      delete[] xpi;
+	      delete[] p1;
+	      delete[] p2;
+	      delete[] gr;
+	    }
+
+	  virtual void init(void)
+	  {
+	    double params[3];
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		this->setPosition(i,POSITION_INITIALIZER::init(PROBLEM::get_lbound(i),PROBLEM::get_ubound(i)));
+
+		params[0] = PROBLEM::get_lbound(i);
+		params[1] = PROBLEM::get_ubound(i);
+		params[2] = this->getPosition(i);
+		this->setVelocity(i, VELOCITY_INITIALIZER::init(params));
+	      }
+
+	    this->evaluateFitness();
+
+	    // Set the best particle to the current position
+	    this->_best_position = *this;
+	  }
+
+	  /**
+	   * Update the position of the particle
+	   */
+	  virtual void updatePosition(void)
+	  {
+	    // Here it is simply : p_{k+1} = p_k + v_k
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
+	    std::cout << "New position : " ;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      std::cout << this->getPosition(i) << " ";
+	    std::cout << std::endl;
+	    std::cout << std::endl;
+	  }
+
+	  /**
+	   * Updates the velocity of the particle
+	   */
+	  virtual void updateVelocity(void)
+	  {
+
+	    
+	    std::cout << "Position of the best informant : " ;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      std::cout << this->getNeighborhood()->getBest()->getPosition(i) << " " ;
+	    std::cout << std::endl;
+
+	    std::cout << "Old velocity : " ;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      std::cout << this->getVelocity(i) << " ";
+	    std::cout << std::endl;
+
+	    // The update of the velocity is done according to the equation :
+	    // v_i(t+1) = w v_i(t) + x'_i(t) - x_i(t)
+	    // where x'_i is normally sampled from the hypersphere (Gi, Ri)
+	    // with Gi the center and Ri the radius and
+	    // Gi = 1/3 ( x_i + (x_i + c(p_i - x_i)) + (x_i + c(l_i - x_i)))
+	    //    = 1/3 ( x_i +          p1          +            p2     )))
+	    // or 
+	    // Gi = 1/2 (x_i + (x_i + c(p_i - x_i))) if p_i == l_i
+	    //    = 1/2 (x_i +          p1         )
+	    // Ri = ||G_i - x_i||
+
+	    // We first check if the local best and personal best are identical by computing the norm of the difference
+	    // between both positions
+	    // This can be done with pointer comparison
+	    // as the neighborhood holds a pointer to the best personal best
+	    bool li_equals_pi = (this->getBestPosition() == this->getNeighborhood()->getBest());
+
+	    // In practive , useless !!! just to match the number of calls to the RNG with SPSO 2011
+	    if(li_equals_pi)
+	      popot::math::uniform_random(0,1); 
+
+	    // First position
+	    // p1 = xi + c * (pi - xi)
+	    // where pi is the personal best position
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition()->getPosition(i) - this->getPosition(i));
+	  
+	    // Second position
+	    // p2 = xi + c * (li - xi)
+	    // where li is the local best position (within the neighborhood)
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      p2[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i));
+	  
+	    // Compute the gravity center of p1, p2 and xi
+	    if(!li_equals_pi)
+	      {
+		// We here consider p1, p2 and xi
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  gr[i] = 1.0/3.0 * (this->getPosition(i) + p1[i] + p2[i]);
+	      }
+	    else
+	      {
+		// We here consider only p1 (or p2, since they are equal) and xi
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  gr[i] = 1.0/2.0 * (this->getPosition(i) + p1[i]);
+	      }
+
+	    // And the radius of the hypersphere
+	    double ri = 0.0;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      ri += (gr[i] - this->getPosition(i))*(gr[i] - this->getPosition(i));
+	    ri = sqrt(ri);
+
+	    // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri);
+	    // To uniformely sample from the hypersphere we uniformely sample a direction
+	    double norm = 0.0;
+	    std::cout << "Nb RNG calls before alea normal: " << RNG_GENERATOR::nb_calls << std::endl;
+
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		xpi[i] = popot::math::normal_spso2011(0.0,1.0);
+		norm += xpi[i] * xpi[i];
+	      }
+	    norm = sqrt(norm);
+	    std::cout << "Alea normal : " ;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      std::cout << xpi[i] << " ";
+	    std::cout << std::endl;
+
+	    std::cout << "Rad = " << ri << std::endl;
+	    // And then scale by a random radius
+	    double r = popot::math::uniform_random(0.0,1.0);
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      xpi[i] =  gr[i] +  r * ri * xpi[i] / norm;
+
+	    // And then update the velocity
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
+				+ xpi[i] - this->getPosition(i));
+
+	    std::cout << "New velocity : " ;
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      std::cout << this->getVelocity(i) << " ";
+	    std::cout << std::endl;
+	    std::cout << "Nb RNG calls after new velocity: " << RNG_GENERATOR::nb_calls << std::endl;
+
+	  }
+
+
+	  /**
+	   * Bounds the velocity and position of the particle
+	   */
+	  
+	  virtual void confine(void)
+	  {
+	    // In case the position is out of the bounds
+	    // we reset the velocities
+	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
+	      {
+		if((this->getPosition(i) < PROBLEM::get_lbound(i)))
+		  {
+		    this->setPosition(i, PROBLEM::get_lbound(i));
+		    this->setVelocity(i,-0.5*this->getVelocity(i));
+		  }
+		else if(this->getPosition(i) > PROBLEM::get_ubound(i))
+		  {		  
+		    this->setPosition(i, PROBLEM::get_ubound(i));
+		    this->setVelocity(i,-0.5*this->getVelocity(i));
+		  }
+	      }
+	  }
+	  
+
+	};
+
+
+
+
+
+
 
 
       /**

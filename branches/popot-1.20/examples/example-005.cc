@@ -7,7 +7,7 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 #include "popot.h"
 
 // Define our problem
-typedef popot::problems::Rosenbrock<5> Problem;
+typedef popot::problems::SPSO2011Bench::Rosenbrock<5> Problem;
 
 // Define our initializers for the position and velocity
 typedef popot::PSO::initializer::PositionUniformRandom PositionInit;
@@ -21,7 +21,7 @@ public:
 };
 
 // Let's define our particle
-typedef popot::PSO::particle::BenchSPSO2006Particle<Problem, ParticleParams> Particle;
+typedef popot::PSO::particle::BenchSPSO2011Particle<Problem, ParticleParams> Particle;
 
 
 // The topology
