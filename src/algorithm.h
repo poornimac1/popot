@@ -76,6 +76,9 @@ namespace popot
 	    // We now form groups of particles depending on the topology
 	    TOPOLOGY::fillNeighborhoods(particles, neighborhoods, neighborhood_membership);
 
+	    //std::cout << "After topology " << std::endl;
+	    //RNG_GENERATOR::print();
+
 	    // We now browse all the neighborhoods and find the best particles
 	    // within each of them
 	    // and initialize the best best particle of the whole swarm
@@ -84,7 +87,7 @@ namespace popot
 	      if(neighborhoods[i]->findBest()->compare(&best_particle) < 0)
 		best_particle = *(neighborhoods[i]->getBest());
                 
-	    std::cout << "After topology " << std::endl;
+	    std::cout << "After topology 2" << std::endl;
 	    RNG_GENERATOR::print();
 
 	    epoch = 0;
@@ -124,7 +127,7 @@ namespace popot
 	  // If we use an asynchronous update, we first shuffle the particles
 	  if(PARAMS::evaluation_mode() == ASYNCHRONOUS_EVALUATION)
 	    {
-	      popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
+	      //popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
 
 	      int particle_index;
 	      for(unsigned int i = 0 ; i < swarm_size ; ++i)

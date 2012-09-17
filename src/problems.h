@@ -611,6 +611,69 @@ namespace popot
     {
     }
 
+    /**
+     * Functions as defined within the Standard PSO 2011 (17/09/2012)
+     */ 
+    namespace SPSO2011Bench
+    {
+
+      /**
+       * N-dimensional Rosenbrock banana function
+       * @brief \f$ \sum_{i=1}^{N-1} (100 (y_{i+1} - y_i^2)^2 + (y_i - 1)^2)\f$
+       *        with \f$ y_i = x_i + o_i - 1\f$
+       * Bounds [-30,30]
+       */
+      template< int dimension>
+	class Rosenbrock
+	{
+	public:
+	  static const int nb_parameters = dimension;
+	  static const int suggested_swarm_size ;
+	  static int count;
+
+	  static void init(void)
+	  {
+	    count = 0;
+	  }
+
+	  static void free(void)
+	{
+	}
+
+	  static double get_lbound(int index)
+	  {
+	    return -30;
+	  }
+
+	  static double get_ubound(int index)
+	  {
+	    return 30;
+	  }
+	
+	  static bool stop(double fitness, int epoch)
+	{
+	  return (fitness <= 100) || (count >= 10000*dimension);
+	}
+
+	  static double evaluate(void * x)
+	  {
+	    double * params = (double*) x;
+	    count++;
+	    double fit = 0.0;
+	    double y_i, y_i_1;
+	    for(int i = 0 ; i < nb_parameters-1 ; ++i)
+	      {
+		y_i = params[i]+1;
+		y_i_1 = params[i+1]+1;
+		fit += 100 * pow(y_i_1 - pow(y_i,2.0),2.0)+pow(y_i - 1.0,2.0);
+	      }
+	    return fit;
+	  }
+	};
+      template<int dimension> int     Rosenbrock<dimension>::count;
+
+    }
+
   } // namespace problems
 } // namespace popot
 
