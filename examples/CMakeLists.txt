@@ -1,9 +1,6 @@
 # Make sure the compiler can find include files from our library.
 include_directories (${CMAKE_SOURCE_DIR}/src)
 
-# Define the libs used to compile the examples
-set(LIBS_FOR_EXAMPLE popot ${GSL_LIBRARIES})
-
 # Define our examples to compile
 set(USAGE_EXAMPLES example-000 example-001 example-002 example-003
 example-004 example-005)

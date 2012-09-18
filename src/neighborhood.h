@@ -84,6 +84,7 @@ namespace popot
 		else if(_particles[i]->getBestPosition()->compare(_best_particle) > 0)
 		  fitnesses_all_the_same = false;
 	      }
+	    // If comparing to SPSO, the following must be commented
 	    if(fitnesses_all_the_same)
 	      _best_particle = _particles[popot::math::uniform_integer(0, size()-1)]->getBestPosition();
 

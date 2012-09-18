@@ -7,19 +7,6 @@ project (popot)
 set(POPOT_VERSION "1.20")
 set(PACKAGE_VERSION ${POPOT_VERSION})
 
-# Adds the path to the FindGSL.cmake
-SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
-                       "${CMAKE_MODULE_PATH}" )
-
-###################################
-# Get required and optional library
-###################################
-
-FIND_PACKAGE( GSL REQUIRED )
-
-include_directories( ${GSL_INCLUDE_DIR})
-link_directories(${GSL_LINK_DIRECTORIES})
-
 ###################################
 # Some prefix definitions
 ###################################

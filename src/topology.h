@@ -32,11 +32,14 @@ namespace popot
 	  for(int i = 0 ; i < SIZE ; ++i)
 	    neighbordhood_membership[i].clear();
 
-	  for(int i = 0 ; i < SIZE ; ++i)
+	  if(VERBOSE_BENCH)
 	    {
-	      for(int j = 0 ;  j< SIZE ; ++j)
-		printf("%i ", who_informs_whom[i*SIZE+j]);
-	      printf("\n");
+	      for(int i = 0 ; i < SIZE ; ++i)
+		{
+		  for(int j = 0 ;  j< SIZE ; ++j)
+		    printf("%i ", who_informs_whom[i*SIZE+j]);
+		  printf("\n");
+		}
 	    }
 		
 
