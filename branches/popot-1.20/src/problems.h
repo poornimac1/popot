@@ -652,7 +652,7 @@ namespace popot
 	
 	  static bool stop(double fitness, int epoch)
 	{
-	  return (fitness <= 100) || (count >= 10000*dimension);
+	  return (fitness <= 1e-10) || (count >= 10000*dimension);
 	}
 
 	  static double evaluate(void * x)

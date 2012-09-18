@@ -411,9 +411,26 @@ namespace popot
 	   */
 	  virtual void updateBestPosition(void)
 	  {
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "Previous best : " << _best_position.getFitness() << " : ";
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << _best_position.getPosition(i) << " ";
+		std::cout << std::endl;
+	      }
 	    // Update the best position the particle ever had
 	    if(this->compare(&_best_position) < 0)
-	      _best_position = *this;
+	      {
+		_best_position = *this;
+	      }
+	    
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "New best : " << _best_position.getFitness() << " : ";
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << _best_position.getPosition(i) << " ";
+		std::cout << std::endl;
+	      }
 	  }
 
 	  /**
@@ -674,10 +691,10 @@ namespace popot
        * These come from the Standard PSO 2011 
        */
       template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionHalton<PROBLEM::nb_parameters>, popot::PSO::initializer::VelocitySPSO2011 >
+	class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
  
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionHalton<PROBLEM::nb_parameters> , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
 
 	  double * xpi;
 	  double * p1;
@@ -779,8 +796,9 @@ namespace popot
 	    norm = sqrt(norm);
 	  
 	    // And then scale by a random radius
+	    double r = popot::math::uniform_random(0.0,1.0);
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      xpi[i] =  gr[i] + popot::math::uniform_random(0.0,1.0) * ri * xpi[i] / norm;
+	      xpi[i] =  gr[i] + r * ri * xpi[i] / norm;
 
 	    // And then update the velocity
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
@@ -815,10 +833,10 @@ namespace popot
 
 	};
 
-
-
-
-
+      /**
+       * Definition of a Standard PSO 2011 particle, respecting the order of the operations of SPSO on swarm central
+       * basically, in the initialization 
+       */
       template< typename PROBLEM, typename PARTICLE_PARAMS>
 	class BenchSPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
  
@@ -879,11 +897,13 @@ namespace popot
 	    // Here it is simply : p_{k+1} = p_k + v_k
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-	    std::cout << "New position : " ;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      std::cout << this->getPosition(i) << " ";
-	    std::cout << std::endl;
-	    std::cout << std::endl;
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "New position : " ;
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << this->getPosition(i) << " ";
+		std::cout << std::endl;
+	      }
 	  }
 
 	  /**
@@ -892,16 +912,18 @@ namespace popot
 	  virtual void updateVelocity(void)
 	  {
 
-	    
-	    std::cout << "Position of the best informant : " ;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      std::cout << this->getNeighborhood()->getBest()->getPosition(i) << " " ;
-	    std::cout << std::endl;
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "Position of the best informant (over " << this->getNeighborhood()->size() << ") : " << this->getNeighborhood()->getBest()->getFitness() << " " ;
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << this->getNeighborhood()->getBest()->getPosition(i) << " " ;
+		std::cout << std::endl;
 
-	    std::cout << "Old velocity : " ;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      std::cout << this->getVelocity(i) << " ";
-	    std::cout << std::endl;
+		std::cout << "Old velocity : " ;
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << this->getVelocity(i) << " ";
+		std::cout << std::endl;
+	      }
 
 	    // The update of the velocity is done according to the equation :
 	    // v_i(t+1) = w v_i(t) + x'_i(t) - x_i(t)
@@ -920,9 +942,16 @@ namespace popot
 	    // as the neighborhood holds a pointer to the best personal best
 	    bool li_equals_pi = (this->getBestPosition() == this->getNeighborhood()->getBest());
 
-	    // In practive , useless !!! just to match the number of calls to the RNG with SPSO 2011
-	    if(li_equals_pi)
-	      popot::math::uniform_random(0,1); 
+	    if(VERBOSE_BENCH)
+	      {
+		if(li_equals_pi)
+		  std::cout << "The particle IIISSSS its own local best" << std::endl;
+	      }
+
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "BW = .... nb_calls = " << RNG_GENERATOR::nb_calls << std::endl;
+	      }
 
 	    // First position
 	    // p1 = xi + c * (pi - xi)
@@ -959,7 +988,10 @@ namespace popot
 	    // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri);
 	    // To uniformely sample from the hypersphere we uniformely sample a direction
 	    double norm = 0.0;
-	    std::cout << "Nb RNG calls before alea normal: " << RNG_GENERATOR::nb_calls << std::endl;
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "Nb RNG calls before alea normal: " << RNG_GENERATOR::nb_calls << std::endl;
+	      }
 
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      {
@@ -967,12 +999,17 @@ namespace popot
 		norm += xpi[i] * xpi[i];
 	      }
 	    norm = sqrt(norm);
-	    std::cout << "Alea normal : " ;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      std::cout << xpi[i] << " ";
-	    std::cout << std::endl;
 
-	    std::cout << "Rad = " << ri << std::endl;
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "Alea normal : " ;
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << xpi[i] << " ";
+		std::cout << std::endl;
+	      
+		std::cout << "Rad = " << ri << std::endl;
+	      }
+
 	    // And then scale by a random radius
 	    double r = popot::math::uniform_random(0.0,1.0);
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
@@ -982,12 +1019,14 @@ namespace popot
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
 				+ xpi[i] - this->getPosition(i));
-
-	    std::cout << "New velocity : " ;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      std::cout << this->getVelocity(i) << " ";
-	    std::cout << std::endl;
-	    std::cout << "Nb RNG calls after new velocity: " << RNG_GENERATOR::nb_calls << std::endl;
+	    if(VERBOSE_BENCH)
+	      {
+		std::cout << "New velocity : " ;
+		for(int i = 0 ; i < TSuper::_dimension ; ++i)
+		  std::cout << this->getVelocity(i) << " ";
+		std::cout << std::endl;
+		std::cout << "Nb RNG calls after new velocity: " << RNG_GENERATOR::nb_calls << std::endl;
+	      }
 
 	  }
 
@@ -1014,15 +1053,7 @@ namespace popot
 		  }
 	      }
 	  }
-	  
-
 	};
-
-
-
-
-
-
 
 
       /**
@@ -1054,6 +1085,7 @@ namespace popot
 	    this->_best_position.evaluateFitness();
 
 	    // Update the best position the particle ever had
+	    // with a copy of the current position
 	    if(this->compare(&this->_best_position) < 0)
 	      this->_best_position = *this;
 	  }
@@ -1088,6 +1120,7 @@ namespace popot
 	    this->_best_position.evaluateFitness();
 
 	    // Update the best position the particle ever had
+	    // with a copy of the current position
 	    if(this->compare(&this->_best_position) < 0)
 	      this->_best_position = *this;
 	  }

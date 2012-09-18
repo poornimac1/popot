@@ -30,8 +30,6 @@ int main(int argc, char* argv[]) {
   // Some initialization of static fields
   Problem::init();
   
-  popot::rng::Halton<Problem::nb_parameters>::init();
-  
   // Let's create our swarm
   PSO* pso = new PSO();
   
@@ -43,5 +41,4 @@ int main(int argc, char* argv[]) {
   delete pso;
   Problem::free();
 
-  popot::rng::Halton<Problem::nb_parameters>::free();
 }

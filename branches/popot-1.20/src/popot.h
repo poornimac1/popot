@@ -27,6 +27,8 @@
 #ifndef POPOT_H
 #define POPOT_H
 
+#define VERBOSE_BENCH false
+
 #include "algorithm.h"
 #include "exceptions.h"
 #include "individuals.h"

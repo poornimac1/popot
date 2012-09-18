@@ -70,14 +70,12 @@ namespace popot
 		particles_indexes[i] = i;
 	      }
 
-	    std::cout << "After initialization " << std::endl;
-	    RNG_GENERATOR::print();
+	    if(VERBOSE_BENCH)
+	      std::cout << "After initialization " << RNG_GENERATOR::nb_calls << std::endl;
 
 	    // We now form groups of particles depending on the topology
 	    TOPOLOGY::fillNeighborhoods(particles, neighborhoods, neighborhood_membership);
-
-	    //std::cout << "After topology " << std::endl;
-	    //RNG_GENERATOR::print();
+	    nb_new_neigh ++;
 
 	    // We now browse all the neighborhoods and find the best particles
 	    // within each of them
@@ -86,9 +84,9 @@ namespace popot
 	    for(unsigned int i = 1 ; i < neighborhoods.size() ; ++i)
 	      if(neighborhoods[i]->findBest()->compare(&best_particle) < 0)
 		best_particle = *(neighborhoods[i]->getBest());
-                
-	    std::cout << "After topology 2" << std::endl;
-	    RNG_GENERATOR::print();
+	    
+	    if(VERBOSE_BENCH)
+	      std::cout << "After topology 2 :" << RNG_GENERATOR::nb_calls << std::endl;
 
 	    epoch = 0;
 
@@ -111,7 +109,7 @@ namespace popot
 	/**
 	 * One step of the swarm
 	 */
-	void step(void)
+	double step(void)
 	{
 	  // For each particle,
 	  // - Update the particle's velocity
@@ -121,36 +119,44 @@ namespace popot
 	  // - Update the particle's best position
 	  // - Update the swarm's best position
 
-	  std::cout << "Random before looping : " << popot::math::uniform_random(0,1) << std::endl;
-	  RNG_GENERATOR::print();
+	  if(VERBOSE_BENCH)
+	    std::cout << "Random before looping : " << popot::math::uniform_random(0,1) << ";" << RNG_GENERATOR::nb_calls << std::endl;
 
 	  // If we use an asynchronous update, we first shuffle the particles
 	  if(PARAMS::evaluation_mode() == ASYNCHRONOUS_EVALUATION)
 	    {
-	      //popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
+	      // If comparing to SPSO, the following should be commented
+	      popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
 
 	      int particle_index;
 	      for(unsigned int i = 0 ; i < swarm_size ; ++i)
 		{
 		  particle_index = particles_indexes[i];
 
+		  // First find the best informant within the neighborhood
+		  particles[particle_index].getNeighborhood()->findBest();
+
+		  // Update the velocities and positions
 		  particles[particle_index].updateVelocity();
 		  particles[particle_index].updatePosition();
 
+		  // Confine the positions and velocities if required
 		  particles[particle_index].confine();
 
+		  // Compute the fitness of the new position
 		  particles[particle_index].evaluateFitness();
 
+		  // And see if we update the personal best
 		  particles[particle_index].updateBestPosition();
 
-		  // We now update the best particle of all the neighborhoods
-		  // to which the particle belongs
-		  for(unsigned int j = 0 ; j < neighborhood_membership[particle_index].size() ; ++j)
-		    neighborhoods[neighborhood_membership[particle_index][j]]->updateBest(&(particles[particle_index]));
+		  if(VERBOSE_BENCH)
+		    std::cout << std::endl;
 		}
 	    }
 	  else // Synchronous evaluation
 	    {
+	      // In synchronous mode
+	      // we first update all the current positions and evaluate their fitness
 	      int particle_index;
 	      for(unsigned int i = 0 ; i < swarm_size ; ++i)
 		{
@@ -161,6 +167,8 @@ namespace popot
 
 		  particles[i].evaluateFitness();
 		}
+	      // before changing the personal bests
+
 
 	      // The personal best position is updated after all the positions of the particles
 	      // have been updated because the neighborhoods hold a pointer to a personal best
@@ -185,16 +193,19 @@ namespace popot
 
 	  if(best_particle.getFitness() >= old_fitness)
 	    {
-	      std::cout << "REGENERATING NEW NEIGHBORHOODS !!!!!!!!!!!!!!!!! " << best_particle.getFitness() << ">= " << old_fitness << std::endl;
+	      if(VERBOSE_BENCH)
+		std::cout << "REGENERATING NEW NEIGHBORHOODS !!!!!!!!!!!!!!!!! " << best_particle.getFitness() << ">= " << old_fitness << std::endl;
 	      // We consider that there is no improvement in the best particle
 	      // and ask the topology if it wants to regenerate its topology
 	      TOPOLOGY::regenerateNeighborhoods(particles, neighborhoods, neighborhood_membership);
 	      nb_new_neigh ++;
 	    }
 	  else
-	    std::cout << "Keeping old NEIGHBORHOOD !!!!!! " << best_particle.getFitness() << " < " << old_fitness << std::endl;
+	    if(VERBOSE_BENCH)
+	      std::cout << "Keeping old NEIGHBORHOOD !!!!!! " << best_particle.getFitness() << " < " << old_fitness << std::endl;
 	  
 	  epoch++;
+	  return old_fitness - best_particle.getFitness();
 	}
 
 	/**
@@ -241,8 +252,6 @@ namespace popot
 	 */
 	void print(int mode=0)
 	{
-	  std::cout << "PRINT !!!" << std::endl;
-
 	  if(PARAMS::evaluation_mode() == SYNCHRONOUS_EVALUATION)
 	    {
 	      printf("Using a synchronous evaluation mode \n");

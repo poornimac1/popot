@@ -5,9 +5,8 @@
 #include <ctime>
 #include <iostream>
 
-// For generating Halton Sequences
-// These are used for initialization
-#include <gsl/gsl_qrng.h>
+
+#include "mersenne.h"
 
 // For random number generations
 // There are some discussions in papers of M. Clerc
@@ -181,51 +180,14 @@ namespace popot
 	  rng_rand();
       }
 
+      // Generate a random number in [0 ; RAND_MAX [
       static unsigned long rng_rand(void)
       {
 	nb_calls++;
 	return rand();
       }
-
-      static void print(void)
-      {
-	std::cout << "Nb calls : " << nb_calls << std::endl;
-      }
     };
     int CRNG::nb_calls;
-
-    /**
-     * Halton quasi random sequence generator
-     * in [0, 1]
-     */
-    template<int D>
-    class Halton
-    {     
-    public:
-      static gsl_qrng *qrng_q;  
-  
-      static void init()
-      {
-	qrng_q=gsl_qrng_alloc (gsl_qrng_halton, D);
-      }
-
-      static void free()
-      {
-	gsl_qrng_free (qrng_q); 
-	qrng_q = 0;
-      } 
-
-      static void rng_rand(double * res)
-      {
-	// res must be allocated to size D
-	if(qrng_q == 0)
-	  std::cerr << "Halton sequence generator not initialized !" << std::endl;
-	gsl_qrng_get (qrng_q, res);
-      }
-    };
-    template<int D>
-      gsl_qrng *popot::rng::Halton<D>::qrng_q = 0;    
-
 
   }
 }

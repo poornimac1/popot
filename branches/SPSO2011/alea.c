@@ -1,3 +1,4 @@
+#define VERBOSE_BENCH false
 
 double alea (double a, double b, int option) 
 {				// random number (uniform distribution) in  [a b]
@@ -270,10 +271,13 @@ struct vector alea_sphere(int D, double radius, int distrib, double mean,
 		length=length+  x.v[j]*x.v[j];
 	}
 
-	printf("Alea sphere : ");
-	for(j = 0 ; j < D ; j++)
-	  printf("%f ", x.v[j]);
-	printf("\n");
+	if(VERBOSE_BENCH)
+	  {
+	    printf("Alea sphere : ");
+	    for(j = 0 ; j < D ; j++)
+	      printf("%f ", x.v[j]);
+	    printf("\n");
+	  }
 	length=sqrt(length);
 	//----------------------------------- Step 2. Random radius
 

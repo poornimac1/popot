@@ -231,7 +231,7 @@ public:
 
   static bool stop(double fitness, int epoch)
   {
-    return (fitness <= 1e-10) || (epoch >= 1000);
+    return (fitness <= 1e-4) || (epoch >= 1000);
   }
 
   static double evaluate(double * params)
@@ -275,8 +275,6 @@ int main(int argc, char* argv[]) {
   // Initialize our problem
   // this actually allocates memory and initializes the boundaries
   Problem::init();
-
-  popot::rng::Halton<Problem::nb_parameters>::init();
 
   // Let's create our swarm
   PSO pso;
@@ -351,6 +349,5 @@ int main(int argc, char* argv[]) {
   // Free the memory used by the problem (e.g. the bounds)
   Problem::free();
 
-  popot::rng::Halton<Problem::nb_parameters>::free();
 }
 

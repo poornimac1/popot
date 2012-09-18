@@ -80,7 +80,7 @@ int randCase;
 									//  3 => when P=G, just look around
 									// 4 =>  different weights for X, P, G  (TEST)
 									
-	param.BW[2]=-1;	// Randomness options
+	param.BW[2]=0;	// Randomness options
 	                // -2nn => Truncated KISS (simulated). 
 									//			nn is the number of bits you use to define
 									//			each random number/ Example: -207 for 7 bits
@@ -124,7 +124,7 @@ int randCase;
 		// WARNING: the CMS method may not work with randomness option >=2
 	if(param.BW[2]>=2) param.distrib=	0;
 
-	Smean=5; //Swarm size or Mean swarm size (if BW[0]=1). Suggested: 40 
+	Smean=10; //Swarm size or Mean swarm size (if BW[0]=1). Suggested: 40 
 
 	param.K=3; 	// Parameter to compute the probability p for a particle to be an
 							// external informant. You may also directly define p (see below),
@@ -306,9 +306,6 @@ randRank=0; randChaos=0.02;
 			// (for a "global best" PSO, directly set param.p=1)
 			
 			printf("\n Swarm size %i", param.S);
-
-			printf("\n Random number before running the PSO : %f \n", alea(0,1,param.BW[2]));
-			printf("nb_ calls : %i \n", nb_alea_calls);
 
 			result = PSO (param, pb);
 			error = result.error;
