@@ -1,3 +1,5 @@
+#define VERBOSE_BENCH false
+
 struct result PSO (struct param param, struct problem pb) 
 {  
   int d; 
@@ -35,7 +37,7 @@ struct result PSO (struct param param, struct problem pb)
   // -----------------------------------------------------
   // INITIALISATION
 
-printf("Nb of calls to alea before initialization: %i\n", nb_alea_calls);
+  if(VERBOSE_BENCH) printf("Nb of calls to alea before initialization: %i\n", nb_alea_calls);
 
   p=param.p; // Probability threshold for random topology
   R.SW.S = param.S; // Size of the current swarm
@@ -57,7 +59,7 @@ printf("Nb of calls to alea before initialization: %i\n", nb_alea_calls);
   switch(randCase)
     {
     default:
-      printf("Default %i \n", R.SW.S*pb.SS.D);
+      if(VERBOSE_BENCH) printf("Default %i \n", R.SW.S*pb.SS.D);
       for (s = 0; s < R.SW.S; s++)   
 	{
 		
@@ -87,7 +89,7 @@ printf("Nb of calls to alea before initialization: %i\n", nb_alea_calls);
 	}	
       break;
     }
-printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
+  if(VERBOSE_BENCH) printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 
   // Take quantisation into account
   if(pb.SS.quantisation==1)
@@ -142,17 +144,17 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
   iter=0; iterBegin=0;
   initLinks = 1;		// So that information links will be initialized
 
-  int nb_new_links = 0;
+  int nb_new_links = 1;
 
   // Each particle informs itself
   for (m = 0; m < R.SW.S; m++) LINKS[m][m] = 1;	
 
-  printf("Nb of calls to alea before while: %i\n", nb_alea_calls);
+  if(VERBOSE_BENCH) printf("Nb of calls to alea before while: %i\n", nb_alea_calls);
 
   while (noStop == 0) 
     {	
-      printf("################################################### %i #########################\n",iter);
-      iter=iter+1;
+      if(VERBOSE_BENCH) printf("################################################### %i #########################\n",iter);
+      //iter=iter+1;
       /*
       // Display the swarm		
       printf("\n Positions (%i) \ Velocities (%i) after iter %i.",pb.SS.D,pb.SS.D, iter-1 );
@@ -173,15 +175,15 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  break;
 		
 	case 1:
-	  printf("Random numbering of the particles !! \n");
+	  if(VERBOSE_BENCH) printf("Random numbering of the particles !! \n");
 	  aleaIndex(index, R.SW.S,randCase); // Random numbering of the particles
 	  break;
 
 	}	
 
+
       if (initLinks==1)	// Modify topology
 	{
-	  nb_new_links++;
 	  switch(param.topology)
 	    {
 	    default: // case 0. As in SPSO 2007
@@ -223,34 +225,37 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      break;
 	    }
 	}
-
-      printf("Links : \n");
-      // Display the links
-      for(s=0;s<R.SW.S;s++)
+      if(VERBOSE_BENCH) 
 	{
-	  printf("\n");
-	  for(m=0;m<R.SW.S;m++)
+	  printf("Links : \n");
+	  // Display the links
+	  for(s=0;s<R.SW.S;s++)
 	    {
-	      printf("%i ",LINKS[s][m]);		
-	    }
-	}	
-      
+	      printf("\n");
+	      for(m=0;m<R.SW.S;m++)
+		{
+		  printf("%i ",LINKS[s][m]);		
+		}
+	    }     
+	}
 
 
       // Print the initial positions
-      printf("Positions at iter %i :\n", iter);
-      for(s = 0 ; s < R.SW.S;s++)
-        {
-          printf("Particle %i (%f): ", s, R.SW.X[s].f);
-          for(d = 0 ; d < pb.SS.D ; d++)
-	    printf("(%f,%f,%f) ", R.SW.X[s].x[d], R.SW.V[s].v[d],R.SW.P[s].x[d]);
-          printf("\n");
-        }
-      printf("PSO stats : \n");
-      printf("Nb new links : %i \n", nb_new_links);
-      printf("Alea before the loop over the particles : %f\n", alea(0,1,randCase));
-      printf("Nb of calls to alea : %i\n", nb_alea_calls);
-
+      if(VERBOSE_BENCH) 
+	{
+	  printf("Positions at iter %i :\n", iter);
+	  for(s = 0 ; s < R.SW.S;s++)
+	    {
+	      printf("Particle %i (%f): ", s, R.SW.X[s].f);
+	      for(d = 0 ; d < pb.SS.D ; d++)
+		printf("(%f,%f,%f) ", R.SW.X[s].x[d], R.SW.V[s].v[d],R.SW.P[s].x[d]);
+	      printf("\n");
+	    }
+	  printf("PSO stats : \n");
+	  printf("Nb new links : %i \n", nb_new_links);
+	  //printf("Alea before the loop over the particles : %f\n", alea(0,1,randCase));
+	  printf("Nb of calls to alea : %i\n", nb_alea_calls);
+	}
       // Loop on particles
       for (s0 = 0; s0 < R.SW.S; s0++)	// For each particle ...
 	{		
@@ -267,20 +272,25 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	    {	    
 	      if (LINKS[m][s] == 1 && R.SW.P[m].f < R.SW.P[g].f)
 		g = m;
-	    }	
+	    }
 
-	  printf("Position of the best informant :");
-	  for(d = 0 ; d < pb.SS.D ; d++)
-	    printf("%f ", R.SW.P[g].x[d]);
-	  printf("\n");
+	  if(VERBOSE_BENCH) 
+	    {
+	      printf("nb alea calls:", nb_alea_calls);
+	      printf("Position of the best informant (%f):", R.SW.P[g].f);
+	      for(d = 0 ; d < pb.SS.D ; d++)
+		printf("%f ", R.SW.P[g].x[d]);
+	      printf("\n");
+	    }
 
 	  //.. compute the new velocity, and move
-
-	  printf("Old velocity : ");
-	  for (d = 0; d < pb.SS.D; d++) 
-	    printf("%f ", R.SW.V[s].v[d]);
-	  printf("\n");
-
+	  if(VERBOSE_BENCH) 
+	    {
+	      printf("Old velocity : ");
+	      for (d = 0; d < pb.SS.D; d++) 
+		printf("%f ", R.SW.V[s].v[d]);
+	      printf("\n");
+	    }
 	  // Exploration tendency
 	  for (d = 0; d < pb.SS.D; d++)
 	    {
@@ -295,7 +305,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		
 	  if(g!=s) // If the particle is not its own local best, prepare g-x
 	    {
-	      printf("The particle is not its own local best \n");
+	      if(VERBOSE_BENCH) printf("The particle is not its own local best \n");
 	      for (d = 0; d < pb.SS.D; d++) 
 		{
 		  GX.v[d]= R.SW.P[g].x[d] - R.SW.X[s].x[d];
@@ -304,21 +314,21 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  else // this is the best particle. Define another random "previous best" 
 	    // May be used or not, though (see below)
 	    {
-	      printf("The particle IISSSS its own local best \n");
+	      if(VERBOSE_BENCH) printf("The particle IISSSS its own local best \n");
 	      //	if(param.BW[1]==1) // WARNING: un-comment this line largely modify the performances
 	      // of list-based option BW[2]=4. Not the same lists are valid
 	      {			
-	      s1:					
-		s1=alea_integer(0,param.S-1,randCase); 
+		//s1:					
+		//s1=alea_integer(0,param.S-1,randCase); 
 
-		if(s1==s) goto s1;	
+		//if(s1==s) goto s1;	
 		// *** WARNING, may be infinite
 	      }
 	    }
 
 	  // Gravity centre Gr
 	  w1=1; w2=1; w3=1; 
-	  printf("BW[1] = %i ; nb calls : %i \n", param.BW[1], nb_alea_calls);
+	  if(VERBOSE_BENCH) printf("BW[1] = %i ; nb calls : %i \n", param.BW[1], nb_alea_calls);
 	  switch(param.BW[1])
 	    {
 	    default:if(g==s) w3=0; break; // Pure standard
@@ -358,7 +368,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  w1=w1/zz; w2=w2/zz; w3=w3/zz;
 
 
-	  printf("nb calls before Gr : %i \n", nb_alea_calls);
+	  if(VERBOSE_BENCH) printf("nb calls before Gr : %i \n", nb_alea_calls);
 
 	  for (d = 0; d < pb.SS.D; d++) 
 	    {
@@ -383,6 +393,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		      {	// Random informant
 			Gr.x[d]=Gr.x[d]+ w3*(R.SW.X[s].x[d] 
 					     +param.c*(R.SW.P[s1].x[d] - R.SW.X[s].x[d]));
+			printf("WARNNINNG !!!! I disabled s1=alea_integer() ... so YOU MUST NOT ENTER THERE !!\n");
 		      }
 		    break;
 		  case 2: // More conservative
@@ -393,7 +404,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      V1.v[d]= Gr.x[d]-R.SW.X[s].x[d]; // Vector X-G
 	    }
 
-	  printf("Nb of calls to alea before rad: %i\n", nb_alea_calls);
+	  if(VERBOSE_BENCH)  printf("Nb of calls to alea before rad: %i\n", nb_alea_calls);
 
 	  // Random point around
 	  switch(param.BW[1])
@@ -405,8 +416,8 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	      rad=(param.c-1)*distanceL(R.SW.X[s],R.SW.P[s],2);
 	      break;
 	    }
-	  printf("Nb of calls to alea before alea sphere: %i\n", nb_alea_calls);
-	  printf("Rad = %f \n", rad);
+	  if(VERBOSE_BENCH) printf("Nb of calls to alea before alea sphere: %i\n", nb_alea_calls);
+	  if(VERBOSE_BENCH) printf("Rad = %f \n", rad);
 
 	  V2=alea_sphere(pb.SS.D,rad,param.distrib, param.mean,param.sigma,randCase); 
 
@@ -415,21 +426,27 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	    {
 	      R.SW.V[s].v[d]=R.SW.V[s].v[d]+V1.v[d] + V2.v[d]; // New "velocity"
 	    }
-	  printf("New velocity : ");
-	  for (d = 0; d < pb.SS.D; d++) 
-	    printf("%f ", R.SW.V[s].v[d]);
-	  printf("\n");
-	  printf("nb calls after new velocity: %i \n", nb_alea_calls);
+	  if(VERBOSE_BENCH) 
+	    {
+	      printf("New velocity : ");
+	      for (d = 0; d < pb.SS.D; d++) 
+		printf("%f ", R.SW.V[s].v[d]);
+	      printf("\n");
+	      printf("nb calls after new velocity: %i \n", nb_alea_calls);
+	    }
 	  // New position
 
 	  for (d = 0; d < pb.SS.D; d++) 
 	    {	
 	      R.SW.X[s].x[d] = R.SW.X[s].x[d] + R.SW.V[s].v[d];			
 	    }
-	  printf("New Position : ");
-	  for (d = 0; d < pb.SS.D; d++) 
-	    printf("%f ", R.SW.X[s].x[d]);
-	  printf("\n");
+	  if(VERBOSE_BENCH) 
+	    {
+	      printf("New Position : ");
+	      for (d = 0; d < pb.SS.D; d++) 
+		printf("%f ", R.SW.X[s].x[d]);
+	      printf("\n");
+	    }
 
 	  if (R.nEval >= pb.evalMax)  goto end;
 
@@ -438,7 +455,7 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	  if(pb.SS.quantisation==1)
 	    R.SW.X[s] = quantis (R.SW.X[s], pb.SS);
 
-	  printf("Confinment ?\n");
+	  if(VERBOSE_BENCH) printf("Confinment ?\n");
 
 	  // Confinement			
 	  out=0;
@@ -476,6 +493,9 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		}	
 	      break;
 	    }
+	  
+	  if(VERBOSE_BENCH) printf("Nb alea calls after confinment : %i \n" , nb_alea_calls);
+
 
 	  if(pb.SS.quantisation==1 && out>0)
 	    {
@@ -486,7 +506,15 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 	    {
 	      // Evaluation
 	      R.SW.X[s].f =perf(R.SW.X[s],pb.function, pb.SS,pb.objective);
-	      R.nEval = R.nEval + 1;				
+	      R.nEval = R.nEval + 1;	
+
+	      if(VERBOSE_BENCH) 
+		{
+		  printf("Previous best : %f : ", R.SW.P[s].f);
+		  for(d = 0 ; d < pb.SS.D; d++)
+		    printf("%f ", R.SW.P[s].x[d]);
+		}
+
 	      // ... update the best previous position		
 	      if (R.SW.X[s].f < R.SW.P[s].f)	// Improvement
 		{															
@@ -497,60 +525,89 @@ printf("Nb of calls to alea after initialization: %i\n", nb_alea_calls);
 		    {		
 		      R.SW.best = s;			
 		    }			
-		}		
+		}
+
+	      if(VERBOSE_BENCH) 
+		{
+		  printf("New best : %f : ", R.SW.P[s].f);
+		  for(d = 0 ; d < pb.SS.D; d++)
+		    printf("%f ", R.SW.P[s].x[d]);
+		}
 	    }
 			
 	  if(param.trace>0)
 	    {
 	      // Keep trace of every position, for further tests
-	      fprintf(f_trace,"%i %f ",s,R.SW.X[s].f);
-	      for (d = 0; d < pb.SS.D; d++)
+	      //fprintf(f_trace, "%i %i \n", iter, nb_new_links);
+	      /*
+		fprintf(f_trace,"%i %f ",s,R.SW.X[s].f);
+		for (d = 0; d < pb.SS.D; d++)
 		{
-		  fprintf(f_trace,"%f ",R.SW.X[s].x[d]);
+		fprintf(f_trace,"%f ",R.SW.X[s].x[d]);
 		}
-	      fprintf(f_trace,"\n");
+		fprintf(f_trace,"\n");
+	      */
 	    }	
-	  printf("\n");
 
+	  if(VERBOSE_BENCH) printf("Nb alea calls before looping back : %i \n" , nb_alea_calls);
+
+
+	  if(VERBOSE_BENCH) printf("\n");
+	  if(VERBOSE_BENCH) printf("\n");
 	}			// End of "for (s0=0 ...  "	
 
+ 
       // Check if finished
       error = R.SW.P[R.SW.best].f;
 
       if (error < errorPrev)	// Improvement of the global best
 	{		
 	  initLinks = 0;
-	  printf("Keeping the old neighbours : %f < %f \n",error, errorPrev);
+	  if(VERBOSE_BENCH) printf("Keeping the old neighbours : %f < %f \n",error, errorPrev);
 	}
       else			// No global improvement
 	{			
 	  initLinks = 1;	// Information links will be	reinitialized
-	  printf("NEW neighbours !!!!!!!!!!!: %f !< %f \n",error, errorPrev);	
+	  nb_new_links++;
+	  if(VERBOSE_BENCH) printf("NEW neighbours !!!!!!!!!!!: %f !< %f \n",error, errorPrev);	
 	}
+
+      if(param.trace>0)
+	{
+	  // Keep trace of every position, for further tests
+	  fprintf(f_trace, "%i %i %f %f %e\n", iter, nb_new_links, error, errorPrev, error-errorPrev);
+	}
+
 
       errorPrev = error;
     end:
 
-      if(iter >= 5)
+      if(iter >= 1000)
 	noStop = 1;
       else
 	noStop = 0;
 
+      if(VERBOSE_BENCH) printf("\n");
       /*
-      if (error > pb.epsilon && R.nEval < pb.evalMax)
+	if (error > pb.epsilon && R.nEval < pb.evalMax)
 	{
-	  noStop = 0;	// Won't stop
+	noStop = 0;	// Won't stop
 	}
-      else
+	else
 	{
-	  noStop = 1;	// Will stop
+	noStop = 1;	// Will stop
 	}
       */
+
+      iter=iter+1;
 
     } // End of "while nostop ...
 
   // printf( "\n and the winner is ... %i", R.SW.best );			
   R.error = error;
+
+  printf("Nb new links : %i \n", nb_new_links);
+
   return R;  
 }
 // ===========================================================
