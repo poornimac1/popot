@@ -28,10 +28,11 @@ namespace popot
       int    _nb_failures;
       double * _best_position;
       double _best_fitness;
+      double _success_rate;
 
     public:
       Benchmark() : _mean_error(0.0),_std_error(0.0), _mean_nb_f_evaluations(0.0),
-		    _log_progress(0.0), _nb_failures(0), _best_position(0), _best_fitness(0)
+		    _log_progress(0.0), _nb_failures(0), _best_position(0), _best_fitness(0), _success_rate(0.0)
       {
 	_best_position = new double[PROBLEM::nb_parameters];
       }
@@ -46,7 +47,7 @@ namespace popot
        */
       double getMeanError(void) const
       {
-	return _mean;
+	return _mean_error;
       }
 
       /**
@@ -79,7 +80,7 @@ namespace popot
        */
       double getSuccessRate(void) const
       {
-	return double(NB_TRIALS-_nb_failures)/double(NB_TRIALS);
+	return _success_rate;
       } 
 
       /**
@@ -104,23 +105,53 @@ namespace popot
       void run(int mode=0)
       {
 	ALGO* algo;
-	for(int i = 0 ; i < NB_TRIALS ; ++i)
+	// Some temporary variables used to compute online the mean, std, .. 
+	double sum_error = 0;
+	double sum_square_errors=0;
+	double sum_fe = 0;
+	 
+	for(int i = 1 ; i <= NB_TRIALS ; ++i)
 	  {
 	    PROBLEM::init();
 	    
 	    algo = new ALGO();
-	    algo.run();
+	    algo->run();
 
-	    // Get the best 
-
-
-	    PROBLEM::free();
-	    delete algo;
-
+	    // Update the statistics
+	    sum_error += algo->getBestFitness();
+	    sum_square_errors += algo->getBestFitness()*algo->getBestFitness();
+	    sum_fe += PROBLEM::count;
+	    if(PROBLEM::has_failed(algo->getBestFitness()))
+	      _nb_failures++;
+	    if(i == 1 || algo->getBestFitness() < _best_fitness)
+	      {
+		_best_fitness = algo->getBestFitness();
+		algo->getBestPosition(_best_position);
+	      }
+	      
 	    // Eventually print the statistics
 	    if(mode)
-	      print(i);
+	      {
+		_mean_error = sum_error/double(i);
+		_std_error = sqrt((sum_square_errors - 2.0 * _mean_error * sum_error + double(i) * _mean_error*_mean_error)/double(i));
+		_mean_nb_f_evaluations = sum_fe/double(i);
+		_log_progress = 0.0;
+		_success_rate = 100.*double(i-_nb_failures)/double(i);
+
+		print(i);
+	      }
+	    
+	    // Free the memory
+	    PROBLEM::free();
+	    delete algo;
 	  }
+		     
+	// Before leaving, ensure that the statistics are up-to-date;
+	_mean_error = sum_error/double(NB_TRIALS);
+	_std_error = sqrt((sum_square_errors - 2.0 * _mean_error * sum_error + double(NB_TRIALS) * _mean_error*_mean_error)/double(NB_TRIALS));
+	_mean_nb_f_evaluations = sum_fe/double(NB_TRIALS);
+	_log_progress = 0.0;
+	print(NB_TRIALS);
       }
 
       /**
@@ -128,8 +159,13 @@ namespace popot
        */
       void print(int trial_nb)
       {
-	std::cout << "Trial " << trial_nb;
-
+	std::cout << "Trial " << trial_nb << ";";
+	std::cout << "Error (mean) = " << getMeanError() << " ";
+	std::cout << "Error (std) = " << _std_error << " ";
+	std::cout << "FE (mean) = " << _mean_nb_f_evaluations << " ";
+	std::cout << "Log progress (mean) = " << getLogProgress() << " ";
+	std::cout << "Best min = " << getBestFitness() << " ";
+	std::cout << "Success rate = " << getSuccessRate() << "% ";
 	std::cout << std::endl;
       }
     };

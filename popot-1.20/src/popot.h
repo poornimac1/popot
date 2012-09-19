@@ -30,6 +30,7 @@
 #define VERBOSE_BENCH false
 
 #include "algorithm.h"
+#include "benchmark.h"
 #include "exceptions.h"
 #include "individuals.h"
 #include "initializers.h"
