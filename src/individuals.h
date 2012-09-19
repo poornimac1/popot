@@ -171,6 +171,16 @@ namespace popot
 	  virtual ~BaseParticle(void) 
 	    {}
 
+	BaseParticle( const BaseParticle & other) : TSuper(other)
+	    {
+	      _fitness = other._fitness;
+	    }
+
+	  BaseParticle & operator=(const BaseParticle &other)
+	    {
+	      this->TSuper::operator=(other);
+	      _fitness = other._fitness;
+	    }
 
 	  /**
 	   * Random intialization of the position followed by a fitness evaluation
@@ -261,10 +271,10 @@ namespace popot
 	   * @return 1 if p1.f > p2.f
 	   * @return 0 otherwise
 	   */
-	  virtual int compare(BaseParticle * p)
+	  virtual int compare(const BaseParticle& p) const
 	  {
 	    double myfitness = getFitness();
-	    double otherfitness = p->getFitness();
+	    double otherfitness = p.getFitness();
 	    if(myfitness < otherfitness)
 	      return -1;
 	    else if(myfitness > otherfitness)
@@ -313,15 +323,17 @@ namespace popot
 	      _neighborhood = new NeighborhoodType();
 	    }
 
-	  Particle(const Particle& other)
+	Particle(const Particle& other) : TSuper(other), _best_position(other.getBestPosition())
 	    {
+	      // Copy the velocity
 	      _velocity = new double[TSuper::_dimension];
 	      for(int i = 0 ; i < TSuper::_dimension ; ++i)
 		_velocity[i] = other.getVelocity(i);
 
-	      _neighborhood = new NeighborhoodType();
-	      for(int i = 0 ; i < other.getNeighborhood()->size() ; ++i)
-		_neighborhood->add(other.getNeighborhood()->get(i));
+	      _neighborhood = new NeighborhoodType(*(other.getNeighborhood()));
+	      //_neighborhood = new NeighborhoodType();
+	      //for(int i = 0 ; i < other.getNeighborhood()->size() ; ++i)
+	      // _neighborhood->add(other.getNeighborhood()->get(i));
 	    }
 
 	  virtual ~Particle(void)
@@ -343,6 +355,7 @@ namespace popot
 	    initVelocity();
 
 	    // Set the best particle to the current position
+	    // Just copies the position and fitness
 	    _best_position = *this;
 	  }
 
@@ -386,6 +399,8 @@ namespace popot
 
 	  /**
 	   * Bounds the velocity and position of the particle
+	   * If the position is out of the boundaries, set the position on the 
+	   * boundaries and the velocity to zero
 	   */
 	  virtual void confine(void)
 	  {
@@ -419,10 +434,8 @@ namespace popot
 		std::cout << std::endl;
 	      }
 	    // Update the best position the particle ever had
-	    if(this->compare(&_best_position) < 0)
-	      {
-		_best_position = *this;
-	      }
+	    if(this->compare(_best_position) < 0)
+	      _best_position = *this;
 	    
 	    if(VERBOSE_BENCH)
 	      {
@@ -449,15 +462,15 @@ namespace popot
 	    std::cout << "No updateVelocity rule is provided for a particle of type Particle " << std::endl;
 	  }
 
-	  virtual BestType * getBestPosition(void)
+	  virtual const BestType & getBestPosition(void) const
 	  {
-	    return &_best_position;
+	    return _best_position;
 	  }
 
 	  /**
 	   * Returns a pointer to the neighborhood of the particle
 	   */
-	  NeighborhoodType* getNeighborhood(void)
+	  NeighborhoodType* getNeighborhood(void) const
 	  {
 	    return _neighborhood;
 	  }
@@ -472,14 +485,16 @@ namespace popot
 
 	  virtual void print(std::ostream & os) const
 	  {
+	    /*
 	    printf("%f - ", this->getFitness());
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      {
 		printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i));
 	      }
 	    printf("\n");
-	    //TSuper::print(os);
-	    //os << "; Best position : " << _best_position;
+	    */
+	    TSuper::print(os);
+	    os << "; Best position : " << _best_position;
 	  }
 
 	};
@@ -534,7 +549,7 @@ namespace popot
 		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-				  + r1 * (this->getBestPosition()->getPosition(i) - this->getPosition(i))
+				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
 				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
 	      }
 	  }
@@ -606,7 +621,7 @@ namespace popot
 		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-				  + r1 * (this->getBestPosition()->getPosition(i) - this->getPosition(i))
+				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
 				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
 	      }
 	  }
@@ -665,7 +680,7 @@ namespace popot
 		  {
 		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-				      + r1 * (this->getBestPosition()->getPosition(i) - this->getPosition(i)));
+				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i)));
 		  }
 	      }
 	    else
@@ -675,7 +690,7 @@ namespace popot
 		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		    r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
 		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-				      + r1 * (this->getBestPosition()->getPosition(i) - this->getPosition(i))
+				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
 				      + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
 		  }
 	      }
@@ -751,13 +766,13 @@ namespace popot
 	    // between both positions
 	    // This can be done with pointer comparison
 	    // as the neighborhood holds a pointer to the best personal best
-	    bool li_equals_pi = (this->getBestPosition() == this->getNeighborhood()->getBest());
+	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
 
 	    // First position
 	    // p1 = xi + c * (pi - xi)
 	    // where pi is the personal best position
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition()->getPosition(i) - this->getPosition(i));
+	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition().getPosition(i) - this->getPosition(i));
 	  
 	    // Second position
 	    // p2 = xi + c * (li - xi)
@@ -940,7 +955,7 @@ namespace popot
 	    // between both positions
 	    // This can be done with pointer comparison
 	    // as the neighborhood holds a pointer to the best personal best
-	    bool li_equals_pi = (this->getBestPosition() == this->getNeighborhood()->getBest());
+	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
 
 	    if(VERBOSE_BENCH)
 	      {
@@ -957,7 +972,7 @@ namespace popot
 	    // p1 = xi + c * (pi - xi)
 	    // where pi is the personal best position
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition()->getPosition(i) - this->getPosition(i));
+	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition().getPosition(i) - this->getPosition(i));
 	  
 	    // Second position
 	    // p2 = xi + c * (li - xi)
@@ -1235,12 +1250,12 @@ namespace popot
 	      {
 		if(popot::math::uniform_random(0.0,1.0) < 0.5)
 		  {
-		    this->setVelocity(i, this->getBestPosition()->getPosition(i));
+		    this->setVelocity(i, this->getBestPosition().getPosition(i));
 		  }
 		else
 		  {
-		    mean = 0.5*(this->getBestPosition()->getPosition(i) + this->getNeighborhood()->getBest()->getPosition(i));
-		    var = fabs(this->getBestPosition()->getPosition(i) - this->getNeighborhood()->getBest()->getPosition(i));
+		    mean = 0.5*(this->getBestPosition().getPosition(i) + this->getNeighborhood()->getBest()->getPosition(i));
+		    var = fabs(this->getBestPosition().getPosition(i) - this->getNeighborhood()->getBest()->getPosition(i));
 		    this->setVelocity(i, popot::math::normal(mean,var));
 		  }
 	      }

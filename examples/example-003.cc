@@ -286,10 +286,10 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////:
   // Test before learning :
   printf("--------------------------------------------- \n Before learning : \n");
-  printf("Best fitness : %f \n", pso.getBest()->getFitness());
+  printf("Best fitness : %f \n", pso.getBest().getFitness());
   
   for(int i = 0 ; i < Problem::nb_parameters ; ++i)
-    params[i] = pso.getBest()->getPosition(i);
+    params[i] = pso.getBest().getPosition(i);
 
   for(int i = 0 ; i < Problem::nb_digits; ++i)
     {
@@ -317,11 +317,11 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////:
   // Test after learning :
   printf("--------------------------------------------- \n After learning : \n");
-  printf("Best fitness : %f \n", pso.getBest()->getFitness());
+  printf("Best fitness : %f \n", pso.getBest().getFitness());
 
   // Get the best parameters
   for(int i = 0 ; i < Problem::nb_parameters ; ++i)
-    params[i] = pso.getBest()->getPosition(i);
+    params[i] = pso.getBest().getPosition(i);
 
   // And test them on our inputs
   odd_numbers.clear();

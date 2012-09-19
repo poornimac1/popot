@@ -82,7 +82,7 @@ namespace popot
 	    // and initialize the best best particle of the whole swarm
 	    best_particle = *(neighborhoods[0]->findBest());
 	    for(unsigned int i = 1 ; i < neighborhoods.size() ; ++i)
-	      if(neighborhoods[i]->findBest()->compare(&best_particle) < 0)
+	      if(neighborhoods[i]->findBest()->compare(best_particle) < 0)
 		best_particle = *(neighborhoods[i]->getBest());
 	    
 	    if(VERBOSE_BENCH)
@@ -120,13 +120,14 @@ namespace popot
 	  // - Update the swarm's best position
 
 	  if(VERBOSE_BENCH)
-	    std::cout << "Random before looping : " << popot::math::uniform_random(0,1) << ";" << RNG_GENERATOR::nb_calls << std::endl;
+	    std::cout << "Random before looping : " << RNG_GENERATOR::nb_calls << " calls " << std::endl;
 
 	  // If we use an asynchronous update, we first shuffle the particles
 	  if(PARAMS::evaluation_mode() == ASYNCHRONOUS_EVALUATION)
 	    {
 	      // If comparing to SPSO, the following should be commented
-	      popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
+	      if(PARAMS::random_shuffle())
+		popot::math::random_shuffle_indexes(particles_indexes, swarm_size);
 
 	      int particle_index;
 	      for(unsigned int i = 0 ; i < swarm_size ; ++i)
@@ -188,7 +189,7 @@ namespace popot
 
 	  best_particle = *(neighborhoods[0]->findBest());
 	  for(unsigned int i = 1 ; i < neighborhoods.size() ; ++i)
-	    if(neighborhoods[i]->findBest()->compare(&best_particle) < 0)
+	    if(neighborhoods[i]->findBest()->compare(best_particle) < 0)
 	      best_particle = *(neighborhoods[i]->getBest());
 
 	  if(best_particle.getFitness() >= old_fitness)
@@ -205,13 +206,13 @@ namespace popot
 	      std::cout << "Keeping old NEIGHBORHOOD !!!!!! " << best_particle.getFitness() << " < " << old_fitness << std::endl;
 	  
 	  epoch++;
-	  return old_fitness - best_particle.getFitness();
+	  return best_particle.getFitness() - old_fitness;
 	}
 
 	/**
 	 * Current epoch
 	 */
-	int getEpoch(void)
+	int getEpoch(void) const
 	{
 	  return epoch;
 	}
@@ -222,10 +223,10 @@ namespace popot
 	 */
 	void run(int verbose=0)
 	{
-	  while(!STOP_CRITERIA::stop(best_particle.getFitness(), epoch))
+	  while(!STOP_CRITERIA::stop(getBest().getFitness(), epoch))
 	    {
 	      step();
-	      if(verbose) std::cout << '\r' << std::setw(6) << std::setfill('0') << epoch << " " << getBest()->getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
+	      if(verbose) std::cout << '\r' << std::setw(6) << std::setfill('0') << epoch << " " << getBest().getFitness() << std::setw(5) << std::setfill(' ') << ' ' << std::flush;
 	    }
 	  if(verbose) std::cout << std::endl;
 	}
@@ -233,9 +234,9 @@ namespace popot
 	/**
 	 * Returns the current best particle of the whole swarm (best of the personal best)
 	 */
-	BestType * getBest(void)
+	const BestType& getBest(void) const
 	  {
-	    return &best_particle;
+	    return best_particle;
 	  }
 
 	/**
@@ -285,7 +286,7 @@ namespace popot
 		for(int i = 0 ; i < swarm_size ; ++i)
 		  {
 		    std::cout << "Particle " << std::setw(3) << std::setfill(' ') << i
-			      << " : " << particles[i].getFitness() << " ; Best : " << particles[i].getBestPosition()->getFitness() << std::endl;
+			      << " : " << particles[i].getFitness() << " ; Best : " << particles[i].getBestPosition().getFitness() << std::endl;
 		  }
 		// Display the best particle
 		std::cout << "Best particle : \n" << best_particle.getFitness() << std::endl;

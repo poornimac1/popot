@@ -50,7 +50,8 @@ namespace popot
       class PSO_params
       {
       public:
-	static int evaluation_mode() { return popot::PSO::algorithm::SYNCHRONOUS_EVALUATION;}
+	static bool random_shuffle() { return false;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
       class Stop_Criteria
@@ -110,7 +111,8 @@ namespace popot
       class PSO_params
       {
       public:
-	static int evaluation_mode() { return popot::PSO::algorithm::SYNCHRONOUS_EVALUATION;}
+	static bool random_shuffle() { return false;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
       class Stop_Criteria
@@ -175,7 +177,8 @@ namespace popot
       class PSO_params
       {
       public:
-	static int evaluation_mode() { return popot::PSO::algorithm::SYNCHRONOUS_EVALUATION;}
+	static bool random_shuffle() { return false;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
       class Stop_Criteria
@@ -225,6 +228,7 @@ namespace popot
       class PSO_params
       {
       public:
+	static bool random_shuffle() { return false;}
 	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
@@ -274,7 +278,8 @@ namespace popot
       class PSO_params
       {
       public:
-	static int evaluation_mode() { return popot::PSO::algorithm::SYNCHRONOUS_EVALUATION;}
+	static bool random_shuffle() { return false;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
       template<typename PROBLEM>
       class Stop_Criteria

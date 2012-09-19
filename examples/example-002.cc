@@ -35,6 +35,7 @@ typedef popot::PSO::topology::RandomInformants<25, 3, Particle> Topology;
 class PSO_Params
 {
 public:
+  static bool random_shuffle() { return false;}
   static int evaluation_mode() {return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
 };
 
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
   pso.run(1);
   
   // Some display
-  std::cout << "Best particle : " << *(pso.getBest()) << std::endl;
+  std::cout << "Best particle : " << pso.getBest() << std::endl;
 
   Problem::free();
 }
