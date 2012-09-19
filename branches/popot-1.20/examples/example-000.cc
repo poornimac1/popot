@@ -12,6 +12,9 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 */
 #include "popot.h"
 
+typedef popot::problems::Rosenbrock<10> Problem;
+typedef popot::PSO::particle::Particle<Problem, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011> Particle;
+
 int main(int argc, char * argv[])
 {
   // // Random number generation
@@ -25,4 +28,14 @@ int main(int argc, char * argv[])
        //std::cout << popot::math::uniform_random(0,5) << std::endl;  
      }
    outfile.close();
+
+
+   Particle p;
+   p.init();
+
+   Particle p1 = p;
+
+   std::cout << p << std::endl;
+
+   std::cout << p1 << std::endl;
 }
