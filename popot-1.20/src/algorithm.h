@@ -99,6 +99,25 @@ namespace popot
 	  }
 
 	/**
+	 * Returns the fitness of the best individual (Required for benchmarking)
+	 */ 
+	double getBestFitness() const
+	{
+	  best_particle.getFitness();
+	}
+	
+	/**
+	 * Copies the position of the best invidual (Required for benchmarking)
+	 * The given array must be initialized with the appropriate size before calling this method
+	 */
+	void getBestPosition(double * pos) const
+	{
+	  for(int i = 0 ; i < PROBLEM::nb_parameters ; ++i)
+	    pos[i] = best_particle.getPosition(i);
+	}
+
+
+	/**
 	 * Returns the size of the swarm
 	 */
 	int getSize(void)
@@ -582,10 +601,7 @@ namespace popot
 
       }; // class Base
     } // namespace algorithm
-
   } // namespace ABC
-
-
 } // namespace popot
 
 #endif // POPOT_ALGORITHM_H
