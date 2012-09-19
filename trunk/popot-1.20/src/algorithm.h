@@ -103,7 +103,7 @@ namespace popot
 	 */ 
 	double getBestFitness() const
 	{
-	  best_particle.getFitness();
+	  return best_particle.getFitness();
 	}
 	
 	/**
@@ -112,7 +112,7 @@ namespace popot
 	 */
 	void getBestPosition(double * pos) const
 	{
-	  for(int i = 0 ; i < PROBLEM::nb_parameters ; ++i)
+	  for(int i = 0 ; i < PARTICLE::Problem::nb_parameters ; ++i)
 	    pos[i] = best_particle.getPosition(i);
 	}
 
