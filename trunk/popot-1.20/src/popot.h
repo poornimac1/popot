@@ -34,6 +34,7 @@
 #include "individuals.h"
 #include "initializers.h"
 #include "maths.h"
+#include "mersenne.h"
 #include "neighborhood.h"
 #include "problems.h"
 #include "rng_generators.h"
