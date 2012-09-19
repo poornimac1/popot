@@ -48,7 +48,6 @@ int main(int argc, char* argv[]) {
     {
       // Some initialization of static fields
       Problem::init();
-      popot::rng::Halton<Problem::nb_parameters>::init();
 
       // Let's create our swarm
       PSO* pso = new PSO();
@@ -60,24 +59,23 @@ int main(int argc, char* argv[]) {
       //std::cout << "Run " << i << " f = " << std::scientific <<  pso->getBest()->getFitness() << " with " << Problem::count << " function evaluations" << std::endl;
 
       // Count a fail if the fitness is larger tha
-      if(Problem::has_failed(pso->getBest()->getFitness()))
+      if(Problem::has_failed(pso->getBest().getFitness()))
 	nb_fails++;
 
       // Let's keep track of the best fitness and number of function evaluations
-      logProgressMean += -log(pso->getBest()->getFitness());
-      fitnesses.insert(pso->getBest()->getFitness());
+      logProgressMean += -log(pso->getBest().getFitness());
+      fitnesses.insert(pso->getBest().getFitness());
       epochs.insert(Problem::count);
 
       //std::cout << i << " " << Problem::count << " " << pso->getBest()->getFitness() << std::endl;
 
       // Keep track of the best particle ever found
-      if(i == 0 || (pso->getBest()->compare(&best_particle) < 0))
-	best_particle = *(pso->getBest());
+      if(i == 0 || (pso->getBest().compare(best_particle) < 0))
+	best_particle = pso->getBest();
 
       // Clean up the memory before starting a new trial
       delete pso;
       Problem::free();
-      popot::rng::Halton<Problem::nb_parameters>::free();
     }
 
   logProgressMean /= double(N_RUNS);
