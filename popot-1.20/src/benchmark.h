@@ -16,6 +16,10 @@ namespace popot
      * - a getEpoch() 
      * The Problem is also the one used as template for ALGO; It provides the stop method and the function 
      * evaluations counter
+     *
+     * Tips : To automatically estimate the number of trials
+     * for getting a good approximate of the mean error of the algorithm, 
+     * we may use the (Maurer & Pontil,2009) inequality with the sample mean and sample variance
      */
     template<typename ALGO, typename PROBLEM, int NB_TRIALS>
     class Benchmark
