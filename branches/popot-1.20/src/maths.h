@@ -97,6 +97,23 @@ namespace popot
     }
 
     /**
+     * Gibbs sampling 
+     */
+    int random_gibbs_from_array(double * proba, int nb, double inv_temperature)
+    {
+      double exp_proba[nb];
+      double sum = 0.0;
+      for(int i = 0 ; i < nb ; ++i)
+	{
+	  exp_proba[i] = exp(inv_temperature * proba[i]);
+	  sum += exp_proba[i];
+	}
+      for(int i = 0 ; i < nb ; ++i)
+	exp_proba[i] /= sum;
+      return random_from_array(exp_proba);
+    }
+
+    /**
      * Returns a permutation of indexes [|0 .. max|]
      * It supposes indexes to be allocated to size max + 1
      **/

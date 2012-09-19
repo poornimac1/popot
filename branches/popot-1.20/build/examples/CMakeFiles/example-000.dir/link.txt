@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/example-000.dir/example-000.cc.o  -o example-000 -rdynamic ../src/libpopot.so -lgsl -lgslcblas -lm -Wl,-rpath,/home/fix_jer/Developpement/Google/popot/branches/popot-1.20/build/src 
