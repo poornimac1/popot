@@ -6,7 +6,7 @@ import os
 
 Algo= ['SPSO2006','SPSO2011']
 Pbs = ['F0<30>', 'F1<30>','F2<30>', 'F3<30>', 'F4','F5<30>','F7<40>','F8<30>','F9<40>'];
-rng = ['CRNG','JKissRNG'] # KissRNG (only on 32 bits)
+rng = ['CRNG','MersenneRNG'] # KissRNG (only on 32 bits)
 for alg in Algo:
     os.system('rm -f res_'+alg+'.data; touch res_'+alg+'.data');
     for rn in rng:
