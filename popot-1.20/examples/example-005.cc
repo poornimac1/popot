@@ -10,8 +10,6 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 // Define our problem
 typedef popot::problems::SPSO2011Bench::Rosenbrock<5> Problem;
 
-// Define our initializers for the position and velocity
-
 class ParticleParams
 {
 public:
@@ -20,11 +18,13 @@ public:
 };
 
 // Let's define our particle
-typedef popot::PSO::particle::BenchSPSO2011Particle<Problem, ParticleParams> Particle;
-
+//typedef popot::PSO::particle::SPSO2011Particle<Problem, ParticleParams> Particle;
+typedef popot::PSO::particle::ModifiedBareboneParticle<Problem> Particle;
+ 
 
 // The topology
-typedef popot::PSO::topology::AdaptiveRandom<5, 3, Particle> Topology;
+typedef popot::PSO::topology::VonNeuman<25, Particle> Topology;
+//typedef popot::PSO::topology::AdaptiveRandom<5, 3, Particle> Topology;
 
 // For the algorithm type, we need to mention
 // if we use synchronous or asynchronous evaluation
@@ -58,7 +58,7 @@ typedef popot::PSO::algorithm::Base<PSO_Params, Particle, Topology, StopCriteria
 
 int main(int argc, char* argv[]) {
 
-  RNG_GENERATOR::rng_srand(0);
+  RNG_GENERATOR::rng_srand();
   RNG_GENERATOR::rng_warm_up();
   
   // To keep track of the best particle ever found

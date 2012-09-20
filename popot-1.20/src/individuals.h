@@ -502,11 +502,12 @@ namespace popot
       /**
        * Definition of a Standard PSO 2006 particle
        * @brief The template parameters is the problem you want to solve and a class providing the parameters w and c
+       * popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class SPSO2006Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff >
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff>
+	class SPSO2006Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff > TSuper;
+	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper;
 
 	public:
 
@@ -555,86 +556,14 @@ namespace popot
 	  }
 	};
 
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class BenchSPSO2006Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
-	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 > TSuper;
-	  typedef popot::PSO::initializer::PositionUniformRandom POSITION_INITIALIZER;
-	  typedef popot::PSO::initializer::VelocitySPSO2011 VELOCITY_INITIALIZER;
-	public:
-
-	BenchSPSO2006Particle(void) : TSuper()
-	    {
-	    }
-
-	  /**
-	   * Destructor
-	   */
-	  virtual ~BenchSPSO2006Particle(void)
-	    {
-	    }
-
-	  virtual void init(void)
-	  {
-	    double params[3];
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      {
-		this->setPosition(i,POSITION_INITIALIZER::init(PROBLEM::get_lbound(i),PROBLEM::get_ubound(i)));
-
-		params[0] = PROBLEM::get_lbound(i);
-		params[1] = PROBLEM::get_ubound(i);
-		params[2] = this->getPosition(i);
-		this->setVelocity(i, VELOCITY_INITIALIZER::init(params));
-	      }
-
-	    this->evaluateFitness();
-
-	    // Set the best particle to the current position
-	    this->_best_position = *this;
-	  }
-
-	  /**
-	   * Update the position of the particle
-	   */
-	  virtual void updatePosition(void)
-	  {
-	    // Here it is simply : p_{k+1} = p_k + v_k
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-	  }
-
-	  /**
-	   * Updates the velocity of the particle
-	   */
-	  virtual void updateVelocity(void)
-	  {
-	    // The update of the velocity is done according to the equation :
-	    // v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
-	    // with :
-	    // r_p, r_g two random real numbers in [0.0,1.0]
-	    // w, c1, c2 : user defined parameters
-	    // best_p : the best position the particle ever had
-	    // best_g : the best position the neighborhood ever had
-	    double r1,r2;
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	      {
-		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
-				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
-	      }
-	  }
-	};
-
       /**
        * Definition of a Standard PSO 2007 particle
        * @brief The template parameters is the problem you want to solve and a class providing the parameters w and c
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class SPSO2007Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff >
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff >
+	class SPSO2007Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff > TSuper;
+	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
 
 	public:
 
@@ -672,7 +601,7 @@ namespace popot
 	    // best_p : the best position the particle ever had
 	    // best_g : the best position the neighborhood ever had
 
-	    bool li_equals_pi = (this->getBestPosition() == this->getNeighborhood()->getBest());
+	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
 	    double r1,r2;
 	    if(li_equals_pi)
 	      {
@@ -705,11 +634,11 @@ namespace popot
        * Compared to the base type BaseParticle, this type adds the some specific position and velocity update rules
        * These come from the Standard PSO 2011 
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class SPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocitySPSO2011>
+	class SPSO2011Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
  
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
+	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper;
 
 	  double * xpi;
 	  double * p1;
@@ -852,13 +781,11 @@ namespace popot
        * Definition of a Standard PSO 2011 particle, respecting the order of the operations of SPSO on swarm central
        * basically, in the initialization 
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class BenchSPSO2011Particle : public Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocitySPSO2011 >
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocitySPSO2011>
+	class BenchSPSO2011Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
  
 	{
-	  typedef Particle<PROBLEM, popot::PSO::initializer::PositionUniformRandom , popot::PSO::initializer::VelocitySPSO2011 > TSuper;
-	  typedef popot::PSO::initializer::PositionUniformRandom POSITION_INITIALIZER;
-	  typedef popot::PSO::initializer::VelocitySPSO2011 VELOCITY_INITIALIZER;
+	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
 
 	  double * xpi;
 	  double * p1;
@@ -1079,8 +1006,8 @@ namespace popot
        * These come from the Standard PSO 2006 . The stochastic code simply reevaluates the fitness of the personal best 
        * position before possibly changing it
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class StochasticSPSO2006Particle : public SPSO2006Particle<PROBLEM, PARTICLE_PARAMS>
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff>
+	class StochasticSPSO2006Particle : public SPSO2006Particle<PROBLEM, PARTICLE_PARAMS, POSITION_INITIALIZER, VELOCITY_INITIALIZER>
  
 	{
 	  typedef SPSO2006Particle<PROBLEM, PARTICLE_PARAMS> TSuper;
@@ -1101,7 +1028,7 @@ namespace popot
 
 	    // Update the best position the particle ever had
 	    // with a copy of the current position
-	    if(this->compare(&this->_best_position) < 0)
+	    if(this->compare(this->getBestPosition()) < 0)
 	      this->_best_position = *this;
 	  }
 	};
@@ -1114,11 +1041,11 @@ namespace popot
        * These come from the Standard PSO 2011 . The stochastic code simply reevaluates the fitness of the personal best 
        * position before possibly changing it
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS>
-	class StochasticSPSO2011Particle : public SPSO2011Particle<PROBLEM, PARTICLE_PARAMS>
+      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocitySPSO2011>
+	class StochasticSPSO2011Particle : public SPSO2011Particle<PROBLEM, PARTICLE_PARAMS, POSITION_INITIALIZER, VELOCITY_INITIALIZER>
  
 	{
-	  typedef SPSO2011Particle<PROBLEM, PARTICLE_PARAMS> TSuper;
+	  typedef SPSO2011Particle<PROBLEM, PARTICLE_PARAMS, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
 
 	public:
 	StochasticSPSO2011Particle() : TSuper()
@@ -1136,7 +1063,7 @@ namespace popot
 
 	    // Update the best position the particle ever had
 	    // with a copy of the current position
-	    if(this->compare(&this->_best_position) < 0)
+	    if(this->compare(this->getBestPosition()) < 0)
 	      this->_best_position = *this;
 	  }
 	};
@@ -1147,7 +1074,7 @@ namespace popot
        * @brief The template parameters is the problem you want to solve,
        *  and the parameters (inertia, accelaration) of the velocity update rule
        */
-      template< typename PROBLEM, typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER>
+      template< typename PROBLEM, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff>
 	class BareboneParticle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER>
 	{
 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
@@ -1190,8 +1117,8 @@ namespace popot
 	    double mean,var;
 	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
 	      {
-		mean = 0.5*(this->getBestPosition()->getPosition(i) + this->getNeighborhood()->getBest()->getPosition(i));
-		var = fabs(this->getBestPosition()->getPosition(i) - this->getNeighborhood()->getBest()->getPosition(i));
+		mean = 0.5*(this->getBestPosition().getPosition(i) + this->getNeighborhood()->getBest()->getPosition(i));
+		var = fabs(this->getBestPosition().getPosition(i) - this->getNeighborhood()->getBest()->getPosition(i));
 		this->setVelocity(i, popot::math::normal(mean,var));
 	      }
 	  }
@@ -1205,7 +1132,7 @@ namespace popot
        * and local best positions (other variations exist, using a random personal best in the neighbor instead
        * of the local best for example)
        */
-      template< typename PROBLEM , typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER>
+      template< typename PROBLEM , typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff>
 	class ModifiedBareboneParticle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER>
 	{
 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
@@ -1270,7 +1197,6 @@ namespace popot
     namespace individuals
     {
       
-
       template< typename PROBLEM>
 	class FoodSource : public Vector<double, PROBLEM::nb_parameters>
 	{
