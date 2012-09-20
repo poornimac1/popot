@@ -1,4 +1,5 @@
-#define VERBOSE_BENCH false
+#define VERBOSE_BENCH true
+#define NB_STEPS 100
 
 struct result PSO (struct param param, struct problem pb) 
 {  
@@ -582,7 +583,7 @@ struct result PSO (struct param param, struct problem pb)
       errorPrev = error;
     end:
 
-      if(iter >= 1000)
+      if(iter >= NB_STEPS)
 	noStop = 1;
       else
 	noStop = 0;

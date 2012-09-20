@@ -164,10 +164,12 @@ namespace popot
        * @short The von Neuman topology connects the particles on a 2D toric grid
        *        with the nearest four neighbours plus itself
        */
-      template<int WIDTH, int HEIGHT, typename PARTICLE>
-        class VonNeuman : public Base<WIDTH*HEIGHT, PARTICLE>
+      template<int SIZE, typename PARTICLE>
+        class VonNeuman : public Base<SIZE, PARTICLE>
       {
       public:
+	static const int WIDTH;
+	static const int HEIGHT;
 	static void fillNeighborhoods(PARTICLE *particles,
 				      std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
 				      std::map< int, std::vector<int> > &neighbordhood_membership)
@@ -231,12 +233,14 @@ namespace popot
 	    }
 	
 	  // Given the connectivity matrix, we now connect the particles
-	  Base<WIDTH*HEIGHT, PARTICLE>::getNeighborhoodList(particles, neighborhoods);
-	  Base<WIDTH*HEIGHT, PARTICLE>::connectParticles(particles, neighbordhood_membership, who_informs_whom);
+	  Base<SIZE, PARTICLE>::getNeighborhoodList(particles, neighborhoods);
+	  Base<SIZE, PARTICLE>::connectParticles(particles, neighbordhood_membership, who_informs_whom);
 
 	  delete[] who_informs_whom;
 	}
       };
+      template<int SIZE, typename PARTICLE> const int VonNeuman<SIZE, PARTICLE>::WIDTH = int(sqrt(SIZE));
+      template<int SIZE, typename PARTICLE> const int VonNeuman<SIZE, PARTICLE>::HEIGHT = int(SIZE / VonNeuman<SIZE, PARTICLE>::WIDTH);
 
 
       /**

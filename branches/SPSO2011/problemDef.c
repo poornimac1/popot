@@ -72,7 +72,7 @@ struct problem problemDef(int functionCode)
       /* pb.evalMax =75000; //200000; //2.e6;  // 40000  */
       /* pb.objective= 0; */
 
-      pb.SS.D = 10;	// 30
+      pb.SS.D = 5;	// 30
 
       // Boundaries
       for (d = 0; d < pb.SS.D; d++)
