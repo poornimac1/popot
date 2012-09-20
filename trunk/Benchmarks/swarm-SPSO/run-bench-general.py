@@ -10,7 +10,7 @@ TopologyNames=['Full25','Ring25','VonNeuman25']
 Topology = ['Full<25, Particle>', 'Ring<25, Particle>','VonNeuman<5,5,Particle>']
 EvaluationMode = ['SYNCHRONOUS_EVALUATION','ASYNCHRONOUS_EVALUATION']
 
-nb_variants = len(Topology)*len(Random_Shuffle)*len(EvaluationMode)
+nb_variants = len(metaparameters)*len(Topology)*len(EvaluationMode)
 print "I have to test %i variants on %i problems ... go and take some coffees" % (nb_variants, len(Pbs))
 
 index = 0
@@ -20,9 +20,9 @@ for pb in Pbs:
     os.system('rm -f '+filename+'; touch '+filename);
     for topo in Topology:
         for evalmode in EvaluationMode:
-            for randShuffle in Random_Shuffle:
+            for m in metaparameters:
                 print(str(index))
                 index+=1
-                mystr = 'g++ -o bench_general bench_general.cc -D\'GCC_RNG='+rng+'\' -D\'GCC_PB='+pb+'\' -DGCC_W=\''+str(w_value)+'\' -DGCC_C=\''+str(c_value)+'\' -DGCC_TOPOLOGY=\''+topo+'\' -DGCC_TOPOLOGY_NAME=\''+TopologyNames[Topology.index(topo)]+'\' -DGCC_EVALUATION_MODE=\''+evalmode+'\' -DGCC_RANDOM_SHUFFLE=\''+randShuffle+'\' `pkg-config --libs --cflags popot swarm` -O3'
+                mystr = 'g++ -o bench_general bench_general.cc -D\'GCC_PB='+pb+'\' -DGCC_W=\''+str(m[0])+'\' -DGCC_C=\''+str(m[1])+'\' -DGCC_TOPOLOGY=\''+topo+'\' -DGCC_TOPOLOGY_NAME=\''+TopologyNames[Topology.index(topo)]+'\' -DGCC_EVALUATION_MODE=\''+evalmode+'\' `pkg-config --libs --cflags popot swarm` -O3'
                 os.system(mystr)
                 os.system('./bench_general >> ' + filename)

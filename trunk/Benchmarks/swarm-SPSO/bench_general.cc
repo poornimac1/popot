@@ -49,8 +49,36 @@ public:
 
 
 // Define our algorithm,
-typedef swarm::algorithm::PSO<Swarm_PSO_params, Particle, Topology, Swarm_Stop_Criteria> PSO;
+typedef swarm::algorithm::PSO<Swarm_PSO_params, Particle, Topology, Swarm_Stop_Criteria> SwarmPSO;
 
+class PSO : public SwarmPSO
+{
+public:
+  PSO() : SwarmPSO()
+  {}
+
+  double getBestFitness(void)
+  {
+    return this->getBest()->getFitness();
+  }
+
+  void getBestPosition(double * pos)
+  {
+  }
+  
+  void run(void)
+  {
+    while(!Swarm_Stop_Criteria::stop(getBestFitness(), getEpoch()))
+      {
+	this->step();
+      }
+  }
+
+  int getEpoch(void)
+  {
+    return epoch;
+  }
+};
 
 
 //*********************************************************
@@ -67,20 +95,16 @@ typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
 int main(int argc, char* argv[]) {
   srand(time(NULL));
  
-  Problem::init();
+  Benchmark bm;
+  bm.run(0);
 
-  for(int i = 0 ; i < N_RUNS ; ++i)
-    {
-      
-    }
-
-  Problem::free();
   
   std::cout << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
 	    << "PARTICULE=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
 	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
 	    << "evalMode=" << STRINGIZE_VALUE_OF(GCC_EVALUATION_MODE) << ";"
-	    << "randShuff=" << STRINGIZE_VALUE_OF(GCC_RANDOM_SHUFFLE) << ";" << std::endl;
-  
+	    << "w=" << GCC_W << ";"
+	    << "c=" << GCC_C << ";"
+	    << bm; 
   
 }
