@@ -25,7 +25,7 @@ typedef BenchmarkProblems::GCC_PB Problem;
 // Define our algorithm,
 typedef popot::PSO::GCC_ALGO PSO;
 
-#define N_RUNS 1000
+#define N_RUNS 500
 
 typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
 
@@ -44,9 +44,8 @@ int main(int argc, char* argv[]) {
   
   std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
 	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
-	    << "ALGO=" << STRINGIZE_VALUE_OF(GCC_ALGO) << ";"
-    	    << bm 
-  	    << std::endl;
+	    << "ALGO=" << GCC_ALGO_NAME << ";"
+    	    << bm ;
   
 
 }

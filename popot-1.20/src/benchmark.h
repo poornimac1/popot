@@ -178,7 +178,7 @@ namespace popot
        */
       void print(std::ostream & os) const
       {
-	os << "Trial " << _trial_counter << ";";
+	os << "Trial=" << _trial_counter << ";";
 	os << "Error(mean)= " << getMeanError() << ";";
 	os << "Error(std)= " << getStdError() << ";";
 	os << "FE(mean)= " << getMeanFEvaluations() << ";";
