@@ -85,7 +85,12 @@ int main(int argc, char* argv[]) {
   
   std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
 	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
-	    << "ALGO=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
+	    << "PARTICULE=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
+	    << "POS=" << STRINGIZE_VALUE_OF(GCC_POSITION_INIT) << ";"
+	    << "VEL=" << STRINGIZE_VALUE_OF(GCC_VELOCITY_INIT) << ";"
+	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
+	    << "evalMode=" << STRINGIZE_VALUE_OF(GCC_EVALUATION_MODE) << ";"
+	    << "randShuff=" << STRINGIZE_VALUE_OF(GCC_RANDOM_SHUFFLE) << ";"
     	    << bm ;
   
   
