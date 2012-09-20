@@ -6,61 +6,50 @@
 
 #include <sys/time.h>
 #include <typeinfo>
-#include "bench.h"
+#include "bench_general.h"
+#include "pso.h"
 
 #define STRINGIZE(x) #x
 #define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
-
-// We first define the generator of random numbers
-#include "rng_generators.h"
-typedef popot::rng::GCC_RNG RNG_GENERATOR;
-
-// And then include our headers (these make use of the RNG_GENERATOR, so we must include 
-// them after the definition of RNG_GENERATOR
-#include "popot.h"
 
 // Define our problem
 typedef BenchmarkProblems::GCC_PB Problem;
 
 //*********************************************************
 
-// Define our initialization methods
-typedef popot::PSO::initializer::GCC_POSITION_INIT PositionInitializer;
-typedef popot::PSO::initializer::GCC_VELOCITY_INIT VelocityInitializer;
-
-
 // Define our particle
-
-class Particle_Params
+class Particle_PSO_Params
 {
 public:
-  static double w()  { return GCC_W;}   // Inertia parameter
-  static double c() { return GCC_C;}   // Best particle position weight
+    static double w()  { return GCC_W;}   // Inertia parameter
+    static double c1() { return GCC_C;}   // Best particle position weight
+    static double c2() { return GCC_C;}   // Best swarm position weight
 };
 
-typedef popot::PSO::particle::GCC_PARTICLE<Problem, Particle_Params, PositionInitializer, VelocityInitializer> Particle;
+typedef swarm::particle::NonStochasticTraditionalParticle< Problem, Particle_PSO_Params > Particle;
 
-// Define our topology
-typedef popot::PSO::topology::GCC_TOPOLOGY Topology;
 
-class PSO_params
+typedef swarm::topology::GCC_TOPOLOGY Topology;
+
+class Swarm_PSO_params
 {
 public:
-  static bool random_shuffle() { return GCC_RANDOM_SHUFFLE;}
-  static int evaluation_mode() { return popot::PSO::algorithm::GCC_EVALUATION_MODE;}
+    static int evaluation_mode() { return swarm::algorithm::GCC_EVALUATION_MODE;}
 };
-  
-class Stop_Criteria
+
+
+class Swarm_Stop_Criteria
 {
 public:
-  static bool stop(double fitness, int epoch)
-  {
-    return  Problem::stop(fitness,epoch);
-  }
+    static bool stop(double fitness, int epoch)
+    {
+      return Problem::stop(fitness,epoch);
+    }
 };
+
 
 // Define our algorithm,
-typedef popot::PSO::algorithm::Base<PSO_params, Particle, Topology, Stop_Criteria > PSO;
+typedef swarm::algorithm::PSO<Swarm_PSO_params, Particle, Topology, Swarm_Stop_Criteria> PSO;
 
 
 
@@ -68,6 +57,7 @@ typedef popot::PSO::algorithm::Base<PSO_params, Particle, Topology, Stop_Criteri
 
 #define N_RUNS 100
 
+#include "benchmark.h"
 typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
 
 // **************************************** //
@@ -75,23 +65,22 @@ typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
 // **************************************** //
 
 int main(int argc, char* argv[]) {
-  RNG_GENERATOR::rng_srand();
-  RNG_GENERATOR::rng_warm_up();
-  
-  Benchmark bm;
-  bm.run(0);
+  srand(time(NULL));
+ 
+  Problem::init();
 
-  //
+  for(int i = 0 ; i < N_RUNS ; ++i)
+    {
+      
+    }
+
+  Problem::free();
   
-  std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
-	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
+  std::cout << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
 	    << "PARTICULE=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
-	    << "POS=" << STRINGIZE_VALUE_OF(GCC_POSITION_INIT) << ";"
-	    << "VEL=" << STRINGIZE_VALUE_OF(GCC_VELOCITY_INIT) << ";"
 	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
 	    << "evalMode=" << STRINGIZE_VALUE_OF(GCC_EVALUATION_MODE) << ";"
-	    << "randShuff=" << STRINGIZE_VALUE_OF(GCC_RANDOM_SHUFFLE) << ";"
-    	    << bm ;
+	    << "randShuff=" << STRINGIZE_VALUE_OF(GCC_RANDOM_SHUFFLE) << ";" << std::endl;
   
   
 }
