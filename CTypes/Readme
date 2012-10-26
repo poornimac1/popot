@@ -1,0 +1,13 @@
+In order to use a C++ function as an input to the CMA-ES python library
+of Hansen, you first need to define your problem like in Pb.cc
+
+And then compile a shared library :
+:> gcc -shared -O3 -o Pb.so Pb.cc
+
+You can then test calling your function with : 
+
+:> python test_function_evaluation.py
+
+And use it into CMA-ES with :
+
+:> python test.py

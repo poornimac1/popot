@@ -86,7 +86,7 @@ namespace popot
        * Full toplogy
        * @short Each of the N particles receives information from the N others
        */
-      template<int SIZE, typename PARTICLE>
+     template<int SIZE, typename PARTICLE, bool SELF=false>
         class Full : public Base<SIZE, PARTICLE>
       {
       public:
@@ -102,6 +102,9 @@ namespace popot
 	  // Set the connection matrix to 1 everywhere
 	  for(int i = 0 ; i < SIZE*SIZE ; ++i)
 	    who_informs_whom[i] = 1.0;
+	  if(!SELF)
+	    for(int i = 0 ; i < SIZE ; ++i)
+	      who_informs_whom[i*SIZE + i] = 0.0;
 
 	  // Given the connectivity matrix, we now connect the particles
 	  Base<SIZE, PARTICLE>::getNeighborhoodList(particles, neighborhoods);
@@ -115,7 +118,7 @@ namespace popot
        * Ring toplogy
        * @short A ring topology connects the particles on a ring plus a connection to itself
        */
-      template<int SIZE, typename PARTICLE>
+     template<int SIZE, typename PARTICLE, bool SELF=false>
         class Ring : public Base<SIZE, PARTICLE>
       {
       public:
@@ -149,6 +152,9 @@ namespace popot
 	      if(i_neigh < 0)
 		i_neigh = SIZE-1;
 	      who_informs_whom[i_neigh*SIZE + i] = 1.0;
+
+	      if(SELF)
+		who_informs_whom[i*SIZE + i] = 1.0;
 	    }
 
 	  // Given the connectivity matrix, we now connect the particles
@@ -164,7 +170,7 @@ namespace popot
        * @short The von Neuman topology connects the particles on a 2D toric grid
        *        with the nearest four neighbours plus itself
        */
-      template<int SIZE, typename PARTICLE>
+     template<int SIZE, typename PARTICLE, bool SELF=false>
         class VonNeuman : public Base<SIZE, PARTICLE>
       {
       public:
@@ -229,6 +235,8 @@ namespace popot
 		  index_neigh = i_neigh * WIDTH + j_neigh;
 		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0;
 
+		  if(SELF)
+		    who_informs_whom[i*SIZE + i] = 1.0;
 		}
 	    }
 	
@@ -239,15 +247,15 @@ namespace popot
 	  delete[] who_informs_whom;
 	}
       };
-      template<int SIZE, typename PARTICLE> const int VonNeuman<SIZE, PARTICLE>::WIDTH = int(sqrt(SIZE));
-      template<int SIZE, typename PARTICLE> const int VonNeuman<SIZE, PARTICLE>::HEIGHT = int(SIZE / VonNeuman<SIZE, PARTICLE>::WIDTH);
+     template<int SIZE, typename PARTICLE, bool SELF> const int VonNeuman<SIZE, PARTICLE, SELF>::WIDTH = int(sqrt(SIZE));
+     template<int SIZE, typename PARTICLE, bool SELF> const int VonNeuman<SIZE, PARTICLE, SELF>::HEIGHT = int(SIZE / VonNeuman<SIZE, PARTICLE>::WIDTH);
 
 
       /**
        * Random topology
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        */
-      template<int SIZE, int K, typename PARTICLE>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
         class RandomInformants : public Base<SIZE, PARTICLE>
       {
       public:
@@ -260,13 +268,15 @@ namespace popot
 	  // Column j indicates which particle informs particle j
 	  // therefore, line i indicates which particles the particle i informs
 
+
 	  // Set the connection matrix to 0 everywhere
 	  for(int i = 0 ; i < SIZE*SIZE ; ++i)
 	    who_informs_whom[i] = 0.0;
 
 	  // A particle informs itself
-	  for(int i = 0 ; i < SIZE ; ++i)
-	    who_informs_whom[i*SIZE + i] = 1.0;
+	  if(SELF)
+	    for(int i = 0 ; i < SIZE ; ++i)
+	      who_informs_whom[i*SIZE + i] = 1.0;
 
 	  for(int i = 0 ; i < SIZE ; ++i)
 	    {
@@ -290,7 +300,7 @@ namespace popot
 	}
       };
 
-      template<int SIZE, int K, typename PARTICLE>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
         class FixedRandomInformants : public Base<SIZE, PARTICLE>
       {
       public:
@@ -308,8 +318,9 @@ namespace popot
 	    who_informs_whom[i] = 0.0;
 
 	  // A particle informs itself
-	  for(int i = 0 ; i < SIZE ; ++i)
-	    who_informs_whom[i*SIZE + i] = 1.0;
+	  if(SELF)
+	    for(int i = 0 ; i < SIZE ; ++i)
+	      who_informs_whom[i*SIZE + i] = 1.0;
 
 	  for(int i = 0 ; i < SIZE ; ++i)
 	    {
@@ -338,7 +349,7 @@ namespace popot
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        *        the topology is regenerated at each unsucessful step
        */
-      template<int SIZE, int K, typename PARTICLE>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
         class AdaptiveRandom : public Base<SIZE, PARTICLE>
       {
       public:
@@ -354,8 +365,9 @@ namespace popot
 	  // therefore, line i indicates which particles the particle i informs
 
 	  // A particle informs itself
-	  for(int i = 0 ; i < SIZE ; ++i)
-	    who_informs_whom[i*SIZE + i] = 1.0;
+	  if(SELF)
+	    for(int i = 0 ; i < SIZE ; ++i)
+	      who_informs_whom[i*SIZE + i] = 1.0;
 
 	  for(int i = 0 ; i < SIZE ; ++i)
 	    {

@@ -83,7 +83,7 @@ public:
 
 //*********************************************************
 
-#define N_RUNS 100
+#define N_RUNS 500
 
 #include "benchmark.h"
 typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
@@ -100,7 +100,6 @@ int main(int argc, char* argv[]) {
 
   
   std::cout << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
-	    << "PARTICULE=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
 	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
 	    << "evalMode=" << STRINGIZE_VALUE_OF(GCC_EVALUATION_MODE) << ";"
 	    << "w=" << GCC_W << ";"

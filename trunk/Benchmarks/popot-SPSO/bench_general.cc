@@ -66,7 +66,7 @@ typedef popot::PSO::algorithm::Base<PSO_params, Particle, Topology, Stop_Criteri
 
 //*********************************************************
 
-#define N_RUNS 100
+#define N_RUNS 500
 
 typedef popot::benchmark::Benchmark<PSO, Problem, N_RUNS> Benchmark;
 
@@ -85,12 +85,14 @@ int main(int argc, char* argv[]) {
   
   std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
 	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
+	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
 	    << "PARTICULE=" << STRINGIZE_VALUE_OF(GCC_PARTICLE) << ";"
 	    << "POS=" << STRINGIZE_VALUE_OF(GCC_POSITION_INIT) << ";"
 	    << "VEL=" << STRINGIZE_VALUE_OF(GCC_VELOCITY_INIT) << ";"
-	    << "TOPO=" << STRINGIZE_VALUE_OF(GCC_TOPOLOGY_NAME) << ";"
 	    << "evalMode=" << STRINGIZE_VALUE_OF(GCC_EVALUATION_MODE) << ";"
 	    << "randShuff=" << STRINGIZE_VALUE_OF(GCC_RANDOM_SHUFFLE) << ";"
+	    << "w=" << GCC_W << ";"
+	    << "c=" << GCC_C << ";"
     	    << bm ;
   
   
