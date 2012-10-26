@@ -4,7 +4,7 @@ import os
 from math import * 
 metaparameters = [[1.0/(2.0*log(2.0)),0.5 + log(2.0)], [0.729844,1.496180]]
 
-Pbs = ['F0<30>', 'F1<30>','F2<30>', 'F3<30>', 'F4','F5<30>','F7<40>','F8<30>','F9<40>'];
+Pbs = ['F0<30>', 'F1<30>','F2<30>', 'F3<30>', 'F4']#,'F5<30>','F7<40>','F8<30>','F9<40>'];
 
 TopologyNames=['Full25','Ring25','VonNeuman25']
 Topology = ['Full<25, Particle>', 'Ring<25, Particle>','VonNeuman<5,5,Particle>']
