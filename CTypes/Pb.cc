@@ -25,6 +25,6 @@ extern "C"
       {
 	val += MyPb::testfunc(params[i]);
       }
-    return val+(2.0*rand()/double(RAND_MAX)-1.0);
+    return val+0.2*(2.0*rand()/double(RAND_MAX)-1.0);
   }
 }
