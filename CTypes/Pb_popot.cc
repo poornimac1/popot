@@ -16,7 +16,7 @@ extern "C"
   void init_problem(void) { Problem::init();}
   void free_problem(void) { Problem::free();}
   double get_lbound(int index) { return Problem::get_lbound(index);}
-  double get_ubound(int index) { return Problem::get_lbound(index);}
+  double get_ubound(int index) { return Problem::get_ubound(index);}
   bool stop(double fitness, int epoch) { return Problem::stop(fitness, epoch);}
   double evaluate(double * params) {return Problem::evaluate(params); }
 
