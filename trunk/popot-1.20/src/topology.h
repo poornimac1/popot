@@ -50,14 +50,17 @@ namespace popot
 	      // We browse column j of who_informs_whom
 	      // if 1.0, then we add particle i to the neighborhood of particle j
 	      for(int i = 0 ; i < SIZE ; ++i)
-		// If particle i informs particle j
-		if(who_informs_whom[i*SIZE + j])
-		  {
-		    // Particle i belongs to the neighborhood of particle j
-		    neighbordhood_membership[i].push_back(j);
-		    // And we add particle i to the neighborhood of particle j
-		    particles[j].getNeighborhood()->add(&(particles[i]));
-		  }
+		  // If particle i informs particle j
+		  if(who_informs_whom[i*SIZE + j])
+		    {
+		      // Particle i belongs to the neighborhood of particle j
+		      neighbordhood_membership[i].push_back(j);
+		      // And we add particle i to the neighborhood of particle j
+		      particles[j].getNeighborhood()->add(&(particles[i]));
+		    }
+
+	      //for(int i = 0 ; i < SIZE ; ++i)
+	      // std::cout << "Particle " << i << " :" << particles[i].getNeighborhood()->size() << std::endl;
 	    }
 	}
 
@@ -257,7 +260,7 @@ namespace popot
        * Random topology
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        */
-      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=true>
         class RandomInformants : public Base<SIZE, PARTICLE>
       {
       public:
@@ -302,7 +305,7 @@ namespace popot
 	}
       };
 
-      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=true>
         class FixedRandomInformants : public Base<SIZE, PARTICLE>
       {
       public:
@@ -351,7 +354,7 @@ namespace popot
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        *        the topology is regenerated at each unsucessful step
        */
-      template<int SIZE, int K, typename PARTICLE, bool SELF=false>
+      template<int SIZE, int K, typename PARTICLE, bool SELF=true>
         class AdaptiveRandom : public Base<SIZE, PARTICLE>
       {
       public:

@@ -20,14 +20,13 @@ typedef popot::PSO::initializer::VelocityZero VelocityInit;
 // Let's define our particle
 typedef popot::PSO::particle::ModifiedBareboneParticle<Problem, PositionInit, VelocityInit> Particle;
 
-
 // The topology
 // Let's use 25 particles 
 //typedef popot::PSO::topology::AdaptiveRandom<25, 3, Particle> Topology;
 typedef popot::PSO::topology::RandomInformants<25, 3, Particle> Topology;
 //typedef popot::PSO::topology::Full<25, Particle> Topology;
 //typedef popot::PSO::topology::Ring<25, Particle> Topology;
-//typedef popot::PSO::topology::VonNeuman<5, 5, Particle> Topology;
+//typedef popot::PSO::topology::VonNeuman<25, Particle, false> Topology;
 
 // For the algorithm type, we need to mention
 // if we use synchronous or asynchronous evaluation
