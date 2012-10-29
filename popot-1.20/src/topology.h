@@ -135,9 +135,10 @@ namespace popot
 	  for(int i = 0 ; i < SIZE*SIZE ; ++i)
 	    who_informs_whom[i] = 0.0;
 
-	  // A particle informs itself
-	  for(int i = 0 ; i < SIZE ; ++i)
-	    who_informs_whom[i*SIZE + i] = 1.0;
+	  // A particle informs itself?
+	  if(SELF)
+	    for(int i = 0 ; i < SIZE ; ++i)
+	      who_informs_whom[i*SIZE + i] = 1.0;
 
 	  int i_neigh;
 	  for(int i = 0 ; i < SIZE ; ++i)
@@ -191,9 +192,10 @@ namespace popot
 	  for(int i = 0 ; i < VonNeuman::size()*VonNeuman::size() ; ++i)
 	    who_informs_whom[i] = 0.0;
 
-	  // A particle informs itself
-	  for(int i = 0 ; i < VonNeuman::size() ; ++i)
-	    who_informs_whom[i*VonNeuman::size() + i] = 1.0;
+	  // A particle informs itself?
+	  if(SELF)
+	    for(int i = 0 ; i < VonNeuman::size() ; ++i)
+	      who_informs_whom[i*VonNeuman::size() + i] = 1.0;
 
 	  int i_neigh, j_neigh;
 	  int index_part, index_neigh;
