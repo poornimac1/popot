@@ -22,8 +22,8 @@ typedef popot::PSO::particle::ModifiedBareboneParticle<Problem, PositionInit, Ve
 
 // The topology
 // Let's use 25 particles 
-//typedef popot::PSO::topology::AdaptiveRandom<25, 3, Particle> Topology;
-typedef popot::PSO::topology::RandomInformants<25, 3, Particle> Topology;
+typedef popot::PSO::topology::AdaptiveRandom<25, 3, Particle> Topology;
+//typedef popot::PSO::topology::RandomInformants<25, 3, Particle> Topology;
 //typedef popot::PSO::topology::Full<25, Particle> Topology;
 //typedef popot::PSO::topology::Ring<25, Particle> Topology;
 //typedef popot::PSO::topology::VonNeuman<25, Particle, false> Topology;

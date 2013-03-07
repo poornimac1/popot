@@ -103,7 +103,7 @@ public:
     int space_digit = 3;
 
     // Segment 0
-    for(int i = 0 ; i < list_digits.size() ; ++i)
+    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
       {
 	for(int j = 0 ; j < span_horiz ; ++j)
 	  {
@@ -119,7 +119,7 @@ public:
     // Segments 5 and 1
     for(int i = 0 ; i < span_vert ; ++i)
       {
-	for(int j = 0 ; j < list_digits.size() ; ++j)
+	for(unsigned int j = 0 ; j < list_digits.size() ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[j]*nb_inputs+5])
 	      printf("|");
@@ -138,7 +138,7 @@ public:
       }
 
     // Segment 6
-    for(int i = 0 ; i < list_digits.size() ; ++i)
+    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
       {
 	for(int j = 0 ; j < span_horiz ; ++j)
 	  {
@@ -154,7 +154,7 @@ public:
     // Segments 4 2
     for(int i = 0 ; i < span_vert ; ++i)
       {
-	for(int j = 0 ; j < list_digits.size() ; ++j)
+	for(unsigned int j = 0 ; j < list_digits.size() ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[j]*nb_inputs+4])
 	      printf("|");
@@ -172,7 +172,7 @@ public:
 	printf("\n");
       }
     // Segment 3
-    for(int i = 0 ; i < list_digits.size() ; ++i)
+    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
       {
 	for(int j = 0 ; j < span_horiz ; ++j)
 	  {

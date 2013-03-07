@@ -1,9 +1,10 @@
 ===============================================================================
                       Popot : C++ POPulation based Optimization Toolbox
-                                 (c) Jeremy Fix 2011-2012
+                                 (c) Jeremy Fix 2011-2013
 ===============================================================================
 
-Popot is a C++ library implementing various population based optimization algorithms. It is provided with several examples.
+Popot is a C++ library implementing various population based
+optimization algorithms. It is provided with several examples.
 
 
 I/ Installation
@@ -26,19 +27,29 @@ Suggesting/Implementing new algorithms, ..
 IV/ Changes
 ----------------------
 
+1.21
+- Some corrections on unsigned int/int revealed with -Wall
+- Forgot to return the particle in BaseParticle::operator=
+- Update of the Doxygen layout to work with Doxygen 1.7.5
+
+
 1.20
 - Removed the Halton sequence
 - Added the Mersenne 64 bits generator
 - Corrected few bugs on copy constructors
 - Changed some pointers to references in return
-- Added a possibility to be extremely verbose verbose (see the define VERBOSE_BENCH in popot.h)
+- Added a possibility to be extremely verbose verbose (see the define
+  VERBOSE_BENCH in popot.h)
 
-I checked the behavior of popot::SPSO2011 and it is identical to the swarm central SPSO. There is
-indeed a divergence between the two codes after some, say, hundreds or thousands of iterations. This is mainly
-when deciding if new neighborhoods should be generated. In the SPSO C code, a very small improvement is still considered
-as an improvement while in the C++ code it takes it to be 0 and produces a new neighborhood. This very
-small numerical difference may actually lead to considerable differences in the performances (indeed in the
-number of generated neighborhoods)
+I checked the behavior of popot::SPSO2011 and it is identical to the
+swarm central SPSO. There is indeed a divergence between the two codes
+after some, say, hundreds or thousands of iterations. This is mainly
+when deciding if new neighborhoods should be generated. In the SPSO C
+code, a very small improvement is still considered as an improvement
+while in the C++ code it takes it to be 0 and produces a new
+neighborhood. This very small numerical difference may actually lead
+to considerable differences in the performances (indeed in the number
+of generated neighborhoods)
 
 1.10
 - Added StochasticSPSO2011, StochasticSPSO2006
