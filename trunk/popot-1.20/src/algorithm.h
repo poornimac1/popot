@@ -45,7 +45,7 @@ namespace popot
 	BestType best_particle;
 	std::vector<NeighborhoodType * > neighborhoods;
 	std::map< int , std::vector<int> > neighborhood_membership;
-	int swarm_size;
+	unsigned int swarm_size;
 	int *particles_indexes;
 
       public:
@@ -64,7 +64,7 @@ namespace popot
 	    particles = new PARTICLE[swarm_size];
 	    particles_indexes = new int[swarm_size];
 
-	    for(int i = 0 ; i < swarm_size ; ++i)
+	    for(unsigned int i = 0 ; i < swarm_size ; ++i)
 	      {
 		particles[i].init(); // This initializes position and velocity
 		particles_indexes[i] = i;
@@ -120,7 +120,7 @@ namespace popot
 	/**
 	 * Returns the size of the swarm
 	 */
-	int getSize(void)
+	unsigned int getSize(void)
 	{
 	  return swarm_size;
 	}
@@ -177,7 +177,6 @@ namespace popot
 	    {
 	      // In synchronous mode
 	      // we first update all the current positions and evaluate their fitness
-	      int particle_index;
 	      for(unsigned int i = 0 ; i < swarm_size ; ++i)
 		{
 		  particles[i].updateVelocity();		  
@@ -408,11 +407,6 @@ namespace popot
 	  delete[] connectivity_matrix;
 	}
       };
-
-
-
-
-
     } // namespace algorithm
   } // namespace PSO
 
@@ -456,11 +450,11 @@ namespace popot
 	{
 	  // In the employed bees phase, we generate new solutions
 	  // around each nectar source
-	  int change_dim;
+	  //int change_dim;
 	  int other_source;
-	  double phi;
+	  //double phi;
 	  FoodSourceType new_source;
-	  double new_param_value;
+	  //double new_param_value;
 	  double sum_fitnesses = 0;
 	  for(int i = 0 ; i < nb_employed ; ++i)
 	    {
@@ -485,8 +479,8 @@ namespace popot
 	  // Onlooker phase
 	  // Each onlooker bee selects a food source
 	  // based on its probability (reflecting its relative fitness)
-	  int selected_source;
-	  int other_source;
+	  int selected_source=0;
+	  int other_source=0;
 	  for(int i = 0 ; i < nb_onlookers ; ++i)
 	    {
 	      // Select a source based on its fitness
@@ -497,7 +491,7 @@ namespace popot
 	      while(other_source == i)
 		other_source = (int) popot::math::uniform_random(0, nb_employed);
 
-	      foodSources[i].combine(foodSources[other_source]);
+	      foodSources[selected_source].combine(foodSources[other_source]);
 	      
 	    }
 	}

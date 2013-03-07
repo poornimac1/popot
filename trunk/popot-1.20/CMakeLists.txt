@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.4 )
 
 project (popot) 
 
-set(POPOT_VERSION "1.20")
+set(POPOT_VERSION "1.21")
 set(PACKAGE_VERSION ${POPOT_VERSION})
 
 ###################################
@@ -23,6 +23,8 @@ SET(DOC_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/doc/popot" CACHE PATH "The su
 
 # Define the path to install the pc pkg-config file
 SET(PKGCONFIG_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig/" CACHE STRING "Base directory for pkgconfig files")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 ###################################
 # Pkg-config stuff

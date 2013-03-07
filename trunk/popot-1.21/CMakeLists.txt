@@ -45,6 +45,19 @@ add_subdirectory (src)
 add_subdirectory (examples)
 add_subdirectory (doc)
 
+###################################
+#  Custom command for source tgz
+###################################
+
+SET(DIST_DIR "${CMAKE_PROJECT_NAME}-${PACKAGE_VERSION}")
+ADD_CUSTOM_TARGET(dist 
+		  COMMAND rm -rf ${DIST_DIR}
+		  COMMAND mkdir  ${DIST_DIR}
+		  COMMAND cp -r ${CMAKE_SOURCE_DIR}/* ${DIST_DIR} || true 
+		  COMMAND rm -rf ${DIST_DIR}/build
+		  COMMAND mkdir ${DIST_DIR}/build
+  		  COMMAND tar --exclude="*~" --exclude="._*" --exclude=".svn*" -zcvf ${DIST_DIR}.tar.gz ${DIST_DIR}
+    	          WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ###################################
 # For building packages

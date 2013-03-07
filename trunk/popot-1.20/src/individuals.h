@@ -180,6 +180,7 @@ namespace popot
 	    {
 	      this->TSuper::operator=(other);
 	      _fitness = other._fitness;
+	      return *this;
 	    }
 
 	  /**

@@ -57,7 +57,7 @@ namespace popot
 	    _particles.push_back(p);
 	  }
 
-	  int size() const
+	  unsigned int size() const
 	  {
 	    return _particles.size();
 	  }
@@ -67,7 +67,7 @@ namespace popot
 	    _particles.clear();
 	  }
 
-	  InNeighborhoodType * get(int i) const
+	  InNeighborhoodType * get(unsigned int i) const
 	  {
 	    if(i >= 0 && i < size())
 	      return _particles[i];
