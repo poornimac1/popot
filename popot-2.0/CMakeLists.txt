@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.4 )
 
 project (popot) 
 
-set(POPOT_VERSION "1.3")
+set(POPOT_VERSION "2.0")
 set(PACKAGE_VERSION ${POPOT_VERSION})
 
 set( CMAKE_BUILD_TYPE Release)
@@ -45,7 +45,7 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/popot.pc
 
 add_subdirectory (src)
 add_subdirectory (examples)
-add_subdirectory (doc)
+#add_subdirectory (doc)
 
 ###################################
 #  Custom command for source tgz
