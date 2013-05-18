@@ -21,11 +21,14 @@ namespace popot
 	static double c() { return 0.5 + log(2.0);}   // Best particle position weight
       };
 
-      template<typename PROBLEM>
-	struct Particle
-	{
-	  typedef popot::PSO::particle::SPSO2006Particle< PROBLEM, Particle_SPSO2006_Params> Type;
-	};
+      template <typename PROBLEM>
+	using Particle = popot::PSO::particle::SPSO2006Particle< PROBLEM, Particle_SPSO2006_Params>;
+
+      /* template<typename PROBLEM> */
+      /* 	struct Particle */
+      /* 	{ */
+      /* 	  typedef popot::PSO::particle::SPSO2006Particle< PROBLEM, Particle_SPSO2006_Params> Type; */
+      /* 	}; */
 
       /**
        * The swarm size is set to 10 + [2 sqrt(S)]
@@ -41,12 +44,20 @@ namespace popot
       /**
        * Topology of SPSO2006 : Adaptive Random with K=3
        */
+      /*
       template<typename PROBLEM>
 	struct Topology
 	{
 	  static const int swarm_size = SwarmSize<PROBLEM>::swarm_size;
-	  typedef popot::PSO::topology::RandomInformants< swarm_size , 3, typename Particle<PROBLEM>::Type> Type;
+	  typedef popot::PSO::topology::RandomInformants< 3, typename Particle<PROBLEM> > Type;
 	};
+      */
+
+      //TODO : Il faut instancier la topologie quand on connecte les unités,
+      // et l'instancier avec la taille 
+
+      template <typename PROBLEM>
+	using Topology = popot::PSO::topology::RandomInformants< 3, Particle<PROBLEM> >;
 
       class PSO_params 
       {
@@ -54,6 +65,7 @@ namespace popot
 	static bool random_shuffle() { return false;}
 	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
       };
+
       template<typename PROBLEM>
 	class Stop_Criteria
 	{
@@ -63,12 +75,16 @@ namespace popot
 	    return  PROBLEM::stop(fitness,epoch);
 	  }
 	};
-      
+      /*
       template<typename PROBLEM>
 	struct PSO
 	{
 	  typedef popot::PSO::algorithm::Base<PSO_params, typename Particle<PROBLEM>::Type,typename Topology<PROBLEM>::Type, Stop_Criteria<PROBLEM> > Type;
 	};
+*/
+      template <typename PROBLEM>
+	using PSO = popot::PSO::algorithm::Base<PSO_params, Particle<PROBLEM>, Topology<PROBLEM>, Stop_Criteria<PROBLEM> >;
+
 
     }
 
