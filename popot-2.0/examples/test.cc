@@ -13,16 +13,14 @@ public:
   static double c() { return 0.5 + log(2.0);}   // Best particle position weight
 };
 
-typedef popot::PSO::particle::SPSO2007Particle< Problem, Params> Particle;
+typedef popot::PSO::SPSO2006::PSO<Problem>::Type Algo;
 
 int main(int argc, char * argv[])
 {
   RNG_GENERATOR::rng_srand();
 
   Problem prob(10);
-  Particle p(prob.dimension);
-  p.init(prob);
-  p.confine(prob);
+  Algo algo(prob);
 
-  std::cout << p << std::endl;
+  algo.run();
 }

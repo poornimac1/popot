@@ -5,72 +5,72 @@
 #include "popot.h"
 
 
-/* namespace popot */
-/* { */
-/*   namespace PSO */
-/*   { */
-/*     /\** */
-/*      * SPSO-2006 , Code based on "Standard PSO Descriptions", M. Clerc */
-/*      *\/ */
-/*     namespace SPSO2006 */
-/*     { */
-/*       class Particle_SPSO2006_Params */
-/*       { */
-/*       public: */
-/* 	static double w()  { return 1.0/(2.0*log(2.0));}   // Inertia parameter */
-/* 	static double c() { return 0.5 + log(2.0);}   // Best particle position weight */
-/*       }; */
+namespace popot
+{
+  namespace PSO
+  {
+    /**
+     * SPSO-2006 , Code based on "Standard PSO Descriptions", M. Clerc
+     */
+    namespace SPSO2006
+    {
+      class Particle_SPSO2006_Params
+      {
+      public:
+	static double w()  { return 1.0/(2.0*log(2.0));}   // Inertia parameter
+	static double c() { return 0.5 + log(2.0);}   // Best particle position weight
+      };
 
-/*       template<typename PROBLEM> */
-/* 	struct Particle */
-/* 	{ */
-/* 	  typedef popot::PSO::particle::SPSO2006Particle< PROBLEM, Particle_SPSO2006_Params> Type; */
-/* 	}; */
+      template<typename PROBLEM>
+	struct Particle
+	{
+	  typedef popot::PSO::particle::SPSO2006Particle< PROBLEM, Particle_SPSO2006_Params> Type;
+	};
 
-/*       /\** */
-/*        * The swarm size is set to 10 + [2 sqrt(S)] */
-/*        *\/ */
-/*       template<typename PROBLEM> */
-/* 	class SwarmSize */
-/* 	{ */
-/* 	public: */
-/* 	  static const int swarm_size; */
-/* 	}; */
-/*       template<typename PROBLEM> const int SwarmSize<PROBLEM>::swarm_size = 10 + int(2.0 * sqrt(PROBLEM::nb_parameters)); */
+      /**
+       * The swarm size is set to 10 + [2 sqrt(S)]
+       */
+      template<typename PROBLEM>
+	class SwarmSize
+	{
+	public:
+	  static const int swarm_size;
+	};
+      template<typename PROBLEM> const int SwarmSize<PROBLEM>::swarm_size = 10 + int(2.0 * sqrt(PROBLEM::dimension));
 
-/*       /\** */
-/*        * Topology of SPSO2006 : Adaptive Random with K=3 */
-/*        *\/ */
-/*       template<typename PROBLEM> */
-/* 	struct Topology */
-/* 	{ */
-/* 	  static const int swarm_size = SwarmSize<PROBLEM>::swarm_size; */
-/* 	  typedef popot::PSO::topology::RandomInformants< swarm_size , 3, typename Particle<PROBLEM>::Type> Type; */
-/* 	}; */
+      /**
+       * Topology of SPSO2006 : Adaptive Random with K=3
+       */
+      template<typename PROBLEM>
+	struct Topology
+	{
+	  static const int swarm_size = SwarmSize<PROBLEM>::swarm_size;
+	  typedef popot::PSO::topology::RandomInformants< swarm_size , 3, typename Particle<PROBLEM>::Type> Type;
+	};
 
-/*       class PSO_params */
-/*       { */
-/*       public: */
-/* 	static bool random_shuffle() { return false;} */
-/* 	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;} */
-/*       }; */
-/*       template<typename PROBLEM> */
-/*       class Stop_Criteria */
-/*       { */
-/*       public: */
-/* 	static bool stop(double fitness, int epoch) */
-/* 	{ */
-/* 	  return  PROBLEM::stop(fitness,epoch); */
-/* 	} */
-/*       }; */
+      class PSO_params 
+      {
+      public:
+	static bool random_shuffle() { return false;}
+	static int evaluation_mode() { return popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION;}
+      };
+      template<typename PROBLEM>
+	class Stop_Criteria
+	{
+	public:
+	  static bool stop(double fitness, int epoch)
+	  {
+	    return  PROBLEM::stop(fitness,epoch);
+	  }
+	};
+      
+      template<typename PROBLEM>
+	struct PSO
+	{
+	  typedef popot::PSO::algorithm::Base<PSO_params, typename Particle<PROBLEM>::Type,typename Topology<PROBLEM>::Type, Stop_Criteria<PROBLEM> > Type;
+	};
 
-/*       template<typename PROBLEM> */
-/* 	struct PSO */
-/* 	{ */
-/* 	  typedef popot::PSO::algorithm::Base<PSO_params, typename Particle<PROBLEM>::Type,typename Topology<PROBLEM>::Type, Stop_Criteria<PROBLEM> > Type; */
-/* 	}; */
-
-/*     } */
+    }
 
 
 /*     namespace StochasticSPSO2006 */
@@ -301,8 +301,8 @@
 
 
 
-/*   } */
-/* } */
+  }
+}
 
 
 
