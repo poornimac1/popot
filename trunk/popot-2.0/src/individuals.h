@@ -701,6 +701,8 @@ namespace popot
       	    //    = 1/2 (x_i +          p1         )
       	    // Ri = ||G_i - x_i||
 
+	    size_t i;
+
       	    // We first check if the local best and personal best are identical by computing the norm of the difference
       	    // between both positions
       	    // This can be done with pointer comparison
@@ -710,39 +712,39 @@ namespace popot
       	    // First position
       	    // p1 = xi + c * (pi - xi)
       	    // where pi is the personal best position
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition().getPosition(i) - this->getPosition(i));
 	  
       	    // Second position
       	    // p2 = xi + c * (li - xi)
       	    // where li is the local best position (within the neighborhood)
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      p2[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i));
 	  
       	    // Compute the gravity center of p1, p2 and xi
       	    if(!li_equals_pi)
       	      {
       		// We here consider p1, p2 and xi
-      		for(int i = 0 ; i < TSuper::dimension ; ++i)
+      		for(i = 0 ; i < TSuper::dimension ; ++i)
       		  gr[i] = 1.0/3.0 * (this->getPosition(i) + p1[i] + p2[i]);
       	      }
       	    else
       	      {
       		// We here consider only p1 (or p2, since they are equal) and xi
-      		for(int i = 0 ; i < TSuper::dimension ; ++i)
+      		for(i = 0 ; i < TSuper::dimension ; ++i)
       		  gr[i] = 1.0/2.0 * (this->getPosition(i) + p1[i]);
       	      }
 
       	    // And the radius of the hypersphere
       	    double ri = 0.0;
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      ri += (gr[i] - this->getPosition(i))*(gr[i] - this->getPosition(i));
       	    ri = sqrt(ri);
 
       	    // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri);
       	    // To uniformely sample from the hypersphere we uniformely sample a direction
       	    double norm = 0.0;
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      {
       		xpi[i] = popot::math::normal(0.0,1.0);
       		norm += xpi[i] * xpi[i];
@@ -751,11 +753,11 @@ namespace popot
 	  
       	    // And then scale by a random radius
       	    double r = popot::math::uniform_random(0.0,1.0);
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      xpi[i] =  gr[i] + r * ri * xpi[i] / norm;
 
       	    // And then update the velocity
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(i = 0 ; i < TSuper::dimension ; ++i)
       	      this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
       				+ xpi[i] - this->getPosition(i));
       	  }
@@ -765,20 +767,20 @@ namespace popot
       	   * Bounds the velocity and position of the particle
       	   */
 	  
-      	  virtual void confine(void)
+      	  virtual void confine(PROBLEM& p)
       	  {
       	    // In case the position is out of the bounds
       	    // we reset the velocities
-      	    for(int i = 0 ; i < TSuper::dimension ; ++i)
+      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
       	      {
-      		if((this->getPosition(i) < PROBLEM::get_lbound(i)))
+      		if((this->getPosition(i) < p.get_lbound(i)))
       		  {
-      		    this->setPosition(i, PROBLEM::get_lbound(i));
+      		    this->setPosition(i, p.get_lbound(i));
       		    this->setVelocity(i,-0.5*this->getVelocity(i));
       		  }
-      		else if(this->getPosition(i) > PROBLEM::get_ubound(i))
+      		else if(this->getPosition(i) > p.get_ubound(i))
       		  {
-      		    this->setPosition(i, PROBLEM::get_ubound(i));
+      		    this->setPosition(i, p.get_ubound(i));
       		    this->setVelocity(i,-0.5*this->getVelocity(i));
       		  }
       	      }
