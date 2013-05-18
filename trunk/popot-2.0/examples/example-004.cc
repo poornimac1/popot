@@ -7,7 +7,7 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 #include "popot.h"
 // Define our problem
 // Here we use a predefined parametrized problem
-typedef popot::problems::Dropwave Problem;
+typedef popot::problems::Rosenbrock Problem;
 
 class ABC_Params
 {
@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
   auto algo = popot::ABC::algorithm::base(params, p, stop);
   */
 
-  Problem p;
+  Problem p(5);
   ABC algo(p);
   
   algo.init();

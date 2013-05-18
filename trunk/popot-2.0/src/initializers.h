@@ -11,41 +11,40 @@ namespace popot
   {
     namespace initializer
     {
-
-
-      //TODOOOOOO EN COURS DE MISE A JOUR
-      // on doit pouvoir ne passer que des fonctions, lambda ou autres ....
-
-      template<PROBLEM>
+      template<typename PROBLEM>
       class PositionZero
       {
       public:
-	static void init(PROBLEM& p, int size, double * positions)
+	static void init(PROBLEM& p, double (PROBLEM::*lowerBound)(size_t), double (PROBLEM::*upperBound)(size_t), double * positions)
 	{
 	  // params = [min, max]
 	  // returns 0
-	  for(int i = 0 ; i < size ; ++i)
+	  for(size_t i = 0 ; i < p.dimension ; ++i)
 	    positions[i] = 0.0;
 	}
+	/*
 	static double init(double lbound, double ubound)
 	{
 	  return 0.0;
-	}	
+	}
+	*/
       };
 
+      template<typename PROBLEM>
       class PositionUniformRandom
       {
       public:
-	template<typename PROBLEM>
-	void init(PROBLEM& p, double * positions)
+	static void init(PROBLEM& p, double (PROBLEM::*lowerBound)(size_t), double (PROBLEM::*upperBound)(size_t), double * positions)
 	{
-	  for(int i = 0 ; i < size ; ++i)
-	    positions[i] = popot::math::uniform_random(lowerBound(i),upperBound(i));
+	  for(size_t i = 0 ; i < p.dimension ; ++i)
+	    positions[i] = popot::math::uniform_random((p.*(lowerBound))(i),(p.*(upperBound))(i));
 	}
+	/*
 	static double init(double lbound, double ubound)
 	{
 	  return popot::math::uniform_random(lbound,ubound);
 	}
+	*/
       };
 
       class VelocityZero
