@@ -358,6 +358,40 @@ namespace popot
       }
     };
 
+    class StaticRosenbrock
+    {
+    public:
+
+      static double get_lbound(size_t index)
+      {
+	return -30;
+      }
+
+      static double get_ubound(size_t index)
+      {
+	return 30;
+      }
+	
+      static bool stop(double fitness, size_t epoch)
+      {
+	return (fitness <= 100) || (epoch >= 10000);
+      }
+
+      static double evaluate(double * x, size_t dimension)
+      {
+	double fit = 0.0;
+	double y_i, y_i_1;
+	for(size_t i = 0 ; i < dimension-1 ; ++i)
+	  {
+	    y_i = x[i];
+	    y_i_1 = x[i+1];
+	    fit += 100 * pow(y_i_1 - pow(y_i,2.0),2.0)+pow(y_i - 1.0,2.0);
+	  }
+	return fit;
+      }
+    };
+
+
     /**
      * N-dimensional Schwefel1_2 function
      * @brief \f$ \sum_{i=1}^{N} (\sum_{j=1}^{i} x_i)^2\f$

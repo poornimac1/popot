@@ -4,23 +4,21 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 
 #include "popot.h"
 
-typedef popot::problems::Rosenbrock Problem;
 
-class Params
-{
-public:
-  static double w()  { return 1.0/(2.0*log(2.0));}   // Inertia parameter
-  static double c() { return 0.5 + log(2.0);}   // Best particle position weight
-};
 
-typedef popot::PSO::SPSO2006::PSO<Problem>::Type Algo;
 
 int main(int argc, char * argv[])
 {
   RNG_GENERATOR::rng_srand();
 
-  Problem prob(10);
-  Algo algo(prob);
+  int dim = 10;
+  			       
+  auto b = popot::PSO::particle::base(dim,   
+				      &popot::initializer::position::uniform_random,
+				      [] (size_t index) -> double { return -10; },
+				      [] (size_t index) -> double { return  10; });
 
-  algo.run();
+  std::cout << b << std::endl;
+  b.init();
+  std::cout << b << std::endl;
 }

@@ -414,37 +414,39 @@ namespace popot
   {
     namespace algorithm
     {
-
-      template< typename ABC_PARAMS, typename PROBLEM, typename STOP_CRITERIA>
+      template<typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
       class Base
       {
 	typedef popot::ABC::individuals::FoodSource FoodSourceType;
 
       private:
-	size_t epoch;
-	int CS;
-	size_t dimension;
-	int limitForScout;
-	size_t nb_employed;
-	size_t nb_onlookers;
-	double * probabilities;
+	size_t _epoch;
+	size_t _CS;
+	size_t _dimension;
+	size_t _limitForScout;
+	size_t _nb_employed;
+	size_t _nb_onlookers;
+	double * _probabilities;
 
-	FoodSourceType * foodSources;
-	FoodSourceType bestSource;
-	PROBLEM & p;
+	FoodSourceType * _foodSources;
+	FoodSourceType _bestSource;
+
+	const LBOUND_FUNC& _lbound;
+	const UBOUND_FUNC& _ubound;
+	const STOP_CRITERIA& _stop_criteria;
+	const COST_FUNCTION& _cost_function;
+
 	
       private:
 	void findBestSource(void)
 	{
-	  double bestf = bestSource.getFitness();
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
-	    {
-	      if(bestf < foodSources[i].getFitness())
-		{
-		  bestf = foodSources[i].getFitness();
-		  bestSource = foodSources[i];
-		}
-	    }
+	  double bestf = _bestSource.getFitness();
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
+	    if(bestf < _foodSources[i].getFitness())
+	      {
+		bestf = _foodSources[i].getFitness();
+		_bestSource = _foodSources[i];
+	      }
 	}
 
 	void employedPhase(void)
@@ -457,22 +459,22 @@ namespace popot
 	  FoodSourceType new_source;
 	  //double new_param_value;
 	  double sum_fitnesses = 0;
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
 	    {
 	      // Randomly select another source, different from the current source
-	      other_source = (size_t) popot::math::uniform_random(0, nb_employed);
+	      other_source = (size_t) popot::math::uniform_random(0, _nb_employed);
 	      while(other_source == i)
-		other_source = (size_t) popot::math::uniform_random(0, nb_employed);
+		other_source = (size_t) popot::math::uniform_random(0, _nb_employed);
 
-	      foodSources[i].combine(foodSources[other_source],p);
+	      _foodSources[i].combine(_foodSources[other_source], _lbound, _ubound, _cost_function);
 
-	      probabilities[i] = (foodSources[i]).getFitness();
-	      sum_fitnesses += probabilities[i];
+	      _probabilities[i] = (_foodSources[i]).getFitness();
+	      sum_fitnesses += _probabilities[i];
 	    }
 
 	  // At the end, we normalize the probabilities for each source
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
-	    probabilities[i] /= sum_fitnesses;
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
+	    _probabilities[i] /= sum_fitnesses;
 	}
 
 	void onlookerPhase(void)
@@ -482,17 +484,17 @@ namespace popot
 	  // based on its probability (reflecting its relative fitness)
 	  size_t selected_source=0;
 	  size_t other_source=0;
-	  for(size_t i = 0 ; i < nb_onlookers ; ++i)
+	  for(size_t i = 0 ; i < _nb_onlookers ; ++i)
 	    {
 	      // Select a source based on its fitness
-	      selected_source = popot::math::random_from_array(probabilities);
+	      selected_source = popot::math::random_from_array(_probabilities);
 
 	      // Randomly select another source, different from the current source
-	      other_source = (size_t) popot::math::uniform_random(0, nb_employed);
+	      other_source = (size_t) popot::math::uniform_random(0, _nb_employed);
 	      while(other_source == i)
-		other_source = (size_t) popot::math::uniform_random(0, nb_employed);
+		other_source = (size_t) popot::math::uniform_random(0, _nb_employed);
 
-	      foodSources[selected_source].combine(foodSources[other_source], p);
+	      _foodSources[selected_source].combine(_foodSources[other_source], _lbound, _ubound, _cost_function);
 	      
 	    }
 	}
@@ -503,48 +505,54 @@ namespace popot
 	  // We browse all the food sources
 	  // If a source has a counter higher than the limit
 	  // we reset it
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
-	    if(foodSources[i].getCounter() >= limitForScout)
-	      foodSources[i].init(p);
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
+	    if(_foodSources[i].getCounter() >= _limitForScout)
+	      _foodSources[i].init(_lbound, _ubound, _cost_function);
 	}
 
       public:
-      Base(PROBLEM& prob): p(prob) 
-	  {
-	    // Set up some parameters
-	    CS = ABC_PARAMS::ColonySize();
-	    dimension = p.dimension;
-	    limitForScout = (CS * dimension) / 2;
-	    nb_employed = CS/2;
-	    nb_onlookers = CS/2;
-	    epoch = 0;
 
+      Base(int colony_size, int dimension, const LBOUND_FUNC &lbound, const UBOUND_FUNC &ubound, const STOP_CRITERIA &stop_criteria, const COST_FUNCTION &cost_function)
+	: _epoch(0), 
+	  _CS(colony_size), 
+	  _dimension(dimension), 
+	  _limitForScout(colony_size * dimension / 2), 
+	  _nb_employed(colony_size/2), 
+	  _nb_onlookers(colony_size/2), 
+	  _probabilities(0), 
+	  _foodSources(0), 
+	  _bestSource(), 
+	  _lbound(lbound), 
+	  _ubound(ubound), 
+	  _stop_criteria(stop_criteria), 
+	  _cost_function(cost_function)
+	  {
 	    // Initialize our populations
-	    foodSources = new FoodSourceType[nb_employed];
-	    for(size_t i = 0 ; i < nb_employed ; ++i)
-	      foodSources[i] = FoodSourceType(dimension);
+	    _foodSources = new FoodSourceType[_nb_employed];
+	    for(size_t i = 0 ; i < _nb_employed ; ++i)
+	      _foodSources[i] = FoodSourceType(_dimension);
 
 	    // And the probabilities of their solutions
-	    probabilities = new double[nb_employed];
+	    _probabilities = new double[_nb_employed];
 
 	  }
 
 	virtual ~Base(void)
 	  {
-	    delete[] foodSources;
-	    delete[] probabilities;
+	    delete[] _foodSources;
+	    delete[] _probabilities;
 	  }
 
 	void init(void)
 	{
 	  // Initialize the positions and fitnesses
 	  // of the employed bees
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
-	    foodSources[i].init(p);
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
+	    _foodSources[i].init(_lbound, _ubound, _cost_function);
 
-	  bestSource = foodSources[0];
+	  _bestSource = _foodSources[0];
 
-	  epoch = 0;
+	  _epoch = 0;
 
 	  // Keep track of the best solution
 	  findBestSource();
@@ -552,7 +560,7 @@ namespace popot
 
 	int getEpoch(void)
 	{
-	  return epoch;
+	  return _epoch;
 	}
 
 	void step(void)
@@ -569,17 +577,17 @@ namespace popot
 	  // Memorize the best solution
 	  findBestSource();
 
-	  epoch ++;
+	  _epoch ++;
 	}
 
 	FoodSourceType& getBest()
 	  {
-	    return bestSource;
+	    return _bestSource;
 	  }
 
 	void run(void)
 	{
-	  while(!STOP_CRITERIA::stop(bestSource.getFValue(),epoch))
+	  while(!_stop_criteria(_bestSource.getFValue(),_epoch))
 	    {
 	      step();
 	    }
@@ -589,19 +597,30 @@ namespace popot
 	{
 	  std::cout << "Artificial Bee Colony " << std::endl;
 	  std::cout << "Food Sources : " << std::endl;
-	  for(size_t i = 0 ; i < nb_employed ; ++i)
-	      std::cout << foodSources[i] << std::endl;
-	  std::cout << "Best source : " << bestSource << std::endl;
+	  for(size_t i = 0 ; i < _nb_employed ; ++i)
+	      std::cout << _foodSources[i] << std::endl;
+	  std::cout << "Best source : " << _bestSource << std::endl;
 
 	}
       }; // class Base
-
-template< typename ABC_PARAMS, typename PROBLEM, typename STOP_CRITERIA>
-  Base< ABC_PARAMS, PROBLEM, STOP_CRITERIA> base(ABC_PARAMS params, PROBLEM pb, STOP_CRITERIA stop) {
-  return Base< ABC_PARAMS, PROBLEM, STOP_CRITERIA>(pb);
- };
     } // namespace algorithm
   } // namespace ABC
+
+
+  namespace algorithm
+  {
+
+      template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+      popot::ABC::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION> abc(size_t colony_size, size_t dimension,
+	   const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+	   const STOP_CRITERIA& stop, const COST_FUNCTION& func) 
+      {
+	return popot::ABC::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION>(colony_size, dimension, lbound, ubound, stop, func);
+      };
+
+
+  } // namespace algorithm
+
 } // namespace popot
 
 #endif // POPOT_ALGORITHM_H
