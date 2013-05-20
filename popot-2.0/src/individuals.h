@@ -28,35 +28,32 @@ namespace popot
     class Vector
     {
     protected:
-      VALUE_TYPE * values;
-      size_t dimension;
+      size_t _dimension;
+      VALUE_TYPE * _values;
 
     public:
 
       /**
        * Constructor
        */
-      Vector(size_t dimension)
-	{
-	  this->dimension = dimension;
-	  values = new VALUE_TYPE[dimension];
-	}
+    Vector(size_t dimension) 
+      : _dimension(dimension)
+      {
+	_values = new VALUE_TYPE[_dimension];
+      }
 
-    Vector(void)
-	{
-	  dimension = 0;
-	  values = 0;
-	}
+    Vector(void) : _dimension(0), _values(0)
+	{}
 
       /**
        * Copy constructor
        */
       Vector(const Vector& other)
 	{
-	  dimension = other.dimension;
-	  values = new VALUE_TYPE[dimension];
-	  for(size_t i = 0 ; i < dimension ; ++i)
-	    values[i] = other.values[i];
+	  _dimension = other._dimension;
+	  _values = new VALUE_TYPE[_dimension];
+	  for(size_t i = 0 ; i < _dimension ; ++i)
+	    _values[i] = other._values[i];
 	}
 
       /**
@@ -64,13 +61,13 @@ namespace popot
        */
       Vector & operator=(const Vector& other)
 	{
-	  if(dimension!=other.dimension){
-	    delete[] values;
-	    dimension = other.dimension;
-	    values = new VALUE_TYPE[dimension];
+	  if(_dimension != other._dimension){
+	    delete[] _values;
+	    _dimension = other._dimension;
+	    _values = new VALUE_TYPE[_dimension];
 	  }
-	  for(size_t i = 0 ; i < dimension ; ++i)
-	    values[i] = other.values[i];
+	  for(size_t i = 0 ; i < _dimension ; ++i)
+	    _values[i] = other._values[i];
 
 	  return *this;
 	}
@@ -81,7 +78,7 @@ namespace popot
        */
       virtual ~Vector(void)
 	{
-	  delete[] values;
+	  delete[] _values;
 	}
 
 
@@ -92,10 +89,10 @@ namespace popot
        */
       void setValueAt(size_t index, VALUE_TYPE value)
       {
-	if(index >= 0 && index < dimension)
-	  values[index] = value;
+	if(index >= 0 && index < _dimension)
+	  _values[index] = value;
 	else
-	  throw popot::Exception::IndexOutOfRange(index, dimension);
+	  throw popot::Exception::IndexOutOfRange(index, _dimension);
       }
 
       /**
@@ -104,10 +101,10 @@ namespace popot
        */
       VALUE_TYPE getValueAt(size_t index) const
       {
-	if(index >= 0 && index < dimension)
-	  return values[index];
+	if(index >= 0 && index < _dimension)
+	  return _values[index];
 	else
-	  throw popot::Exception::IndexOutOfRange(index, dimension);
+	  throw popot::Exception::IndexOutOfRange(index, _dimension);
       }
 
       /**
@@ -115,7 +112,7 @@ namespace popot
        */
       size_t size(void) const
       {
-	return dimension;
+	return _dimension;
       }
 
       /**
@@ -123,7 +120,7 @@ namespace popot
        */
       VALUE_TYPE * getValuesPtr(void)
       {
-	return values;
+	return _values;
       }
 
       /**
@@ -157,484 +154,567 @@ namespace popot
     namespace particle
     {
 
+      template<typename POSITION_INITIALIZER, typename LBOUND_FUNC, typename UBOUND_FUNC>
+      class Base: public Vector<double>
+      {
+      private:
+	typedef Vector<double> TSuper;
+
+	const POSITION_INITIALIZER& _pinit;
+	const LBOUND_FUNC& _lbound;
+	const UBOUND_FUNC& _ubound;
+
+      protected:
+	double _fitness;
+
+      public:
+
+	Base(const POSITION_INITIALIZER & pinit, const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
+	  : TSuper() ,
+	    _pinit(pinit),
+	    _lbound(lbound),
+	    _ubound(ubound),
+	    _fitness(0)
+	{}
+	
+	Base(size_t dimension, const POSITION_INITIALIZER & pinit, const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
+	  : TSuper(dimension),
+	    _pinit(pinit),
+	    _lbound(lbound),
+	    _ubound(ubound),
+	    _fitness(0)
+	{}
+	
+	virtual ~Base(void)
+	{}
+
+      	Base(const Base & other) 
+	  : TSuper(other),
+	    _pinit(other._pinit),
+	    _lbound(other._lbound),
+	    _ubound(other._ubound),
+	    _fitness(other._fitness)
+	{}
+
+	Base & operator=(const Base &other)
+	{
+	  this->TSuper::operator=(other);
+	  _pinit = other._pinit;
+	  _lbound = other._lbound;
+	  _ubound = other._bound;
+	  _fitness = other._fitness;
+	  return *this;
+	}
+
+	/**
+	 * Random intialization of the position followed by a fitness evaluation
+	 */
+	virtual void init()
+	{
+	  // Initialize the position
+	  initPosition();
+
+	  /* // Evaluate the fitness */
+	  /* evaluateFitness(p); */
+	}
+
+	/**
+	 * Initialization of the position
+	 */
+	void initPosition()
+	{
+	  _pinit(this->_dimension, _lbound, _ubound, this->getValuesPtr());
+	}
+      };
+
+      template<typename POSITION_INITIALIZER, typename LBOUND_FUNC, typename UBOUND_FUNC>
+      Base<POSITION_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC> base(size_t dimension,
+								const POSITION_INITIALIZER& pinit,
+								const LBOUND_FUNC& lbound, 
+								const UBOUND_FUNC& ubound) 
+      {
+	return Base<POSITION_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC>(dimension, pinit, lbound, ubound);
+      };
+
       /**
        * BaseParticle is a vector with a fitness and an associated Problem
        */
-      template<typename PROBLEM, typename POSITION_INITIALIZER>
-  	class BaseParticle : public Vector<double>
-  	{
-  	private:
-  	  typedef Vector<double> TSuper;
+      /* template<typename PROBLEM, typename POSITION_INITIALIZER> */
+      /* 	class BaseParticle : public Vector<double> */
+      /* 	{ */
+      /* 	private: */
+      /* 	  typedef Vector<double> TSuper; */
 
-  	protected:
-  	  double _fitness;
+      /* 	protected: */
+      /* 	  double _fitness; */
 
-  	public:
+      /* 	public: */
 
-	BaseParticle(): TSuper()
-	    {}
+      /* 	BaseParticle(): TSuper() */
+      /* 	    {} */
 
-  	BaseParticle(size_t dimension) : TSuper(dimension)
-  	    {}
+      /* 	BaseParticle(size_t dimension) : TSuper(dimension) */
+      /* 	    {} */
 	  
-  	  virtual ~BaseParticle(void)
-  	    {}
+      /* 	  virtual ~BaseParticle(void) */
+      /* 	    {} */
 
-  	BaseParticle(const BaseParticle & other) : TSuper(other)
-  	    {
-  	      _fitness = other._fitness;
-  	    }
+      /* 	BaseParticle(const BaseParticle & other) : TSuper(other) */
+      /* 	    { */
+      /* 	      _fitness = other._fitness; */
+      /* 	    } */
 
-  	  BaseParticle & operator=(const BaseParticle &other)
-  	    {
-  	      this->TSuper::operator=(other);
-  	      _fitness = other._fitness;
-  	      return *this;
-  	    }
+      /* 	  BaseParticle & operator=(const BaseParticle &other) */
+      /* 	    { */
+      /* 	      this->TSuper::operator=(other); */
+      /* 	      _fitness = other._fitness; */
+      /* 	      return *this; */
+      /* 	    } */
 
-  	  /**
-  	   * Random intialization of the position followed by a fitness evaluation
-  	   */	  
-  	  virtual void init(PROBLEM& p)
-  	  {
-  	    // Initialize the position
-  	    initPosition(p);
+      /* 	  /\** */
+      /* 	   * Random intialization of the position followed by a fitness evaluation */
+      /* 	   *\/	   */
+      /* 	  virtual void init(PROBLEM& p) */
+      /* 	  { */
+      /* 	    // Initialize the position */
+      /* 	    initPosition(p); */
 
-  	    // Evaluate the fitness
-  	    evaluateFitness(p);
-  	  }
+      /* 	    // Evaluate the fitness */
+      /* 	    evaluateFitness(p); */
+      /* 	  } */
 
-  	  /**
-  	   * Initialization of the position
-  	   */
-	  void initPosition(PROBLEM& p)
-  	  {
-  	    POSITION_INITIALIZER::init(p,&PROBLEM::get_lbound, &PROBLEM::get_ubound, this->getValuesPtr());
-  	  }
+      /* 	  /\** */
+      /* 	   * Initialization of the position */
+      /* 	   *\/ */
+      /* 	  void initPosition(PROBLEM& p) */
+      /* 	  { */
+      /* 	    POSITION_INITIALIZER::init(p,&PROBLEM::get_lbound, &PROBLEM::get_ubound, this->getValuesPtr()); */
+      /* 	  } */
 
-  	  /**
-  	   * Getter on the position
-  	   */
-  	  double getPosition(int i) const
-  	  {
-  	    return this->getValueAt(i);
-  	  }
-  	  /**
-  	   * Setter on the position
-  	   */
-  	  void setPosition(int i, double val)
-  	  {
-  	    this->setValueAt(i, val);
-  	  }
+      /* 	  /\** */
+      /* 	   * Getter on the position */
+      /* 	   *\/ */
+      /* 	  double getPosition(int i) const */
+      /* 	  { */
+      /* 	    return this->getValueAt(i); */
+      /* 	  } */
+      /* 	  /\** */
+      /* 	   * Setter on the position */
+      /* 	   *\/ */
+      /* 	  void setPosition(int i, double val) */
+      /* 	  { */
+      /* 	    this->setValueAt(i, val); */
+      /* 	  } */
 
-  	  /**
-  	   * Ensures the position is within the boundaries
-  	   */
-  	  virtual void confine(PROBLEM &p)
-  	  {
-  	    for(size_t i = 0 ; i < p.dimension ; ++i)
-  	      {
-  		if(getPosition(i) < p.get_lbound(i))
-  		  setPosition(i, p.get_lbound(i));
-  		else if(getPosition(i) > p.get_ubound(i))
-  		  setPosition(i, p.get_ubound(i));
-  	      }
-  	  }
+      /* 	  /\** */
+      /* 	   * Ensures the position is within the boundaries */
+      /* 	   *\/ */
+      /* 	  virtual void confine(PROBLEM &p) */
+      /* 	  { */
+      /* 	    for(size_t i = 0 ; i < p.dimension ; ++i) */
+      /* 	      { */
+      /* 		if(getPosition(i) < p.get_lbound(i)) */
+      /* 		  setPosition(i, p.get_lbound(i)); */
+      /* 		else if(getPosition(i) > p.get_ubound(i)) */
+      /* 		  setPosition(i, p.get_ubound(i)); */
+      /* 	      } */
+      /* 	  } */
 
-  	  /**
-  	   * Returns the currently known fitness
-  	   */
-  	  double getFitness(void) const
-  	  {
-  	    return _fitness;
-  	  }
+      /* 	  /\** */
+      /* 	   * Returns the currently known fitness */
+      /* 	   *\/ */
+      /* 	  double getFitness(void) const */
+      /* 	  { */
+      /* 	    return _fitness; */
+      /* 	  } */
 
-  	  /**
-  	   * Set the fitness
-  	   */
-  	  void setFitness(double f)
-  	  {
-  	    _fitness = f;
-  	  }
+      /* 	  /\** */
+      /* 	   * Set the fitness */
+      /* 	   *\/ */
+      /* 	  void setFitness(double f) */
+      /* 	  { */
+      /* 	    _fitness = f; */
+      /* 	  } */
 	
-  	  /**
-  	   * Recompute the fitness
-  	   */
-  	  virtual double evaluateFitness(PROBLEM& p)
-  	  {
-  	    _fitness = p.evaluate(this->getValuesPtr());
-  	    return _fitness;
-  	  }
-  	  /**
-  	   * Comparison of the fitness of two particles
-  	   */
-  	  bool operator<(const BaseParticle &p) const
-  	  {
-  	    return (compare(p) < 0);
-  	  }
-  	  /**
-  	   * Comparison of the fitness of two particles p1.compare(p2)
-  	   * @return -1 if p1.f < p2.f
-  	   * @return 1 if p1.f > p2.f
-  	   * @return 0 otherwise
-  	   */
-  	  virtual int compare(const BaseParticle& p) const
-  	  {
-  	    double myfitness = getFitness();
-  	    double otherfitness = p.getFitness();
-  	    if(myfitness < otherfitness)
-  	      return -1;
-  	    else if(myfitness > otherfitness)
-  	      return 1;
-  	    else
-  	      return 0;
-  	  }
+      /* 	  /\** */
+      /* 	   * Recompute the fitness */
+      /* 	   *\/ */
+      /* 	  virtual double evaluateFitness(PROBLEM& p) */
+      /* 	  { */
+      /* 	    _fitness = p.evaluate(this->getValuesPtr()); */
+      /* 	    return _fitness; */
+      /* 	  } */
+      /* 	  /\** */
+      /* 	   * Comparison of the fitness of two particles */
+      /* 	   *\/ */
+      /* 	  bool operator<(const BaseParticle &p) const */
+      /* 	  { */
+      /* 	    return (compare(p) < 0); */
+      /* 	  } */
+      /* 	  /\** */
+      /* 	   * Comparison of the fitness of two particles p1.compare(p2) */
+      /* 	   * @return -1 if p1.f < p2.f */
+      /* 	   * @return 1 if p1.f > p2.f */
+      /* 	   * @return 0 otherwise */
+      /* 	   *\/ */
+      /* 	  virtual int compare(const BaseParticle& p) const */
+      /* 	  { */
+      /* 	    double myfitness = getFitness(); */
+      /* 	    double otherfitness = p.getFitness(); */
+      /* 	    if(myfitness < otherfitness) */
+      /* 	      return -1; */
+      /* 	    else if(myfitness > otherfitness) */
+      /* 	      return 1; */
+      /* 	    else */
+      /* 	      return 0; */
+      /* 	  } */
 
-  	  virtual void print(std::ostream & os) const
-  	  {
-  	    TSuper::print(os);
-  	    os << " ; Fitness : " << this->getFitness();
-  	  }
+      /* 	  virtual void print(std::ostream & os) const */
+      /* 	  { */
+      /* 	    TSuper::print(os); */
+      /* 	    os << " ; Fitness : " << this->getFitness(); */
+      /* 	  } */
 	
-  	};
+      /* 	}; */
 
 
       // Particle introduces the notion
       // of neighborhood and velocity
       // and best position
-      template< typename PROBLEM, typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER>
-      	class Particle : public BaseParticle<PROBLEM, POSITION_INITIALIZER>
-      	{
-      	private:
-      	  typedef BaseParticle<PROBLEM, POSITION_INITIALIZER> TSuper;
-      	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > ThisParticleType;
+      /* template< typename PROBLEM, typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER> */
+      /* 	class Particle : public BaseParticle<PROBLEM, POSITION_INITIALIZER> */
+      /* 	{ */
+      /* 	private: */
+      /* 	  typedef BaseParticle<PROBLEM, POSITION_INITIALIZER> TSuper; */
+      /* 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > ThisParticleType; */
 
-      	public:
-      	  typedef BaseParticle<PROBLEM, POSITION_INITIALIZER> BestType;
-      	  typedef popot::PSO::neighborhood::Neighborhood< ThisParticleType > NeighborhoodType;
+      /* 	public: */
+      /* 	  typedef BaseParticle<PROBLEM, POSITION_INITIALIZER> BestType; */
+      /* 	  typedef popot::PSO::neighborhood::Neighborhood< ThisParticleType > NeighborhoodType; */
 	
 	
-      	protected:
-      	  double *_velocity;
-      	  BestType _best_position;
-      	  NeighborhoodType *_neighborhood;
+      /* 	protected: */
+      /* 	  double *_velocity; */
+      /* 	  BestType _best_position; */
+      /* 	  NeighborhoodType *_neighborhood; */
 	
-      	public:
+      /* 	public: */
 
-	Particle() : TSuper()
-	    {}
+      /* 	Particle() : TSuper() */
+      /* 	    {} */
 
-      	Particle(size_t dimension) : TSuper(dimension)
-      	    {
-      	      _velocity = new double[TSuper::dimension];
-      	      memset(_velocity, 0, TSuper::dimension * sizeof(double));
+      /* 	Particle(size_t dimension) : TSuper(dimension) */
+      /* 	    { */
+      /* 	      _velocity = new double[TSuper::dimension]; */
+      /* 	      memset(_velocity, 0, TSuper::dimension * sizeof(double)); */
 
-      	      // Create an empty neighborhood
-      	      _neighborhood = new NeighborhoodType();
-      	    }
+      /* 	      // Create an empty neighborhood */
+      /* 	      _neighborhood = new NeighborhoodType(); */
+      /* 	    } */
 
-      	Particle(const Particle& other) : TSuper(other), _best_position(other.getBestPosition())
-      	    {
-      	      // Copy the velocity
-      	      _velocity = new double[TSuper::dimension];
-      	      for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      		_velocity[i] = other.getVelocity(i);
+      /* 	Particle(const Particle& other) : TSuper(other), _best_position(other.getBestPosition()) */
+      /* 	    { */
+      /* 	      // Copy the velocity */
+      /* 	      _velocity = new double[TSuper::dimension]; */
+      /* 	      for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		_velocity[i] = other.getVelocity(i); */
 
-      	      _neighborhood = new NeighborhoodType(*(other.getNeighborhood()));
-      	      //_neighborhood = new NeighborhoodType();
-      	      //for(int i = 0 ; i < other.getNeighborhood()->size() ; ++i)
-      	      // _neighborhood->add(other.getNeighborhood()->get(i));
-      	    }
+      /* 	      _neighborhood = new NeighborhoodType(*(other.getNeighborhood())); */
+      /* 	      //_neighborhood = new NeighborhoodType(); */
+      /* 	      //for(int i = 0 ; i < other.getNeighborhood()->size() ; ++i) */
+      /* 	      // _neighborhood->add(other.getNeighborhood()->get(i)); */
+      /* 	    } */
 
-      	  virtual ~Particle(void)
-      	    {
-      	      delete[] _velocity;
-      	      delete _neighborhood;
-      	    }
+      /* 	  virtual ~Particle(void) */
+      /* 	    { */
+      /* 	      delete[] _velocity; */
+      /* 	      delete _neighborhood; */
+      /* 	    } */
 
-      	  /**
-      	   * Initialization of the position, velocity and fitness of the particle and set the best_position as the current position
-      	   */
-      	  virtual void init(PROBLEM &p)
-      	  {
-      	    // Initialize the position
-      	    // and computes the fitness
-      	    TSuper::init(p);
+      /* 	  /\** */
+      /* 	   * Initialization of the position, velocity and fitness of the particle and set the best_position as the current position */
+      /* 	   *\/ */
+      /* 	  virtual void init(PROBLEM &p) */
+      /* 	  { */
+      /* 	    // Initialize the position */
+      /* 	    // and computes the fitness */
+      /* 	    TSuper::init(p); */
 
-      	    // Initialize the velocity
-      	    initVelocity(p);
+      /* 	    // Initialize the velocity */
+      /* 	    initVelocity(p); */
 
-      	    // Set the best particle to the current position
-      	    // Just copies the position and fitness
-      	    _best_position = *this;
-      	  }
+      /* 	    // Set the best particle to the current position */
+      /* 	    // Just copies the position and fitness */
+      /* 	    _best_position = *this; */
+      /* 	  } */
 
 
-      	  /**
-      	   * Initialization of the velocity
-      	   */
-      	  virtual void initVelocity(PROBLEM& p)
-      	  {
-      	    double params[3];
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      {
-      		params[0] = p.get_lbound(i);
-      		params[1] = p.get_ubound(i);
-      		params[2] = this->getPosition(i);
-      		setVelocity(i, VELOCITY_INITIALIZER::init(params));
-      	      }
-      	  }
+      /* 	  /\** */
+      /* 	   * Initialization of the velocity */
+      /* 	   *\/ */
+      /* 	  virtual void initVelocity(PROBLEM& p) */
+      /* 	  { */
+      /* 	    double params[3]; */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      { */
+      /* 		params[0] = p.get_lbound(i); */
+      /* 		params[1] = p.get_ubound(i); */
+      /* 		params[2] = this->getPosition(i); */
+      /* 		setVelocity(i, VELOCITY_INITIALIZER::init(params)); */
+      /* 	      } */
+      /* 	  } */
 
-      	  /**
-      	   * Getter on the velocity
-      	   */
-      	  double getVelocity(size_t i) const
-      	  {
-      	    if(i >= 0 && i < TSuper::dimension)
-      	      return _velocity[i];
-      	    else
-      	      throw popot::Exception::IndexOutOfRange(i, TSuper::dimension);
-      	  }
+      /* 	  /\** */
+      /* 	   * Getter on the velocity */
+      /* 	   *\/ */
+      /* 	  double getVelocity(size_t i) const */
+      /* 	  { */
+      /* 	    if(i >= 0 && i < TSuper::dimension) */
+      /* 	      return _velocity[i]; */
+      /* 	    else */
+      /* 	      throw popot::Exception::IndexOutOfRange(i, TSuper::dimension); */
+      /* 	  } */
 
-      	  /**
-      	   * Setter on the velocity
-      	   */
-      	  void setVelocity(size_t i, double value)
-      	  {
-      	    if(i >= 0 && i < TSuper::dimension)
-      	      _velocity[i] = value;
-      	    else
-      	      throw popot::Exception::IndexOutOfRange(i, TSuper::dimension);
-      	  }
+      /* 	  /\** */
+      /* 	   * Setter on the velocity */
+      /* 	   *\/ */
+      /* 	  void setVelocity(size_t i, double value) */
+      /* 	  { */
+      /* 	    if(i >= 0 && i < TSuper::dimension) */
+      /* 	      _velocity[i] = value; */
+      /* 	    else */
+      /* 	      throw popot::Exception::IndexOutOfRange(i, TSuper::dimension); */
+      /* 	  } */
 
-      	  /**
-      	   * Bounds the velocity and position of the particle
-      	   * If the position is out of the boundaries, set the position on the
-      	   * boundaries and the velocity to zero
-      	   */
-      	  virtual void confine(PROBLEM& p)
-      	  {
-      	    // In case the position is out of the bounds
-      	    // we reset the velocities
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      {
-      		if((this->getPosition(i) < p.get_lbound(i)))
-      		  {
-      		    this->setPosition(i, p.get_lbound(i));
-      		    this->setVelocity(i,0);
-      		  }
-      		else if(this->getPosition(i) > p.get_ubound(i))
-      		  {
-      		    this->setPosition(i, p.get_ubound(i));
-      		    this->setVelocity(i,0);
-      		  }
-      	      }
-      	  }
+      /* 	  /\** */
+      /* 	   * Bounds the velocity and position of the particle */
+      /* 	   * If the position is out of the boundaries, set the position on the */
+      /* 	   * boundaries and the velocity to zero */
+      /* 	   *\/ */
+      /* 	  virtual void confine(PROBLEM& p) */
+      /* 	  { */
+      /* 	    // In case the position is out of the bounds */
+      /* 	    // we reset the velocities */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      { */
+      /* 		if((this->getPosition(i) < p.get_lbound(i))) */
+      /* 		  { */
+      /* 		    this->setPosition(i, p.get_lbound(i)); */
+      /* 		    this->setVelocity(i,0); */
+      /* 		  } */
+      /* 		else if(this->getPosition(i) > p.get_ubound(i)) */
+      /* 		  { */
+      /* 		    this->setPosition(i, p.get_ubound(i)); */
+      /* 		    this->setVelocity(i,0); */
+      /* 		  } */
+      /* 	      } */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the best position
-      	   */
-      	  virtual void updateBestPosition(void)
-      	  {
-      	    if(VERBOSE_BENCH)
-      	      {
-      		std::cout << "Previous best : " << _best_position.getFitness() << " : ";
-      		for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      		  std::cout << _best_position.getPosition(i) << " ";
-      		std::cout << std::endl;
-      	      }
-      	    // Update the best position the particle ever had
-      	    if(this->compare(_best_position) < 0)
-      	      _best_position = *this;
+      /* 	  /\** */
+      /* 	   * Updates the best position */
+      /* 	   *\/ */
+      /* 	  virtual void updateBestPosition(void) */
+      /* 	  { */
+      /* 	    if(VERBOSE_BENCH) */
+      /* 	      { */
+      /* 		std::cout << "Previous best : " << _best_position.getFitness() << " : "; */
+      /* 		for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  std::cout << _best_position.getPosition(i) << " "; */
+      /* 		std::cout << std::endl; */
+      /* 	      } */
+      /* 	    // Update the best position the particle ever had */
+      /* 	    if(this->compare(_best_position) < 0) */
+      /* 	      _best_position = *this; */
 	    
-      	    if(VERBOSE_BENCH)
-      	      {
-      		std::cout << "New best : " << _best_position.getFitness() << " : ";
-      		for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      		  std::cout << _best_position.getPosition(i) << " ";
-      		std::cout << std::endl;
-      	      }
-      	  }
+      /* 	    if(VERBOSE_BENCH) */
+      /* 	      { */
+      /* 		std::cout << "New best : " << _best_position.getFitness() << " : "; */
+      /* 		for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  std::cout << _best_position.getPosition(i) << " "; */
+      /* 		std::cout << std::endl; */
+      /* 	      } */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the velocity of the particle
-      	   */
-      	  virtual void updatePosition(void)
-      	  {
-      	    std::cout << "No updatePosition rule is provided for a particle of type Particle " << std::endl;
-      	  }
+      /* 	  /\** */
+      /* 	   * Updates the velocity of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updatePosition(void) */
+      /* 	  { */
+      /* 	    std::cout << "No updatePosition rule is provided for a particle of type Particle " << std::endl; */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the velocity of the particle
-      	   */
-      	  virtual void updateVelocity(void)
-      	  {
-      	    std::cout << "No updateVelocity rule is provided for a particle of type Particle " << std::endl;
-      	  }
+      /* 	  /\** */
+      /* 	   * Updates the velocity of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updateVelocity(void) */
+      /* 	  { */
+      /* 	    std::cout << "No updateVelocity rule is provided for a particle of type Particle " << std::endl; */
+      /* 	  } */
 
-      	  virtual const BestType & getBestPosition(void) const
-      	  {
-      	    return _best_position;
-      	  }
+      /* 	  virtual const BestType & getBestPosition(void) const */
+      /* 	  { */
+      /* 	    return _best_position; */
+      /* 	  } */
 
-      	  /**
-      	   * Returns a pointer to the neighborhood of the particle
-      	   */
-      	  NeighborhoodType* getNeighborhood(void) const
-      	  {
-      	    return _neighborhood;
-      	  }
+      /* 	  /\** */
+      /* 	   * Returns a pointer to the neighborhood of the particle */
+      /* 	   *\/ */
+      /* 	  NeighborhoodType* getNeighborhood(void) const */
+      /* 	  { */
+      /* 	    return _neighborhood; */
+      /* 	  } */
 
-      	  /**
-      	   * Set the pointer to the neighborhood
-      	   */
-      	  void setNeighborhood(NeighborhoodType * neighborhood)
-      	  {
-      	    _neighborhood = neighborhood;
-      	  }
+      /* 	  /\** */
+      /* 	   * Set the pointer to the neighborhood */
+      /* 	   *\/ */
+      /* 	  void setNeighborhood(NeighborhoodType * neighborhood) */
+      /* 	  { */
+      /* 	    _neighborhood = neighborhood; */
+      /* 	  } */
 
-      	  virtual void print(std::ostream & os) const
-      	  {
-      	    /*
-      	    printf("%f - ", this->getFitness());
-      	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-      	      {
-      		printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i));
-      	      }
-      	    printf("\n");
-      	    */
-      	    TSuper::print(os);
-      	    os << "; Best position : " << _best_position;
-      	  }
+      /* 	  virtual void print(std::ostream & os) const */
+      /* 	  { */
+      /* 	    /\* */
+      /* 	    printf("%f - ", this->getFitness()); */
+      /* 	    for(int i = 0 ; i < TSuper::_dimension ; ++i) */
+      /* 	      { */
+      /* 		printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i)); */
+      /* 	      } */
+      /* 	    printf("\n"); */
+      /* 	    *\/ */
+      /* 	    TSuper::print(os); */
+      /* 	    os << "; Best position : " << _best_position; */
+      /* 	  } */
 
-      	};
+      /* 	}; */
+
 
       /**
        * Definition of a Standard PSO 2006 particle
        * @brief The template parameters is the problem you want to solve and a class providing the parameters w and c
        * popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff>
-      	class SPSO2006Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
-      	{
-      	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper;
+      /* template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff> */
+      /* 	class SPSO2006Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > */
+      /* 	{ */
+      /* 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper; */
 
-      	public:
+      /* 	public: */
 
-      	SPSO2006Particle(size_t dimension) : TSuper(dimension)
-      	    {
-      	    }
+      /* 	SPSO2006Particle(size_t dimension) : TSuper(dimension) */
+      /* 	    { */
+      /* 	    } */
 
-      	  /**
-      	   * Destructor
-      	   */
-      	  virtual ~SPSO2006Particle(void)
-      	    {
-      	    }
+      /* 	  /\** */
+      /* 	   * Destructor */
+      /* 	   *\/ */
+      /* 	  virtual ~SPSO2006Particle(void) */
+      /* 	    { */
+      /* 	    } */
 
-      	  /**
-      	   * Update the position of the particle
-      	   */
-      	  virtual void updatePosition(void)
-      	  {
-      	    // Here it is simply : p_{k+1} = p_k + v_k
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-      	  }
+      /* 	  /\** */
+      /* 	   * Update the position of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updatePosition(void) */
+      /* 	  { */
+      /* 	    // Here it is simply : p_{k+1} = p_k + v_k */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i)); */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the velocity of the particle
-      	   */
-      	  virtual void updateVelocity(void)
-      	  {
-      	    // The update of the velocity is done according to the equation :
-      	    // v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
-      	    // with :
-      	    // r_p, r_g two random real numbers in [0.0,1.0]
-      	    // w, c1, c2 : user defined parameters
-      	    // best_p : the best position the particle ever had
-      	    // best_g : the best position the neighborhood ever had
-      	    double r1,r2;
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      {
-      		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-      		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-      		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-      				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
-      				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
-      	      }
-      	  }
-      	};
+      /* 	  /\** */
+      /* 	   * Updates the velocity of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updateVelocity(void) */
+      /* 	  { */
+      /* 	    // The update of the velocity is done according to the equation : */
+      /* 	    // v = w * v + c r1 (best_p - p) + c r2 (best_g - p) */
+      /* 	    // with : */
+      /* 	    // r_p, r_g two random real numbers in [0.0,1.0] */
+      /* 	    // w, c1, c2 : user defined parameters */
+      /* 	    // best_p : the best position the particle ever had */
+      /* 	    // best_g : the best position the neighborhood ever had */
+      /* 	    double r1,r2; */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      { */
+      /* 		r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c()); */
+      /* 		r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c()); */
+      /* 		this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i) */
+      /* 				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i)) */
+      /* 				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i))); */
+      /* 	      } */
+      /* 	  } */
+      /* 	}; */
 
       /**
        * Definition of a Standard PSO 2007 particle
        * @brief The template parameters is the problem you want to solve and a class providing the parameters w and c
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff >
-      	class SPSO2007Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
-      	{
-      	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper;
+      /* template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocityHalfDiff > */
+      /* 	class SPSO2007Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > */
+      /* 	{ */
+      /* 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER> TSuper; */
 
-      	public:
+      /* 	public: */
 
-      	SPSO2007Particle(size_t dimension) : TSuper(dimension)
-      	    {
-      	    }
+      /* 	SPSO2007Particle(size_t dimension) : TSuper(dimension) */
+      /* 	    { */
+      /* 	    } */
 
-      	  /**
-      	   * Destructor
-      	   */
-      	  virtual ~SPSO2007Particle(void)
-      	    {
-      	    }
+      /* 	  /\** */
+      /* 	   * Destructor */
+      /* 	   *\/ */
+      /* 	  virtual ~SPSO2007Particle(void) */
+      /* 	    { */
+      /* 	    } */
 
-      	  /**
-      	   * Update the position of the particle
-      	   */
-      	  virtual void updatePosition(void)
-      	  {
-      	    // Here it is simply : p_{k+1} = p_k + v_k
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-      	  }
+      /* 	  /\** */
+      /* 	   * Update the position of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updatePosition(void) */
+      /* 	  { */
+      /* 	    // Here it is simply : p_{k+1} = p_k + v_k */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i)); */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the velocity of the particle
-      	   */
-      	  virtual void updateVelocity(void)
-      	  {
-      	    // The update of the velocity is done according to the equation :
-      	    // v = w * v + r1 (best_p - p) + r2 (best_g - p)
-      	    // with :
-      	    // r_1, r_2 two random real numbers in [0.0,c]
-      	    // w, c : user defined parameters
-      	    // best_p : the best position the particle ever had
-      	    // best_g : the best position the neighborhood ever had
+      /* 	  /\** */
+      /* 	   * Updates the velocity of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updateVelocity(void) */
+      /* 	  { */
+      /* 	    // The update of the velocity is done according to the equation : */
+      /* 	    // v = w * v + r1 (best_p - p) + r2 (best_g - p) */
+      /* 	    // with : */
+      /* 	    // r_1, r_2 two random real numbers in [0.0,c] */
+      /* 	    // w, c : user defined parameters */
+      /* 	    // best_p : the best position the particle ever had */
+      /* 	    // best_g : the best position the neighborhood ever had */
 
-      	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
-      	    double r1,r2;
-      	    if(li_equals_pi)
-      	      {
-      		for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      		  {
-      		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-      		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-      				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i)));
-      		  }
-      	      }
-      	    else
-      	      {
-      		for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      		  {
-      		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-      		    r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c());
-      		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-      				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
-      				      + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
-      		  }
-      	      }
-      	  }
-      	};
+      /* 	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest()); */
+      /* 	    double r1,r2; */
+      /* 	    if(li_equals_pi) */
+      /* 	      { */
+      /* 		for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  { */
+      /* 		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c()); */
+      /* 		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i) */
+      /* 				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))); */
+      /* 		  } */
+      /* 	      } */
+      /* 	    else */
+      /* 	      { */
+      /* 		for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  { */
+      /* 		    r1 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c()); */
+      /* 		    r2 = popot::math::uniform_random(0.0,PARTICLE_PARAMS::c()); */
+      /* 		    this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i) */
+      /* 				      + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i)) */
+      /* 				      + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i))); */
+      /* 		  } */
+      /* 	      } */
+      /* 	  } */
+      /* 	}; */
 
 
       /**
@@ -644,150 +724,150 @@ namespace popot
        * Compared to the base type BaseParticle, this type adds the some specific position and velocity update rules
        * These come from the Standard PSO 2011
        */
-      template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocitySPSO2011>
-      	class SPSO2011Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER >
+      /* template< typename PROBLEM, typename PARTICLE_PARAMS, typename POSITION_INITIALIZER=popot::PSO::initializer::PositionUniformRandom<PROBLEM>, typename VELOCITY_INITIALIZER=popot::PSO::initializer::VelocitySPSO2011> */
+      /* 	class SPSO2011Particle : public Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > */
  
-      	{
-      	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper;
+      /* 	{ */
+      /* 	  typedef Particle<PROBLEM, POSITION_INITIALIZER, VELOCITY_INITIALIZER > TSuper; */
 
-      	  double * xpi;
-      	  double * p1;
-      	  double * p2;
-      	  double * gr;
-      	public:
+      /* 	  double * xpi; */
+      /* 	  double * p1; */
+      /* 	  double * p2; */
+      /* 	  double * gr; */
+      /* 	public: */
 
-      	SPSO2011Particle(size_t dimension) : TSuper(dimension)
-      	    {
-      	      xpi = new double[TSuper::dimension];
-      	      p1 = new double[TSuper::dimension];
-      	      p2 = new double[TSuper::dimension];
-      	      gr = new double[TSuper::dimension];
-      	    }
+      /* 	SPSO2011Particle(size_t dimension) : TSuper(dimension) */
+      /* 	    { */
+      /* 	      xpi = new double[TSuper::dimension]; */
+      /* 	      p1 = new double[TSuper::dimension]; */
+      /* 	      p2 = new double[TSuper::dimension]; */
+      /* 	      gr = new double[TSuper::dimension]; */
+      /* 	    } */
 
-      	  /**
-      	   * Destructor
-      	   */
-      	  virtual ~SPSO2011Particle(void)
-      	    {
-      	      delete[] xpi;
-      	      delete[] p1;
-      	      delete[] p2;
-      	      delete[] gr;
-      	    }
+      /* 	  /\** */
+      /* 	   * Destructor */
+      /* 	   *\/ */
+      /* 	  virtual ~SPSO2011Particle(void) */
+      /* 	    { */
+      /* 	      delete[] xpi; */
+      /* 	      delete[] p1; */
+      /* 	      delete[] p2; */
+      /* 	      delete[] gr; */
+      /* 	    } */
 
-      	  /**
-      	   * Update the position of the particle
-      	   */
-      	  virtual void updatePosition(void)
-      	  {
-      	    // Here it is simply : p_{k+1} = p_k + v_k
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-      	  }
+      /* 	  /\** */
+      /* 	   * Update the position of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updatePosition(void) */
+      /* 	  { */
+      /* 	    // Here it is simply : p_{k+1} = p_k + v_k */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i)); */
+      /* 	  } */
 
-      	  /**
-      	   * Updates the velocity of the particle
-      	   */
-      	  virtual void updateVelocity(void)
-      	  {
-      	    // The update of the velocity is done according to the equation :
-      	    // v_i(t+1) = w v_i(t) + x'_i(t) - x_i(t)
-      	    // where x'_i is normally sampled from the hypersphere (Gi, Ri)
-      	    // with Gi the center and Ri the radius and
-      	    // Gi = 1/3 ( x_i + (x_i + c(p_i - x_i)) + (x_i + c(l_i - x_i)))
-      	    //    = 1/3 ( x_i +          p1          +            p2     )))
-      	    // or
-      	    // Gi = 1/2 (x_i + (x_i + c(p_i - x_i))) if p_i == l_i
-      	    //    = 1/2 (x_i +          p1         )
-      	    // Ri = ||G_i - x_i||
+      /* 	  /\** */
+      /* 	   * Updates the velocity of the particle */
+      /* 	   *\/ */
+      /* 	  virtual void updateVelocity(void) */
+      /* 	  { */
+      /* 	    // The update of the velocity is done according to the equation : */
+      /* 	    // v_i(t+1) = w v_i(t) + x'_i(t) - x_i(t) */
+      /* 	    // where x'_i is normally sampled from the hypersphere (Gi, Ri) */
+      /* 	    // with Gi the center and Ri the radius and */
+      /* 	    // Gi = 1/3 ( x_i + (x_i + c(p_i - x_i)) + (x_i + c(l_i - x_i))) */
+      /* 	    //    = 1/3 ( x_i +          p1          +            p2     ))) */
+      /* 	    // or */
+      /* 	    // Gi = 1/2 (x_i + (x_i + c(p_i - x_i))) if p_i == l_i */
+      /* 	    //    = 1/2 (x_i +          p1         ) */
+      /* 	    // Ri = ||G_i - x_i|| */
 
-	    size_t i;
+      /* 	    size_t i; */
 
-      	    // We first check if the local best and personal best are identical by computing the norm of the difference
-      	    // between both positions
-      	    // This can be done with pointer comparison
-      	    // as the neighborhood holds a pointer to the best personal best
-      	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
+      /* 	    // We first check if the local best and personal best are identical by computing the norm of the difference */
+      /* 	    // between both positions */
+      /* 	    // This can be done with pointer comparison */
+      /* 	    // as the neighborhood holds a pointer to the best personal best */
+      /* 	    bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest()); */
 
-      	    // First position
-      	    // p1 = xi + c * (pi - xi)
-      	    // where pi is the personal best position
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition().getPosition(i) - this->getPosition(i));
+      /* 	    // First position */
+      /* 	    // p1 = xi + c * (pi - xi) */
+      /* 	    // where pi is the personal best position */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      p1[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getBestPosition().getPosition(i) - this->getPosition(i)); */
 	  
-      	    // Second position
-      	    // p2 = xi + c * (li - xi)
-      	    // where li is the local best position (within the neighborhood)
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      p2[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i));
+      /* 	    // Second position */
+      /* 	    // p2 = xi + c * (li - xi) */
+      /* 	    // where li is the local best position (within the neighborhood) */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      p2[i] = this->getPosition(i) + PARTICLE_PARAMS::c() *(this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)); */
 	  
-      	    // Compute the gravity center of p1, p2 and xi
-      	    if(!li_equals_pi)
-      	      {
-      		// We here consider p1, p2 and xi
-      		for(i = 0 ; i < TSuper::dimension ; ++i)
-      		  gr[i] = 1.0/3.0 * (this->getPosition(i) + p1[i] + p2[i]);
-      	      }
-      	    else
-      	      {
-      		// We here consider only p1 (or p2, since they are equal) and xi
-      		for(i = 0 ; i < TSuper::dimension ; ++i)
-      		  gr[i] = 1.0/2.0 * (this->getPosition(i) + p1[i]);
-      	      }
+      /* 	    // Compute the gravity center of p1, p2 and xi */
+      /* 	    if(!li_equals_pi) */
+      /* 	      { */
+      /* 		// We here consider p1, p2 and xi */
+      /* 		for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  gr[i] = 1.0/3.0 * (this->getPosition(i) + p1[i] + p2[i]); */
+      /* 	      } */
+      /* 	    else */
+      /* 	      { */
+      /* 		// We here consider only p1 (or p2, since they are equal) and xi */
+      /* 		for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 		  gr[i] = 1.0/2.0 * (this->getPosition(i) + p1[i]); */
+      /* 	      } */
 
-      	    // And the radius of the hypersphere
-      	    double ri = 0.0;
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      ri += (gr[i] - this->getPosition(i))*(gr[i] - this->getPosition(i));
-      	    ri = sqrt(ri);
+      /* 	    // And the radius of the hypersphere */
+      /* 	    double ri = 0.0; */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      ri += (gr[i] - this->getPosition(i))*(gr[i] - this->getPosition(i)); */
+      /* 	    ri = sqrt(ri); */
 
-      	    // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri);
-      	    // To uniformely sample from the hypersphere we uniformely sample a direction
-      	    double norm = 0.0;
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      {
-      		xpi[i] = popot::math::normal(0.0,1.0);
-      		norm += xpi[i] * xpi[i];
-      	      }
-      	    norm = sqrt(norm);
+      /* 	    // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri); */
+      /* 	    // To uniformely sample from the hypersphere we uniformely sample a direction */
+      /* 	    double norm = 0.0; */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      { */
+      /* 		xpi[i] = popot::math::normal(0.0,1.0); */
+      /* 		norm += xpi[i] * xpi[i]; */
+      /* 	      } */
+      /* 	    norm = sqrt(norm); */
 	  
-      	    // And then scale by a random radius
-      	    double r = popot::math::uniform_random(0.0,1.0);
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      xpi[i] =  gr[i] + r * ri * xpi[i] / norm;
+      /* 	    // And then scale by a random radius */
+      /* 	    double r = popot::math::uniform_random(0.0,1.0); */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      xpi[i] =  gr[i] + r * ri * xpi[i] / norm; */
 
-      	    // And then update the velocity
-      	    for(i = 0 ; i < TSuper::dimension ; ++i)
-      	      this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i)
-      				+ xpi[i] - this->getPosition(i));
-      	  }
+      /* 	    // And then update the velocity */
+      /* 	    for(i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      this->setVelocity(i, PARTICLE_PARAMS::w() * this->getVelocity(i) */
+      /* 				+ xpi[i] - this->getPosition(i)); */
+      /* 	  } */
 
 
-      	  /**
-      	   * Bounds the velocity and position of the particle
-      	   */
+      /* 	  /\** */
+      /* 	   * Bounds the velocity and position of the particle */
+      /* 	   *\/ */
 	  
-      	  virtual void confine(PROBLEM& p)
-      	  {
-      	    // In case the position is out of the bounds
-      	    // we reset the velocities
-      	    for(size_t i = 0 ; i < TSuper::dimension ; ++i)
-      	      {
-      		if((this->getPosition(i) < p.get_lbound(i)))
-      		  {
-      		    this->setPosition(i, p.get_lbound(i));
-      		    this->setVelocity(i,-0.5*this->getVelocity(i));
-      		  }
-      		else if(this->getPosition(i) > p.get_ubound(i))
-      		  {
-      		    this->setPosition(i, p.get_ubound(i));
-      		    this->setVelocity(i,-0.5*this->getVelocity(i));
-      		  }
-      	      }
-      	  }
+      /* 	  virtual void confine(PROBLEM& p) */
+      /* 	  { */
+      /* 	    // In case the position is out of the bounds */
+      /* 	    // we reset the velocities */
+      /* 	    for(size_t i = 0 ; i < TSuper::dimension ; ++i) */
+      /* 	      { */
+      /* 		if((this->getPosition(i) < p.get_lbound(i))) */
+      /* 		  { */
+      /* 		    this->setPosition(i, p.get_lbound(i)); */
+      /* 		    this->setVelocity(i,-0.5*this->getVelocity(i)); */
+      /* 		  } */
+      /* 		else if(this->getPosition(i) > p.get_ubound(i)) */
+      /* 		  { */
+      /* 		    this->setPosition(i, p.get_ubound(i)); */
+      /* 		    this->setVelocity(i,-0.5*this->getVelocity(i)); */
+      /* 		  } */
+      /* 	      } */
+      /* 	  } */
 	  
 
-      	};
+      /* 	}; */
 
       /* /\** */
       /*  * Definition of a Standard PSO 2011 particle, respecting the order of the operations of SPSO on swarm central */
@@ -1208,146 +1288,150 @@ namespace popot
   {
     namespace individuals
     {
-	class FoodSource : public Vector<double>
+      class FoodSource : public Vector<double>
+      {
+	typedef Vector<double> TVector;
+
+      private:
+	double _fitness;
+	double _fvalue;
+	size_t _counter;
+
+      public:
+
+      FoodSource(size_t dimension)
+	: TVector(dimension),
+	  _fitness(0), 
+	  _fvalue(0), 
+	  _counter(0)
+	  {}
+
+      FoodSource(): TVector(), _fitness(0), _fvalue(0), _counter(0)
+	  {}
+
+	/**
+	 * Copy constructor
+	 */
+      FoodSource(const FoodSource & other) 
+	: TVector(other), 
+	  _fitness(other._fitness), 
+	  _fvalue(other._fvalue), 
+	  _counter(other._counter)
+	  {
+	  }
+
+	virtual ~FoodSource(void)
+	  {}
+
+	template<typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNCTION>
+	  void init(const LBOUND_FUNC& lbound, const UBOUND_FUNC &ubound, const COST_FUNCTION& cost_function)
 	{
-	  typedef Vector<double> TVector;
+	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+	    this->setValueAt(i, popot::math::uniform_random(lbound(i), ubound(i)));
 
-	private:
-	  double fitness;
-	  double fvalue;
-	  int counter;
+	  computeFitness(cost_function);
 
-	public:
+	  // Initialize the counter
+	  _counter = 0;
+	}
 
-	FoodSource(size_t dimension): TVector(dimension)
-	    {}
+	template<typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNCTION>
+	  void combine(const FoodSource & other_source, const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound, const COST_FUNCTION& cost_function)
+	{
+	  // Combination operator
+	  int change_dim;
+	  double phi;
+	  FoodSource new_source;
+	  double new_param_value;
 
-	FoodSource(): TVector()
-	    {}
+	  // Randomly select a dimension to change
+	  change_dim = (int) popot::math::uniform_random(0, this->_dimension);
+	  
+	  // Random combination coefficient
+	  phi = popot::math::uniform_random(-1.0, 1.0);
 
-	  /**
-	   * Copy constructor
-	   */
-	FoodSource(const FoodSource & other) : TVector(other), fitness(other.fitness), fvalue(other.fvalue), counter(other.counter)
+	  // Compute the new source
+	  new_source = *this;
+	  new_param_value = this->getValueAt(change_dim) + phi * (this->getValueAt(change_dim) - other_source.getValueAt(change_dim));
+
+	  // Bound the parameter value
+	  if(new_param_value < lbound(change_dim))
+	    new_param_value = lbound(change_dim);
+	  else if(new_param_value > ubound(change_dim))
+	    new_param_value = ubound(change_dim);
+	  
+	  new_source.setValueAt(change_dim, new_param_value);
+
+	  // Evaluate the fitness of the new solution
+	  new_source.computeFitness(cost_function);
+
+	  // Perform a greedy selection
+	  if(new_source.getFitness() > getFitness())
 	    {
+	      // If we get a better solution, it takes the place of the previous one
+	      *this = new_source;
+	      resetCounter();
 	    }
+	  else
+	    {
+	      // otherwise we increment its counter
+	      (*this)++;
+	    }
+	}
 
-	  virtual ~FoodSource(void)
-	    {}
-
-	  template<typename PROBLEM>
-	  void init(PROBLEM &p)
-	  {
-	    for(size_t i = 0 ; i < p.dimension ; ++i)
-	      this->setValueAt(i, popot::math::uniform_random(p.get_lbound(i), p.get_ubound(i)));
-
-	    computeFitness(p);
-
-	    // Initialize the counter
-	    counter = 0;
-	  }
-
-	  template<typename PROBLEM>
-	    void combine(const FoodSource & other_source, PROBLEM& p)
-	  {
-	    // Combination operator
-	    int change_dim;
-	    double phi;
-	    FoodSource new_source;
-	    double new_param_value;
-
-	    // Randomly select a dimension to change
-	    change_dim = (int) popot::math::uniform_random(0, this->dimension);
-	  
-	    // Random combination coefficient
-	    phi = popot::math::uniform_random(-1.0, 1.0);
-
-	    // Compute the new source
-	    new_source = *this;
-	    new_param_value = this->getValueAt(change_dim) + phi * (this->getValueAt(change_dim) - other_source.getValueAt(change_dim));
-
-	    // Bound the parameter value
-	    if(new_param_value < p.get_lbound(change_dim))
-	      new_param_value = p.get_lbound(change_dim);
-	    else if(new_param_value > p.get_ubound(change_dim))
-	      new_param_value = p.get_ubound(change_dim);
-	  
-	    new_source.setValueAt(change_dim, new_param_value);
-
-	    // Evaluate the fitness of the new solution
-	    new_source.computeFitness(p);
-
-	    // Perform a greedy selection
-	    if(new_source.getFitness() > getFitness())
-	      {
-		// If we get a better solution, it takes the place of the previous one
-		*this = new_source;
-		resetCounter();
-	      }
-	    else
-	      {
-		// otherwise we increment its counter
-		(*this)++;
-	      }
-	  }
-
-	  void resetCounter(void)
-	  {
-	    counter = 0;
-	  }
+	void resetCounter(void)  {
+	  _counter = 0;
+	}
 
 
-	  int getCounter(void)
-	  {
-	    return counter;
-	  }
+	size_t getCounter(void) {
+	  return _counter;
+	}
 
-	  void operator++(int) { 
-	    counter ++;
-	  }
+	void operator++(int) { 
+	  _counter ++;
+	}
 
-	  template<typename PROBLEM>
-	  void computeFitness(PROBLEM& p)
-	  {
-	    // Compute the fitness
-	    fvalue = p.evaluate(this->getValuesPtr());
-	    fitness = fitnessFunction(fvalue);
-	  }
+	template<typename COST_FUNCTION>
+	  void computeFitness(const COST_FUNCTION& cost_function)  {
+	  // Compute the fitness
+	  _fvalue = cost_function(this->getValuesPtr());
+	  _fitness = fitnessFunction(_fvalue);
+	}
 
-	  double fitnessFunction(double x)
-	  {
-	    if(x >= 0.0)
-	      return 1.0 / (1.0 + x);
-	    else
-	      return 1.0 + fabs(x);
-	  }
+	double fitnessFunction(double x)  {
+	  if(x >= 0.0)
+	    return 1.0 / (1.0 + x);
+	  else
+	    return 1.0 + fabs(x);
+	}
 
-	  double getFitness(void)
-	  {
-	    return fitness;
-	  }
+	double getFitness(void)
+	{
+	  return _fitness;
+	}
 
-	  double getFValue(void)
-	  {
-	    return fvalue;
-	  }
+	double getFValue(void)
+	{
+	  return _fvalue;
+	}
 
-	  virtual void print(std::ostream & os) const
-	  {
-	    TVector::print(os);
-	    os << " Fitness : " << fitness << " Fvalue : " << fvalue << " Count : " << counter;
-	  }
+	virtual void print(std::ostream & os) const
+	{
+	  TVector::print(os);
+	  os << " Fitness : " << _fitness << " Fvalue : " << _fvalue << " Count : " << _counter;
+	}
 
-	  /**
-	   * Serialization operator, for display
-	   */
-	  friend std::ostream & operator <<(std::ostream & os, const FoodSource &b)
+	/**
+	 * Serialization operator, for display
+	 */
+	friend std::ostream & operator <<(std::ostream & os, const FoodSource &b)
 	  {
 	    b.print(os);
 	    return os;
 	  }
 
-	}; // FoodSource     
+      }; // FoodSource     
     } // namespace individuals
 
   } // namespace ABC

@@ -1,53 +1,63 @@
-
-
 // We first define the generator of random numbers
 #include "rng_generators.h"
 typedef popot::rng::CRNG RNG_GENERATOR;
 
 #include "popot.h"
-// Define our problem
-// Here we use a predefined parametrized problem
-typedef popot::problems::Rosenbrock Problem;
 
-class ABC_Params
+double evaluate(double * x, size_t dimension, size_t & count)
 {
-public:
-  static int ColonySize() { return 50;};
-};
+  double * params = (double*) x;
+  double fit = 0.0;
+  double y_i, y_i_1;
+  for(size_t i = 0 ; i < dimension-1 ; ++i)
+    {
+      y_i = params[i];
+      y_i_1 = params[i+1];
+      fit += 100 * pow(y_i_1 - pow(y_i,2.0),2.0)+pow(y_i - 1.0,2.0);
+    }
+  count ++;
 
-class Stop_Criteria
+  return fit;
+}
+
+bool stop(double f, int epoch)
 {
-public:
-  static bool stop(double f, int epoch)
-  {
-    return (f <= -1 + 1e-4) || (epoch >= 100000);
-  }
-};
-
-typedef popot::ABC::algorithm::Base<ABC_Params, Problem, Stop_Criteria> ABC;
+  return (f <= 1e-2) || (epoch >= 10000);
+}
 
 int main(int argc, char * argv[])
 {
   RNG_GENERATOR::rng_srand();
 
+  size_t colony_size = 50;
+  size_t dimension = 15;
+  size_t count=0;
+  
+  auto algo = popot::algorithm::abc(colony_size, dimension,
+				    [] (size_t index) -> double { return -10; },
+				    [] (size_t index) -> double { return  10; },
+				    stop,
+				    [&count,dimension] (double * params) -> double { return evaluate(params, dimension, count);});
+
+  
   /*
-  Problem p(50);
-  ABC_Params params;
-  Stop_Criteria stop;
-  auto algo = popot::ABC::algorithm::base(params, p, stop);
+
+    typedef popot::problems::StaticRosenbrock Problem;
+  auto algo = popot::algorithm::abc(colony_size, dimension,
+				    Problem::get_lbound,
+				    Problem::get_ubound,
+				    Problem::stop,
+				    [&count,dimension] (double * x) -> double { return Problem::evaluate(x, dimension);});
   */
 
-  Problem p(5);
-  ABC algo(p);
-  
   algo.init();
   algo.run();
 
   std::cout << "Best minimum found :" << algo.getBest().getFValue() << " in " << algo.getEpoch() << " steps " << std::endl;
   std::cout << "Position of the optimum : " << std::endl;
-  for(size_t i = 0 ; i < p.dimension ; ++i)
+  for(size_t i = 0 ; i < dimension ; ++i)
     std::cout << algo.getBest().getValueAt(i) << " ";
   std::cout << std::endl;
-  std::cout << (int)p.count << " Function Evaluations" << std::endl;
+  std::cout << (int)count << " Function Evaluations" << std::endl;
   
 }
