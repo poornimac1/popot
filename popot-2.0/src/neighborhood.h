@@ -2,6 +2,7 @@
 #define POPOT_NEIGHBORHOOD_H
 
 #include <vector>
+#include <algorithm>
 #include "exceptions.h"
 #include "maths.h"
 
@@ -42,9 +43,10 @@ namespace popot
 
 	Neighborhood(const Neighborhood & other)
 	{
-	  _best_particle = other.getBest();
-	  for(unsigned int i = 0 ; i < other.size() ; ++i)
-	    _particles.push_back(other.get(i));
+	  _best_particle = other._best_particle;
+	  _particles.resize(other.size());
+	  std::copy(other._particles.begin(), other._particles.end(), _particles.begin());
+
 	}
 
 	virtual ~Neighborhood(void){
@@ -100,6 +102,8 @@ namespace popot
 
 	const BestType* getBest(void) const
 	{
+	  if(_best_particle == 0)
+	    throw popot::Exception::BestParticleNotInitialized();
 	  return _best_particle;
 	}
 
