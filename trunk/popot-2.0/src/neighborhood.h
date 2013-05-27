@@ -34,7 +34,7 @@ namespace popot
 
       protected:
 	std::vector<InNeighborhoodType *> _particles;
-	const BestType *_best_particle;
+	BestType *_best_particle;
 
       public:
 	Neighborhood(void) : _best_particle(0) 
@@ -76,7 +76,7 @@ namespace popot
 	    throw popot::Exception::IndexOutOfRange(i, size());
 	}
 
-	const BestType * findBest(void)
+	BestType * findBest(void)
 	{
 	  if(_particles.size() == 0)
 	    throw popot::Exception::FindBestFromEmptyNeighborhood();
@@ -100,7 +100,7 @@ namespace popot
 	    _best_particle = &(p->getBestPosition());
 	}
 
-	const BestType* getBest(void) const
+	BestType* getBest(void)
 	{
 	  if(_best_particle == 0)
 	    throw popot::Exception::BestParticleNotInitialized();

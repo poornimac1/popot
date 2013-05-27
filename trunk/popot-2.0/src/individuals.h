@@ -110,6 +110,11 @@ namespace popot
 	throw popot::Exception::IndexOutOfRange(index, _dimension);
     }
 
+    VALUE_TYPE operator[](size_t index) const 
+    {
+      return getValueAt(index);
+    }
+
     /**
      * Returns the size of the vector
      */
@@ -213,16 +218,17 @@ namespace popot
 	/**
 	 * Random intialization of the position followed by a fitness evaluation
 	 */
-	template<typename INIT_FUNCTION>
-	void init(const INIT_FUNCTION& init_function)
+      /*
+      template<typename INIT_FUNCTION, typename COST_FUNCTION>
+      void init(const INIT_FUNCTION& init_function, const COST_FUNCTION& cost_function)
 	{
 	  // Initialize the position
 	  init_function(*this);
 
 	  // Evaluate the fitness
-	  evaluateFitness();
+	  evaluateFitness(cost_function);
 	}
-	
+	*/
 	/**
 	 * Getter on the position
 	 */
@@ -266,7 +272,7 @@ namespace popot
 	template< typename COST_FUNCTION>
 	double evaluateFitness(const COST_FUNCTION& cost_function)
 	{
-	  _fitness = cost_function(this->getValuesPtr());
+	  _fitness = cost_function(this->getPosition());
 	  return _fitness;
 	}
 	
@@ -330,7 +336,6 @@ namespace popot
 	typedef TSuper BestType;
 	typedef popot::PSO::neighborhood::Neighborhood< ThisParticleType > NeighborhoodType;
 
-      protected:
 	TVECTOR_TYPE _velocity;
 	BestType _best_position;
 	NeighborhoodType _neighborhood;
@@ -372,34 +377,6 @@ namespace popot
 	virtual ~Particle(void)
 	{}
 
-	// /**
-	//  * Initialization of the position, velocity and fitness of the particle and 
-	//  * set the best_position as the current position
-	//  */
-
-	// virtual void init()
-	// {
-	//   // Initialize the position
-	//   // and computes the fitness
-	//   TSuper::init();
-
-	//   // Initialize the velocity
-	//   initVelocity();
-
-	//   // Set the best particle to the current position
-	//   // Just copies the position and fitness
-	//   _best_position = *this;
-	// }
-
-
-	// /**
-	//  * Initialization of the velocity
-	//  */
-	// virtual void initVelocity()
-	// {
-	//   _vinit(this->_dimension, this->_lbound, this->_ubound, this->getValuesPtr(), _velocity.getValuesPtr());
-	// }
-
 	/**
 	 * Getter on the velocity
 	 */
@@ -413,68 +390,36 @@ namespace popot
 	 * If the position is out of the boundaries, set the position on the
 	 * boundaries and the velocity to zero
 	 */
-	/*
-	virtual void confine()
+	
+	template<typename LBOUND_FUNC, typename UBOUND_FUNC>
+	void confine(const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
 	{
 	  // In case the position is out of the bounds
 	  // we reset the velocities
-	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+	  TVECTOR_TYPE& pos = this->getPosition();
+	  for(size_t i = 0 ; i < pos.size() ; ++i)
 	    {
-	      if((this->getPosition(i) < this->_lbound(i)))
+	      if(pos[i] < lbound(i))
 		{
-		  this->setPosition(i, this->_lbound(i));
-		  this->setVelocity(i, 0);
+		  pos.setValueAt(i, lbound(i));
+		  this->getVelocity().setValueAt(i, 0);
 		}
-	      else if(this->getPosition(i) > this->_ubound(i))
+	      else if(pos[i] > ubound(i))
 		{
-		  this->setPosition(i, this->_ubound(i));
-		  this->setVelocity(i, 0);
+		  pos.setValueAt(i, ubound(i));
+		  this->getVelocity().setValueAt(i, 0);
 		}
 	    }
 	}
-*/
 
-	/**
-	 * Updates the best position
-	 */
-	virtual void updateBestPosition(void)
-	{
-	  if(VERBOSE_BENCH)
-	    {
-	      std::cout << "Previous best : " << _best_position.getFitness() << " : ";
-	      for(size_t i = 0 ; i < _best_position.getPosition().size() ; ++i)
-		std::cout << _best_position.getPosition().getValueAt(i) << " ";
-	      std::cout << std::endl;
-	    }
 
-	  // Update the best position the particle ever had
-	  if(this->compare(_best_position) < 0)
-	    _best_position = *this;
-	    
-	  if(VERBOSE_BENCH)
-	    {
-	      std::cout << "New best : " << _best_position.getFitness() << " : ";
-	      for(size_t i = 0 ; i < _best_position.getPosition().size() ; ++i)
-		std::cout << _best_position.getPosition().getValueAt(i) << " ";
-	      std::cout << std::endl;
-	    }
-	}
-
-	/**
-	 * Updates the velocity of the particle
-	 */
-	virtual void updatePosition(void)
-	{
-	  std::cout << "No updatePosition rule is provided for a particle of type Particle " << std::endl;
-	}
-
-	/**
-	 * Updates the velocity of the particle
-	 */
-	virtual void updateVelocity(void)
-	{
-	  std::cout << "No updateVelocity rule is provided for a particle of type Particle " << std::endl;
-	}
+      /**
+       * Initialization of the best position to the current position
+       */
+      void initBestPosition()
+      {
+	_best_position = *this;
+      }
 
 	/**
 	 * Returns a reference to the current best position
@@ -492,14 +437,6 @@ namespace popot
 	  return _neighborhood;
 	}
 	  
-	/**
-	 * Set the pointer to the neighborhood
-	 */
-	void setNeighborhood(NeighborhoodType& neighborhood)
-	{
-	  _neighborhood = neighborhood;
-	}
-
 	/**
 	 * Display the current position+fitness
 	 * and the current best position + fitness
@@ -555,7 +492,10 @@ namespace popot
       template<typename PARTICLE>
       void updatePosition(PARTICLE& p)
       {
-	// Here it is simply : p_{k+1} = p_k + v_k
+	std::cout << "Update position " << std::endl;
+	std::cout << p.getPosition() << std::endl;
+	std::cout << p.getVelocity() << std::endl;
+	// Here it is simply : p_{k+1} = p_k + v_k      
 	for(size_t i = 0 ; i < p.getPosition().size() ; ++i)
 	  p.getPosition().setValueAt(i, p.getPosition().getValueAt(i) + p.getVelocity().getValueAt(i));
       }
@@ -566,6 +506,7 @@ namespace popot
       template<typename PARTICLE, typename PARAMS>
       void updateVelocity_spso2006(PARTICLE& p)
       {
+	std::cout << "Update velocity" << std::endl;
 	// The update of the velocity is done according to the equation :
 	// v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
 	// with :
@@ -574,13 +515,16 @@ namespace popot
 	// best_p : the best position the particle ever had
 	// best_g : the best position the neighborhood ever had
 	double r1,r2;
-	for(size_t i = 0 ; i < p._dimension; ++i)
+        typename PARTICLE::VECTOR_TYPE& pos = p.getPosition();
+	typename PARTICLE::VECTOR_TYPE& vel = p.getVelocity();
+
+	for(size_t i = 0 ; i < pos.size(); ++i)
 	  {
 	    r1 = popot::math::uniform_random(0.0, PARAMS::c());
 	    r2 = popot::math::uniform_random(0.0, PARAMS::c());
-	    p.setVelocity(i, PARAMS::w() * p.getVelocity(i)
-			  + r1 * (p.getBestPosition().getPosition(i) - p.getPosition(i))
-			  + r2 * (p.getNeighborhood()->getBest()->getPosition(i) - p.getPosition(i)));
+	    vel.setValueAt(i, PARAMS::w() * vel.getValueAt(i)
+			   + r1 * (p.getBestPosition().getPosition().getValueAt(i) - pos.getValueAt(i))
+			   + r2 * (p.getNeighborhood().getBest()->getPosition().getValueAt(i) - pos.getValueAt(i)));
 	  }
       }
 
