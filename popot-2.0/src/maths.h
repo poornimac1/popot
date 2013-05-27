@@ -117,23 +117,23 @@ namespace popot
      * Returns a permutation of indexes [|0 .. max|]
      * It supposes indexes to be allocated to size max + 1
      **/
-    void random_shuffle_indexes(int * indexes, int S)
+    void random_shuffle_indexes(size_t * indexes, size_t S)
     {
-      int * index_temp = new int[S];
-      for(int i = 0 ; i < S ; i++)
+      size_t * index_temp = new size_t[S];
+      for(size_t i = 0 ; i < S ; ++i)
 	index_temp[i] = i;
 
-      int rank;
-      int length = S;
-      int i ,t;
-      for (i=0;i < S;i++)
+      size_t rank;
+      size_t length = S;
+      size_t i ,t;
+      for (i=0; i < S; ++i)
 	{
 	  rank=uniform_integer(0,length-1);
 	  indexes[i]=index_temp[rank];
 	  
 	  if (rank<length-1)	// Compact
 	    {
-	      for (t=rank;t<length-1;t++)
+	      for (t=rank; t<length-1; ++t)
 		index_temp[t]=index_temp[t+1];
 	    }					
 	  length=length-1;

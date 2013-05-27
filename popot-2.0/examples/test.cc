@@ -4,10 +4,14 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 
 #include "popot.h"
 
+typedef popot::Vector<double> TVector;
 
-double evaluate(double * x)
+double evaluate(TVector& x)
 {
-  return x[0]*x[0] + x[1]*x[1];
+  double sum = 0.0;
+  for(size_t i = 0 ; i < x.size() ; ++i)
+    sum += x[i] * x[i];
+  return sum;
 }
 
 bool stop(double f, int epoch)
@@ -33,14 +37,20 @@ int main(int argc, char * argv[])
   popot::initializer::position::zero(b.getBestPosition().getPosition());
   //popot::PSO::particle::init_position(b, popot::initializer::position::zero<PARTICLE_TYPE::VECTOR_TYPE>);
   init_func(b);
+  b.evaluateFitness(evaluate);
 
   std::cout << b << std::endl;
   
-  auto algo = popot::algorithm::spso2006(10,
+  auto algo = popot::algorithm::spso2006(5,
 					 [] (size_t index) -> double { return -10; },
 					 [] (size_t index) -> double { return  10; },
 					 stop, evaluate);
-  
+  algo.print();
+  //
+  auto position_update = popot::PSO::particle::updatePosition<popot::algorithm::ParticleSPSO2006>;
+  position_update(algo.getParticles()[0]);
   //decltype(popot::PSO::topology::ring_fillNeighborhoods<popot::PSO::particle::Particle<> >) titi = popot::PSO::topology::ring_fillNeighborhoods<PARTICLE_TYPE>;
+
+  algo.step();
 
 }
