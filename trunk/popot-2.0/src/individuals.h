@@ -127,7 +127,7 @@ namespace popot
     }
 
     /**
-     * Method for displaying a vector, fills in the stream
+     * Prints the current position + fitness
      */
     virtual void print(std::ostream & os) const
     {
@@ -157,49 +157,29 @@ namespace popot
     namespace particle
     {
 
-      template<typename POSITION_INITIALIZER, typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNC>
-      class Base: public Vector<double>
+      template<typename TVECTOR_TYPE=Vector<double> >
+      class Base
       {
-
-      private:
-	typedef Vector<double> TSuper;
-
       protected:
-	const POSITION_INITIALIZER& _pinit;
-	const LBOUND_FUNC& _lbound;
-	const UBOUND_FUNC& _ubound;
-	const COST_FUNC& _cost_func;
-
+	TVECTOR_TYPE _position;
 	double _fitness;
 
       public:
+	typedef TVECTOR_TYPE VECTOR_TYPE;
 
 	/**
 	 * Default constructor, dimension=0 is assumed
 	 */
-	Base(const POSITION_INITIALIZER & pinit, 
-	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound, 
-	     const COST_FUNC& cost_func)
-	  : TSuper() ,
-	    _pinit(pinit),
-	    _lbound(lbound),
-	    _ubound(ubound),
-	    _cost_func(cost_func),
+	Base()
+	  : _position(),
 	    _fitness(0)
 	{}
 	
 	/**
 	 * Default constructor
 	 */
-	Base(size_t dimension, 
-	     const POSITION_INITIALIZER & pinit, 
-	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
-	     const COST_FUNC& cost_func)
-	  : TSuper(dimension),
-	    _pinit(pinit),
-	    _lbound(lbound),
-	    _ubound(ubound),
-	    _cost_func(cost_func),
+	Base(size_t dimension)
+	  : _position(dimension),
 	    _fitness(0)
 	{}
 	
@@ -207,11 +187,7 @@ namespace popot
 	 * Copy constructor
 	 */
 	Base(const Base & other) 
-	  : TSuper(other),
-	    _pinit(other._pinit),
-	    _lbound(other._lbound),
-	    _ubound(other._ubound),
-	    _cost_func(other._cost_func),
+	  : _position(other._position),
 	    _fitness(other._fitness)
 	{}
 
@@ -228,13 +204,8 @@ namespace popot
 	{
 	  if (this == &other) 
 	    return *this;
-	  this->TSuper::operator=(other);
-	  /*
-	    _pinit = other._pinit;
-	    _lbound = other._lbound;
-	    _ubound = other._ubound;
-	    _cost_func = other._cost_func;
-	  */
+
+	  _position = other._position;
 	  _fitness = other._fitness;
 	  return *this;
 	}
@@ -242,52 +213,35 @@ namespace popot
 	/**
 	 * Random intialization of the position followed by a fitness evaluation
 	 */
-	virtual void init()
+	template<typename INIT_FUNCTION>
+	void init(const INIT_FUNCTION& init_function)
 	{
 	  // Initialize the position
-	  initPosition();
+	  init_function(*this);
 
 	  // Evaluate the fitness
 	  evaluateFitness();
 	}
-
-	/**
-	 * Initialization of the position
-	 */
-	void initPosition()
-	{
-	  _pinit(this->_dimension, this->_lbound, this->_ubound, this->getValuesPtr());
-	}
-
+	
 	/**
 	 * Getter on the position
 	 */
-	double getPosition(int i) const
+	TVECTOR_TYPE& getPosition()
 	{
-	  return this->getValueAt(i);
-	}
-
-	/**
-	 * Setter on the position
-	 */
-	void setPosition(int i, double val)
-	{
-	  this->setValueAt(i, val);
+	  return _position;
 	}
 
 	/**
 	 * Ensures the position is within the boundaries
 	 */
-	virtual void confine()
+	/*
+	template<typename CONFINE_FUNCTION>
+	void confine(const CONFINE_FUNCTION& confine_function)
 	{
-	  for(size_t i = 0 ; i < this->_dimension ; ++i)
-	    {
-	      if(getPosition(i) < this->_lbound(i))
-		setPosition(i, this->_lbound(i));
-	      else if(getPosition(i) > this->_ubound(i))
-		setPosition(i, this->_ubound(i));
-	    }
+	  confine_function(*this);
 	}
+	*/
+	
 
 	/**
 	 * Returns the currently known fitness
@@ -308,11 +262,14 @@ namespace popot
 	/**
 	 * Recompute the fitness
 	 */
-	virtual double evaluateFitness()
+	
+	template< typename COST_FUNCTION>
+	double evaluateFitness(const COST_FUNCTION& cost_function)
 	{
-	  _fitness = _cost_func(this->getValuesPtr());
+	  _fitness = cost_function(this->getValuesPtr());
 	  return _fitness;
 	}
+	
 
 	/**
 	 * Comparison of two particles through the fitness
@@ -345,150 +302,110 @@ namespace popot
 	 */
 	virtual void print(std::ostream & os) const
 	{
-	  TSuper::print(os);
+	  os << "Position : " << this->_position;
 	  os << " ; Fitness : " << this->getFitness();
 	}
 
+	/**
+	 * Serialization operator 
+	 */
+	friend std::ostream & operator <<(std::ostream & os, const Base &v)
+	{
+	  v.print(os);
+	  return os;
+	}
       };
 
-      /**
-       * Builds up a base particle, its types is deduced by the compiler
-       */
-      template<typename POSITION_INITIALIZER, typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNC>
-      Base<POSITION_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> make_base(size_t dimension,
-										const POSITION_INITIALIZER& pinit,
-										const LBOUND_FUNC& lbound, 
-										const UBOUND_FUNC& ubound,
-										const COST_FUNC& cost_func) 
-      {
-	return Base<POSITION_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, pinit, lbound, ubound, cost_func);
-      };
 
       // Particle introduces the notion
-      // of neighborhood and velocity
-      // and best position
-      template< typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER, 
-		typename LBOUND_FUNC, typename UBOUND_FUNC,
-		typename COST_FUNC>
-      class Particle : public Base<POSITION_INITIALIZER,
-				   LBOUND_FUNC, UBOUND_FUNC,
-				   COST_FUNC>
+      // of neighborhood, velocity and best position
+      template<typename TVECTOR_TYPE=Vector<double> >
+      class Particle : public Base<TVECTOR_TYPE>
       {
       private:
-	typedef Base<POSITION_INITIALIZER,
-		     LBOUND_FUNC, UBOUND_FUNC,
-		     COST_FUNC> TSuper;
-	typedef Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER,
-			 LBOUND_FUNC, UBOUND_FUNC,
-			 COST_FUNC> ThisParticleType;
+	typedef Base<TVECTOR_TYPE> TSuper;
+	typedef Particle<TVECTOR_TYPE> ThisParticleType;
 
       public:
 	typedef TSuper BestType;
 	typedef popot::PSO::neighborhood::Neighborhood< ThisParticleType > NeighborhoodType;
 
       protected:
-	Vector<double> _velocity;
+	TVECTOR_TYPE _velocity;
 	BestType _best_position;
-	NeighborhoodType *_neighborhood;
-	const VELOCITY_INITIALIZER& _vinit;
+	NeighborhoodType _neighborhood;
 	  
       public:
 
 	/**
 	 * Default constructor, dimension=0 is assumed
 	 */
-	Particle(const POSITION_INITIALIZER& pinit, const VELOCITY_INITIALIZER &vinit,
-		 const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound, 
-		 const COST_FUNC& cost_func) 
-	  : TSuper(pinit, lbound, ubound, cost_func),
-	  _vinit(vinit),
-	  _best_position(pinit, lbound, ubound, cost_func)
-	{
-	  this->_pinit(pinit);
-	  this->_lbound(lbound);
-	  this->_ubound(ubound);
-	  this->_cost_func(cost_func);
-
-	  // Create an empty neighborhood
-	  _neighborhood = new NeighborhoodType();
-	}
+	Particle() 
+	  : TSuper(),
+	    _best_position(),
+	    _neighborhood()
+	{}
 
 	/**
 	 * Default constructor
 	 */
-	Particle(size_t dimension,
-		 const POSITION_INITIALIZER& pinit, const VELOCITY_INITIALIZER &vinit,
-		 const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound, 
-		 const COST_FUNC& cost_func) 
-	  : TSuper(dimension, pinit, lbound, ubound, cost_func), 
-	  _velocity(dimension), _best_position(dimension, pinit, lbound, ubound, cost_func),
-	    _vinit(vinit)
-	{
-	  // Create an empty neighborhood
-	  _neighborhood = new NeighborhoodType();
-	}
+	Particle(size_t dimension) 
+	  : TSuper(dimension), 
+	    _velocity(dimension),
+	    _best_position(dimension),
+	    _neighborhood()
+	{}
 
 	/**
 	 * Copy constructor
 	 */
-      Particle(const Particle& other) 
-	: TSuper(other), 
-	  _velocity(other._velocity),
-	  _best_position(other._best_position),
-	  _vinit(other._vinit)
-	    {
-	      _neighborhood = new NeighborhoodType(*(other.getNeighborhood()));
-	    }
+	Particle(const Particle& other) 
+	  : TSuper(other), 
+	    _velocity(other._velocity),
+	    _best_position(other._best_position),
+	    _neighborhood(other._neighborhood)
+	{}
 
 	/**
 	 * Destructor
 	 */
 	virtual ~Particle(void)
-	{
-	  delete _neighborhood;
-	}
+	{}
 
-	/**
-	 * Initialization of the position, velocity and fitness of the particle and 
-	 * set the best_position as the current position
-	 */
-	virtual void init()
-	{
-	  // Initialize the position
-	  // and computes the fitness
-	  TSuper::init();
+	// /**
+	//  * Initialization of the position, velocity and fitness of the particle and 
+	//  * set the best_position as the current position
+	//  */
 
-	  // Initialize the velocity
-	  initVelocity();
+	// virtual void init()
+	// {
+	//   // Initialize the position
+	//   // and computes the fitness
+	//   TSuper::init();
 
-	  // Set the best particle to the current position
-	  // Just copies the position and fitness
-	  _best_position = *this;
-	}
+	//   // Initialize the velocity
+	//   initVelocity();
+
+	//   // Set the best particle to the current position
+	//   // Just copies the position and fitness
+	//   _best_position = *this;
+	// }
 
 
-	/**
-	 * Initialization of the velocity
-	 */
-	virtual void initVelocity()
-	{
-	  _vinit(this->_dimension, this->_lbound, this->_ubound, this->getValuesPtr(), _velocity.getValuesPtr());
-	}
+	// /**
+	//  * Initialization of the velocity
+	//  */
+	// virtual void initVelocity()
+	// {
+	//   _vinit(this->_dimension, this->_lbound, this->_ubound, this->getValuesPtr(), _velocity.getValuesPtr());
+	// }
 
 	/**
 	 * Getter on the velocity
 	 */
-	double getVelocity(size_t i) const
+	TVECTOR_TYPE& getVelocity(void)
 	{
-	  return _velocity.getValueAt(i);
-	}
-
-	/**
-	 * Setter on the velocity
-	 */
-	void setVelocity(size_t i, double value)
-	{
-	  _velocity.setValueAt(i, value);
+	  return _velocity;
 	}
 
 	/**
@@ -496,6 +413,7 @@ namespace popot
 	 * If the position is out of the boundaries, set the position on the
 	 * boundaries and the velocity to zero
 	 */
+	/*
 	virtual void confine()
 	{
 	  // In case the position is out of the bounds
@@ -514,6 +432,7 @@ namespace popot
 		}
 	    }
 	}
+*/
 
 	/**
 	 * Updates the best position
@@ -523,10 +442,11 @@ namespace popot
 	  if(VERBOSE_BENCH)
 	    {
 	      std::cout << "Previous best : " << _best_position.getFitness() << " : ";
-	      for(size_t i = 0 ; i < this->_dimension ; ++i)
-		std::cout << _best_position.getPosition(i) << " ";
+	      for(size_t i = 0 ; i < _best_position.getPosition().size() ; ++i)
+		std::cout << _best_position.getPosition().getValueAt(i) << " ";
 	      std::cout << std::endl;
 	    }
+
 	  // Update the best position the particle ever had
 	  if(this->compare(_best_position) < 0)
 	    _best_position = *this;
@@ -534,8 +454,8 @@ namespace popot
 	  if(VERBOSE_BENCH)
 	    {
 	      std::cout << "New best : " << _best_position.getFitness() << " : ";
-	      for(size_t i = 0 ; i < this->_dimension ; ++i)
-		std::cout << _best_position.getPosition(i) << " ";
+	      for(size_t i = 0 ; i < _best_position.getPosition().size() ; ++i)
+		std::cout << _best_position.getPosition().getValueAt(i) << " ";
 	      std::cout << std::endl;
 	    }
 	}
@@ -559,7 +479,7 @@ namespace popot
 	/**
 	 * Returns a reference to the current best position
 	 */
-	virtual BestType & getBestPosition(void)
+	BestType& getBestPosition(void)
 	{
 	  return this->_best_position;
 	}
@@ -567,7 +487,7 @@ namespace popot
 	/**
 	 * Returns a pointer to the neighborhood of the particle
 	 */
-	NeighborhoodType* getNeighborhood(void) const
+	NeighborhoodType& getNeighborhood(void)
 	{
 	  return _neighborhood;
 	}
@@ -575,7 +495,7 @@ namespace popot
 	/**
 	 * Set the pointer to the neighborhood
 	 */
-	void setNeighborhood(NeighborhoodType * neighborhood)
+	void setNeighborhood(NeighborhoodType& neighborhood)
 	{
 	  _neighborhood = neighborhood;
 	}
@@ -586,14 +506,6 @@ namespace popot
 	 */
 	virtual void print(std::ostream & os) const
 	{
-	  /*
-	    printf("%f - ", this->getFitness());
-	    for(int i = 0 ; i < TSuper::_dimension ; ++i)
-	    {
-	    printf("(%f,%f,%f) ", this->getPosition(i),this->getVelocity(i),_best_position.getPosition(i));
-	    }
-	    printf("\n");
-	  */
 	  TSuper::print(os);
 	  os << "; Velocity : " << _velocity;
 	  os << "; Best position : " << _best_position;
@@ -601,111 +513,488 @@ namespace popot
 
       };
 
-      /**
-       * Builds up a particle, its types is deduced by the compiler
-       */
-      template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
-	       typename LBOUND_FUNC, typename UBOUND_FUNC, 
-	       typename COST_FUNC>
-      Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
-      make_particle(size_t dimension,
-		    const POSITION_INITIALIZER& pinit,
-		    const VELOCITY_INITIALIZER& vinit,
-		    const LBOUND_FUNC& lbound, 
-		    const UBOUND_FUNC& ubound,
-		    const COST_FUNC& cost_func) 
+      /*
+      template<typename PARTICLE, typename POSITION_INITIALIZER>
+      void init_position(PARTICLE& p, const POSITION_INITIALIZER& pinit)
       {
-	return Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, pinit, vinit, lbound, ubound, cost_func);
-      };
+	pinit(p.getPosition());
+      }
 
-     /**
-       * Definition of a Standard PSO 2006 particle
-       * @brief The template parameters is the problem you want to solve and a class providing the parameters w and c
-       * popot::PSO::initializer::PositionUniformRandom, popot::PSO::initializer::VelocityHalfDiff
+      template<typename PARTICLE, typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER>
+      void init_position_velocity(PARTICLE& p, const POSITION_INITIALIZER& pinit, const VELOCITY_INITIALIZER& vinit)
+      {
+	pinit(p.getPosition());
+	vinit(p.getPosition(), p.getVelocity());
+      }
+      */
+
+
+      template<typename PARTICLE>
+      void updateBestPosition(PARTICLE& p)
+      {
+	// Update the best position the particle ever had
+	// with a copy of the current position
+	if(p.compare(p.getBestPosition()) < 0)
+	  p._best_position = p;
+      }
+
+      template<typename PARTICLE>
+      void updateBestPosition_reevaluateBest(PARTICLE& p)
+      {
+	// Reevalute the fitness of the personal best before
+	// possibly changing the personal best
+	p._best_position.evaluateFitness();
+
+	updateBestPosition(p);
+      }
+
+
+      /**
+       * Basic update of the position of a particle
        */
-      template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
-	typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNC>
-      	class SPSO2006Particle : public Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC >
-      	{
-	private:
+      template<typename PARTICLE>
+      void updatePosition(PARTICLE& p)
+      {
+	// Here it is simply : p_{k+1} = p_k + v_k
+	for(size_t i = 0 ; i < p.getPosition().size() ; ++i)
+	  p.getPosition().setValueAt(i, p.getPosition().getValueAt(i) + p.getVelocity().getValueAt(i));
+      }
 
-      	  typedef Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC > TSuper;
-	  double _w, _c;
+      /**
+       * Updates the velocity of the particle
+       */
+      template<typename PARTICLE, typename PARAMS>
+      void updateVelocity_spso2006(PARTICLE& p)
+      {
+	// The update of the velocity is done according to the equation :
+	// v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
+	// with :
+	// r_p, r_g two random real numbers in [0.0,1.0]
+	// w, c1, c2 : user defined parameters
+	// best_p : the best position the particle ever had
+	// best_g : the best position the neighborhood ever had
+	double r1,r2;
+	for(size_t i = 0 ; i < p._dimension; ++i)
+	  {
+	    r1 = popot::math::uniform_random(0.0, PARAMS::c());
+	    r2 = popot::math::uniform_random(0.0, PARAMS::c());
+	    p.setVelocity(i, PARAMS::w() * p.getVelocity(i)
+			  + r1 * (p.getBestPosition().getPosition(i) - p.getPosition(i))
+			  + r2 * (p.getNeighborhood()->getBest()->getPosition(i) - p.getPosition(i)));
+	  }
+      }
 
-      	public:
 
-      	SPSO2006Particle(size_t dimension,
-			 const LBOUND_FUNC& lbound, 
-			 const UBOUND_FUNC& ubound,
-			 const COST_FUNC& cost_func,
-			 double w, double c,
-			 const POSITION_INITIALIZER& pinit=popot::initializer::position::zero,
-			 const VELOCITY_INITIALIZER& vinit=popot::initializer::velocity::half_diff) 
-	  : TSuper(dimension, pinit, vinit, lbound, ubound, cost_func),
-	    _w(w), _c(c)
-      	    {
-      	    }
-
-      	  /**
-      	   * Destructor
-	   */
+ 
+      /**
+       * Definition of a Stochastic Standard PSO 2006 particle
+       * @brief The template parameters is the problem you want to solve,
+       *  and the parameters (inertia, accelaration) of the velocity update rule
+       * Compared to the base type BaseParticle, this type adds the some specific position and velocity update rules
+       * These come from the Standard PSO 2006 . The stochastic code simply reevaluates the fitness of the personal best
+       * position before possibly changing it
+       */
       
-	   virtual ~SPSO2006Particle(void)
-	   {
-	   }
+      // template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
+      // 	       typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNC>
+      // class StochasticSPSO2006Particle : public SPSO2006Particle< POSITION_INITIALIZER, VELOCITY_INITIALIZER,
+      // 								  LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>
+ 
+      // 	{
+      // 	  typedef SPSO2006Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> TSuper;
 
-      	  /**
-      	   * Update the position of the particle
-	   */
-      	  virtual void updatePosition(void)
-      	  {
-      	    // Here it is simply : p_{k+1} = p_k + v_k
-      	    for(size_t i = 0 ; i < this->_dimension ; ++i)
-      	      this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
-      	  }
+      // 	public:
+      // 	  StochasticSPSO2006Particle(size_t dimension,
+      // 				     const LBOUND_FUNC& lbound, 
+      // 				     const UBOUND_FUNC& ubound,
+      // 				     const COST_FUNC& cost_func,
+      // 				     double w, double c,
+      // 				     const POSITION_INITIALIZER& pinit=popot::initializer::position::uniform_random,
+      // 				     const VELOCITY_INITIALIZER& vinit=popot::initializer::velocity::half_diff) 
+      // 	    : TSuper(dimension, lbound, ubound, cost_func, w, c, pinit, vinit)
+      // 	    {
+      // 	    }
 
-      	  /**
-      	   * Updates the velocity of the particle
-	   */
-      	  virtual void updateVelocity(void)
-      	  {
-      	    // The update of the velocity is done according to the equation :
-      	    // v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
-      	    // with :
-      	    // r_p, r_g two random real numbers in [0.0,1.0]
-      	    // w, c1, c2 : user defined parameters
-      	    // best_p : the best position the particle ever had
-      	    // best_g : the best position the neighborhood ever had
-      	    double r1,r2;
-      	    for(size_t i = 0 ; i < this->_dimension ; ++i)
-      	      {
-      		r1 = popot::math::uniform_random(0.0, _c);
-      		r2 = popot::math::uniform_random(0.0, _c);
-      		this->setVelocity(i, _w * this->getVelocity(i)
-      				  + r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
-      				  + r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
-      	      }
-      	  }
-      	};
+      // 	  /**
+      // 	   * Updates the best position
+      // 	   */
+      // 	  virtual void updateBestPosition(void)
+      // 	  {
+      // 	    // Reevalute the fitness of the personal best before
+      // 	    // possibly changing the personal best
+      // 	    this->_best_position.evaluateFitness();
+
+      // 	    // Update the best position the particle ever had
+      // 	    // with a copy of the current position
+      // 	    if(this->compare(this->getBestPosition()) < 0)
+      // 	      this->_best_position = *this;
+      // 	  }
+      // 	};
 
       /**
        * Builds up a particle, its types is deduced by the compiler
        */
-      template< typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER, 
-	typename LBOUND_FUNC, typename UBOUND_FUNC, 
-	typename COST_FUNC>
-	SPSO2006Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
-      make_spso2006_particle(size_t dimension,
-			     const LBOUND_FUNC& lbound, 
-			     const UBOUND_FUNC& ubound,
-			     const COST_FUNC& cost_func, double w, double c) 
-      {
-	return SPSO2006Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, lbound, ubound, cost_func, w, c);
-      };
+    /*
+      template<typename LBOUND_FUNC, typename UBOUND_FUNC, 
+	       typename COST_FUNC>
+      StochasticSPSO2006Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+				 void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *),
+				 LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
+      make_stochastic_spso2006_particle(size_t dimension,
+					const LBOUND_FUNC& lbound, 
+					const UBOUND_FUNC& ubound,
+					const COST_FUNC& cost_func, double w, double c) 
+				 {
+				   return StochasticSPSO2006Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+								     void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *), 
+								     LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, lbound, ubound, cost_func, w, c);
+				 };
 
+    */
+
+
+//   template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
+// 	   typename LBOUND_FUNC, typename UBOUND_FUNC, typename COST_FUNC>
+//   class SPSO2007Particle : public Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC >
+//   {
+
+//   private:
+//     typedef Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC > TSuper;
+//     double _w, _c;
+
+//   public:
+
+//     SPSO2007Particle(size_t dimension,
+// 		     const LBOUND_FUNC& lbound, 
+// 		     const UBOUND_FUNC& ubound,
+// 		     const COST_FUNC& cost_func,
+// 		     double w, double c,
+// 		     const POSITION_INITIALIZER& pinit=popot::initializer::position::uniform_random,
+// 		     const VELOCITY_INITIALIZER& vinit=popot::initializer::velocity::half_diff) 
+//       : TSuper(dimension, pinit, vinit, lbound, ubound, cost_func),
+// 	_w(w), _c(c)
+//     {
+//     }
+
+//     /**
+//      * Destructor
+//      */
+//     virtual ~SPSO2007Particle(void)
+//     {
+//     }
+
+//     /**
+//      * Update the position of the particle
+//      */
+//     virtual void updatePosition(void)
+//     {
+//       // Here it is simply : p_{k+1} = p_k + v_k
+//       for(size_t i = 0 ; i < this->_dimension ; ++i)
+// 	this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
+//     }
+
+//     /**
+//      * Updates the velocity of the particle
+//      */
+//     virtual void updateVelocity(void)
+//     {
+//       // The update of the velocity is done according to the equation :
+//       // v = w * v + r1 (best_p - p) + r2 (best_g - p)
+//       // with :
+//       // r_1, r_2 two random real numbers in [0.0,c]
+//       // w, c : user defined parameters
+//       // best_p : the best position the particle ever had
+//       // best_g : the best position the neighborhood ever had
+
+//       bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
+//       double r1,r2;
+//       if(li_equals_pi)
+// 	{
+// 	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+// 	    {
+// 	      r1 = popot::math::uniform_random(0.0, _c);
+// 	      this->setVelocity(i, _w * this->getVelocity(i)
+// 				+ r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i)));
+// 	    }
+// 	}
+//       else
+// 	{
+// 	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+// 	    {
+// 	      r1 = popot::math::uniform_random(0.0, _c);
+// 	      r2 = popot::math::uniform_random(0.0, _c);
+// 	      this->setVelocity(i, _w * this->getVelocity(i)
+// 				+ r1 * (this->getBestPosition().getPosition(i) - this->getPosition(i))
+// 				+ r2 * (this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i)));
+// 	    }
+// 	}
+//     }
+//   };
+
+//   /**
+//    * Builds up a particle, its types is deduced by the compiler
+//    */
+//   template<typename LBOUND_FUNC, typename UBOUND_FUNC, 
+// 	   typename COST_FUNC>
+//   SPSO2007Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 		   void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *),
+// 		   LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
+//   make_spso2007_particle(size_t dimension,
+// 			 const LBOUND_FUNC& lbound, 
+// 			 const UBOUND_FUNC& ubound,
+// 			 const COST_FUNC& cost_func, double w, double c) 
+// 		   {
+// 		     return SPSO2007Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 					     void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *), 
+// 					     LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, lbound, ubound, cost_func, w, c);
+// };
+
+
+//       /**
+//        * Definition of a Standard PSO 2011 particle
+//        * @brief The template parameters is the problem you want to solve,
+//        *  and the parameters (inertia, accelaration) of the velocity update rule
+//        * Compared to the base type BaseParticle, this type adds the some specific position and velocity update rules
+//        * These come from the Standard PSO 2011
+//        */
+//       template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
+// 	       typename LBOUND_FUNC, typename UBOUND_FUNC, 
+// 	       typename COST_FUNC>
+//       class SPSO2011Particle : public Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC >
+ 
+//       {
+//       private:
+
+// 	typedef Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC > TSuper;
+// 	double _w, _c;
+// 	double * xpi;
+// 	double * p1;
+// 	double * p2;
+// 	double * gr;
+//       public:
+
+//       	SPSO2011Particle(size_t dimension,
+// 			 const LBOUND_FUNC& lbound, 
+// 			 const UBOUND_FUNC& ubound,
+// 			 const COST_FUNC& cost_func,
+// 			 double w, double c,
+// 			 const POSITION_INITIALIZER& pinit=popot::initializer::position::uniform_random,
+// 			 const VELOCITY_INITIALIZER& vinit=popot::initializer::velocity::spso2011) 
+// 	  : TSuper(dimension, pinit, vinit, lbound, ubound, cost_func),
+// 	    _w(w), _c(c)
+// 	{
+// 	  xpi = new double[this->_dimension];
+// 	  p1 = new double[this->_dimension];
+// 	  p2 = new double[this->_dimension];
+// 	  gr = new double[this->_dimension];
+// 	}
+
+// 	/**
+// 	 * Destructor
+// 	 */
+// 	virtual ~SPSO2011Particle(void)
+// 	{
+// 	  delete[] xpi;
+// 	  delete[] p1;
+// 	  delete[] p2;
+// 	  delete[] gr;
+// 	}
+
+// 	/**
+// 	 * Update the position of the particle
+// 	 */
+// 	virtual void updatePosition(void)
+// 	{
+// 	  // Here it is simply : p_{k+1} = p_k + v_k
+// 	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+// 	    this->setPosition(i, this->getPosition(i) + this->getVelocity(i));
+// 	}
+
+// 	/**
+// 	 * Updates the velocity of the particle
+// 	 */
+// 	virtual void updateVelocity(void)
+// 	{
+// 	  // The update of the velocity is done according to the equation :
+// 	  // v_i(t+1) = w v_i(t) + x'_i(t) - x_i(t)
+// 	  // where x'_i is normally sampled from the hypersphere (Gi, Ri)
+// 	  // with Gi the center and Ri the radius and
+// 	  // Gi = 1/3 ( x_i + (x_i + c(p_i - x_i)) + (x_i + c(l_i - x_i)))
+// 	  //    = 1/3 ( x_i +          p1          +            p2     )))
+// 	  // or
+// 	  // Gi = 1/2 (x_i + (x_i + c(p_i - x_i))) if p_i == l_i
+// 	  //    = 1/2 (x_i +          p1         )
+// 	  // Ri = ||G_i - x_i||
+
+// 	  size_t i;
+
+// 	  // We first check if the local best and personal best are identical by computing the norm of the difference
+// 	  // between both positions
+// 	  // This can be done with pointer comparison
+// 	  // as the neighborhood holds a pointer to the best personal best
+// 	  bool li_equals_pi = (&(this->getBestPosition()) == this->getNeighborhood()->getBest());
+
+// 	  // First position
+// 	  // p1 = xi + c * (pi - xi)
+// 	  // where pi is the personal best position
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    p1[i] = this->getPosition(i) + _c *(this->getBestPosition().getPosition(i) - this->getPosition(i));
+	  
+// 	  // Second position
+// 	  // p2 = xi + c * (li - xi)
+// 	  // where li is the local best position (within the neighborhood)
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    p2[i] = this->getPosition(i) + _c *(this->getNeighborhood()->getBest()->getPosition(i) - this->getPosition(i));
+	  
+// 	  // Compute the gravity center of p1, p2 and xi
+// 	  if(!li_equals_pi)
+// 	    {
+// 	      // We here consider p1, p2 and xi
+// 	      for(i = 0 ; i < this->_dimension ; ++i)
+// 		gr[i] = 1.0/3.0 * (this->getPosition(i) + p1[i] + p2[i]);
+// 	    }
+// 	  else
+// 	    {
+// 	      // We here consider only p1 (or p2, since they are equal) and xi
+// 	      for(i = 0 ; i < this->_dimension ; ++i)
+// 		gr[i] = 1.0/2.0 * (this->getPosition(i) + p1[i]);
+// 	    }
+
+// 	  // And the radius of the hypersphere
+// 	  double ri = 0.0;
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    ri += (gr[i] - this->getPosition(i))*(gr[i] - this->getPosition(i));
+// 	  ri = sqrt(ri);
+
+// 	  // Compute the auxiliary position x'_i randomly within the hypersphere (gr, ri);
+// 	  // To uniformely sample from the hypersphere we uniformely sample a direction
+// 	  double norm = 0.0;
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    {
+// 	      xpi[i] = popot::math::normal(0.0,1.0);
+// 	      norm += xpi[i] * xpi[i];
+// 	    }
+// 	  norm = sqrt(norm);
+	  
+// 	  // And then scale by a random radius
+// 	  double r = popot::math::uniform_random(0.0,1.0);
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    xpi[i] =  gr[i] + r * ri * xpi[i] / norm;
+
+// 	  // And then update the velocity
+// 	  for(i = 0 ; i < this->_dimension ; ++i)
+// 	    this->setVelocity(i, _w * this->getVelocity(i)
+// 			      + xpi[i] - this->getPosition(i));
+// 	}
+
+
+// 	/**
+// 	 * Bounds the velocity and position of the particle
+// 	 */
+	  
+// 	virtual void confine(void)
+// 	{
+// 	  // In case the position is out of the bounds
+// 	  // we reset the velocities
+// 	  for(size_t i = 0 ; i < this->_dimension ; ++i)
+// 	    {
+// 	      if((this->getPosition(i) < this->_lbound(i)))
+// 		{
+// 		  this->setPosition(i, this->_lbound(i));
+// 		  this->setVelocity(i,-0.5*this->getVelocity(i));
+// 		}
+// 	      else if(this->getPosition(i) > this->_ubound(i))
+// 		{
+// 		  this->setPosition(i, this->_ubound(i));
+// 		  this->setVelocity(i,-0.5*this->getVelocity(i));
+// 		}
+// 	    }
+// 	}
+//       };
+      
+//       /**
+//        * Builds up a particle, its types is deduced by the compiler
+//        */
+//       template<typename LBOUND_FUNC, typename UBOUND_FUNC, 
+// 	       typename COST_FUNC>
+//       SPSO2011Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 		       void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *),
+// 		       LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
+//       make_spso2011_particle(size_t dimension,
+// 			     const LBOUND_FUNC& lbound, 
+// 			     const UBOUND_FUNC& ubound,
+// 			     const COST_FUNC& cost_func, double w, double c) 
+// 		       {
+// 			 return SPSO2011Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 						 void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *), 
+// 						 LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, lbound, ubound, cost_func, w, c);
+// 		       };
+      
+//       /**
+//        * Definition of a Stochastic Standard PSO 2011 particle
+//        * @brief The template parameters is the problem you want to solve,
+//        *  and the parameters (inertia, accelaration) of the velocity update rule
+//        * Compared to the base type BaseParticle, this type adds the some specific position and velocity update rules
+//        * These come from the Standard PSO 2011 . The stochastic code simply reevaluates the fitness of the personal best
+//        * position before possibly changing it
+//        */
+//       template<typename POSITION_INITIALIZER, typename VELOCITY_INITIALIZER,
+// 	       typename LBOUND_FUNC, typename UBOUND_FUNC, 
+// 	       typename COST_FUNC>
+//       class StochasticSPSO2011Particle : public SPSO2011Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>
+ 
+//       	{
+//       	  typedef SPSO2011Particle<POSITION_INITIALIZER, VELOCITY_INITIALIZER, LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> TSuper;
+
+//       	public:
+//      	StochasticSPSO2011Particle(size_t dimension,
+// 				   const LBOUND_FUNC& lbound, 
+// 				   const UBOUND_FUNC& ubound,
+// 				   const COST_FUNC& cost_func,
+// 				   double w, double c,
+// 				   const POSITION_INITIALIZER& pinit=popot::initializer::position::uniform_random,
+// 				   const VELOCITY_INITIALIZER& vinit=popot::initializer::velocity::spso2011)
+// 	  : TSuper(dimension, lbound, ubound, cost_func, w, c, pinit, vinit)
+//       	    {}
+
+//       	  /**
+//       	   * Updates the best position
+//       	   */
+//       	  virtual void updateBestPosition(void)
+//       	  {
+//       	    // Reevalute the fitness of the personal best before
+//       	    // possibly changing the personal best
+//       	    this->_best_position.evaluateFitness();
+
+//       	    // Update the best position the particle ever had
+//       	    // with a copy of the current position
+//       	    if(this->compare(this->getBestPosition()) < 0)
+//       	      this->_best_position = *this;
+//       	  }
+//       	};
+
+//       /**
+//        * Builds up a particle, its types is deduced by the compiler
+//        */
+//       template<typename LBOUND_FUNC, typename UBOUND_FUNC, 
+// 	       typename COST_FUNC>
+//       StochasticSPSO2011Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 		       void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *),
+// 		       LBOUND_FUNC, UBOUND_FUNC, COST_FUNC> 
+//       make_stochastic_spso2011_particle(size_t dimension,
+// 					const LBOUND_FUNC& lbound, 
+// 					const UBOUND_FUNC& ubound,
+// 					const COST_FUNC& cost_func, double w, double c) 
+// 		       {
+// 			 return StochasticSPSO2011Particle<void(*)(size_t, double(*)(size_t), double(*)(size_t), double *),
+// 							   void(*)(size_t, double(*)(size_t), double(*)(size_t), double *, double *), 
+// 							   LBOUND_FUNC, UBOUND_FUNC, COST_FUNC>(dimension, lbound, ubound, cost_func, w, c);
+// 		       };
+
+      
     } // namespace particle
   } // namespace PSO
-
+  
   // Artificial Bee Colony
   namespace ABC
   {

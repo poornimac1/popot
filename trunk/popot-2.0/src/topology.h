@@ -20,412 +20,365 @@ namespace popot
        *
        * Basic topology methods
        */
+      
       template<typename PARTICLE>
-        class Base
-	{
-	private:
-	  size_t _size;
+      void connectParticles(std::vector<PARTICLE>& particles,
+			    std::map< size_t, std::vector<size_t> > &neighbordhood_membership,
+			    bool * who_informs_whom)
+      {
+	size_t size = particles.size();
 
-	public:
-	Base(size_t size): _size(size)
-	  {}
+	// Just clean up the neighborhood memberships
+	for(size_t i = 0 ; i < size ; ++i)
+	  neighbordhood_membership[i].clear();
 
-	  // Method called when there is no improvement in the global best
-	  // By default it does nothing.
-	  void regenerateNeighborhoods(PARTICLE * particles,
-				       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-				       std::map< int, std::vector<int> > &neighbordhood_membership)
-	  {}
-
-	  int size() { 
-	    return _size;
-	  }
-
-	protected:
-	  void connectParticles(PARTICLE * particles,
-				std::map< int, std::vector<int> > &neighbordhood_membership,
-				int * who_informs_whom)
+	for(size_t j = 0 ; j < size ; ++j)
 	  {
-	    // Just clean up the neighborhood memberships
-	    for(size_t i = 0 ; i < _size ; ++i)
-	      neighbordhood_membership[i].clear();
+	    particles[j].getNeighborhood().clear();
 
-	    if(VERBOSE_BENCH)
-	      {
-		for(int i = 0 ; i < _size ; ++i)
-		  {
-		    for(int j = 0 ;  j< _size ; ++j)
-		      printf("%i ", who_informs_whom[i*_size+j]);
-		    printf("\n");
-		  }
-	      }
-		
-
-	    for(int j = 0 ; j < _size ; ++j)
-	      {
-		particles[j].getNeighborhood()->clear();
-
-		// We browse column j of who_informs_whom
-		// if 1.0, then we add particle i to the neighborhood of particle j
-		for(int i = 0 ; i < _size ; ++i)
-		  // If particle i informs particle j
-		  if(who_informs_whom[i*_size + j])
-		    {
-		      // Particle i belongs to the neighborhood of particle j
-		      neighbordhood_membership[i].push_back(j);
-		      // And we add particle i to the neighborhood of particle j
-		      particles[j].getNeighborhood()->add(&(particles[i]));
-		    }
-
-		//for(int i = 0 ; i < size ; ++i)
-		// std::cout << "Particle " << i << " :" << particles[i].getNeighborhood()->size() << std::endl;
-	      }
+	    // We browse column j of who_informs_whom
+	    // if 1.0, then we add particle i to the neighborhood of particle j
+	    for(size_t i = 0 ; i < size ; ++i)
+	      // If particle i informs particle j
+	      if(who_informs_whom[i*size + j])
+		{
+		  // Particle i belongs to the neighborhood of particle j
+		  neighbordhood_membership[i].push_back(j);
+		  // And we add particle i to the neighborhood of particle j
+		  particles[j].getNeighborhood().add(&(particles[i]));
+		}
 	  }
+      }
 
-	  void getNeighborhoodList(PARTICLE * particles,
-				   std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods)
-	  {
-	    neighborhoods.clear();
-	    for(int i = 0 ; i < _size ; ++i)
-	      neighborhoods.push_back(particles[i].getNeighborhood());
-	  }
-	};
+      template<typename PARTICLE>
+      void getNeighborhoodList(std::vector<PARTICLE>& particles,
+			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods)
+      {
+	neighborhoods.clear();
+	for(size_t i = 0 ; i < particles.size() ; ++i)
+	  neighborhoods.push_back(&(particles[i].getNeighborhood()));
+      }
 
       /**
        * Full toplogy
        * @short Each of the N particles receives information from the N others
        */
       template<typename PARTICLE, bool SELF=false>
-        class Full : public Base<PARTICLE>
-	{
-	public:
-	Full(size_t size): Base<PARTICLE>(size) 
-	{}
-      
-	void fillNeighborhoods(PARTICLE * particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[this->_size * this->_size];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
+      void full_fillNeighborhoods(std::vector<PARTICLE> &particles,
+				  std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
+				  std::map< size_t, std::vector<size_t> > &neighbordhood_membership)
+      {
+	size_t size = particles.size();
 
-	  // Set the connection matrix to 1 everywhere
-	  for(int i = 0 ; i < this->_size*this->_size ; ++i)
-	    who_informs_whom[i] = 1.0;
-	  if(!SELF)
-	    for(int i = 0 ; i < this->_size ; ++i)
-	      who_informs_whom[i*this->_size + i] = 0.0;
+	// Generate the connection matrix
+	// Column j indicates which particle informs particle j
+	// therefore, line i indicates which particles the particle i informs
+	bool *who_informs_whom = new bool[size * size];
+	memset(who_informs_whom, true, size*size*sizeof(int));
 
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
+	if(!SELF)
+	  for(size_t i = 0 ; i < size ; ++i)
+	    who_informs_whom[i*size + i] = false;
+
+	// Given the connectivity matrix, we now connect the particles
+	getNeighborhoodList(particles, neighborhoods);
+	connectParticles(particles, neighbordhood_membership, who_informs_whom);
 	  
-	  delete[] who_informs_whom;
-	}
-	};
+	delete[] who_informs_whom;
+      }
 
       /**
        * Ring toplogy
        * @short A ring topology connects the particles on a ring plus a connection to itself
        */
       template<typename PARTICLE, bool SELF=false>
-        class Ring : public Base<PARTICLE>
-	{
-	public:
-	Ring(size_t size) : Base<PARTICLE>(size)
-	{}
+      void ring_fillNeighborhoods(std::vector<PARTICLE>& particles,
+				  std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
+				  std::map< size_t, std::vector<size_t> > &neighbordhood_membership)
+      	{
+	  size_t size = particles.size();
+	  
+      	  // Generate the connection matrix
+      	  // Column j indicates which particle informs particle j
+      	  // therefore, line i indicates which particles the particle i informs
+      	  bool *who_informs_whom = new bool[size * size];
 
-	void fillNeighborhoods(PARTICLE *particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[this->_size * this->_size];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
+      	  // Set the connection matrix to False everywhere
+	  memset(who_informs_whom, false, size*size*sizeof(bool));
 
-	  // Set the connection matrix to 0 everywhere
-	  for(int i = 0 ; i < this->_size*this->_size ; ++i)
-	    who_informs_whom[i] = 0.0;
-
-	  // A particle informs itself?
-	  if(SELF)
-	    for(int i = 0 ; i < this->_size ; ++i)
-	      who_informs_whom[i*this->_size + i] = 1.0;
-
-	  int i_neigh;
-	  for(int i = 0 ; i < this->_size ; ++i)
-	    {
-	      // Particle i is informed by the particle on the left and the particle on its right
-	      i_neigh = i + 1;
-	      if(i_neigh >= this->_size)
+       	  size_t i_neigh;
+      	  for(size_t i = 0 ; i < size ; ++i)
+      	    {
+      	      // Particle i is informed by the particle on the left and the particle on its right
+      	      if(i == size - 1)
 		i_neigh = 0;
-	      who_informs_whom[i_neigh*this->_size + i] = 1.0;
+	      else
+		i_neigh = i + 1;
+      	      who_informs_whom[i_neigh*size + i] = true;
 
-	      i_neigh = i - 1;
-	      if(i_neigh < 0)
-		i_neigh = this->_size-1;
-	      who_informs_whom[i_neigh*this->_size + i] = 1.0;
+      	      if(i == 0)
+      		i_neigh = size-1;
+	      else
+		i_neigh = i - 1;
+      	      who_informs_whom[i_neigh*size + i] = true;
 
-	      if(SELF)
-		who_informs_whom[i*this->_size + i] = 1.0;
-	    }
+      	      if(SELF)
+      		who_informs_whom[i*size + i] = true;
+      	    }
 
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
+      	  // Given the connectivity matrix, we now connect the particles
+      	  getNeighborhoodList<PARTICLE>(particles, neighborhoods);
+      	  connectParticles<PARTICLE>(particles, neighbordhood_membership, who_informs_whom);
 
-	  delete[] who_informs_whom;
-	}
-	};
+      	  delete[] who_informs_whom;
+      	}
+      	
 
-      /**
-       * Von Neuman topology
-       * @short The von Neuman topology connects the particles on a 2D toric grid
-       *        with the nearest four neighbours plus itself
-       */
-      template<typename PARTICLE, bool SELF=false>
-        class VonNeuman : public Base<PARTICLE>
-	{
-	private:
-	size_t _width, _height;
+      /* /\** */
+      /*  * Von Neuman topology */
+      /*  * @short The von Neuman topology connects the particles on a 2D toric grid */
+      /*  *        with the nearest four neighbours plus itself */
+      /*  *\/ */
+      /* template<typename PARTICLE, bool SELF=false> */
+      /*   class VonNeuman : public Base<PARTICLE> */
+      /* 	{ */
+      /* 	private: */
+      /* 	size_t _width, _height; */
 
-	public:
+      /* 	public: */
 
-	VonNeuman(size_t size) : Base<PARTICLE>(size)
-	{
-	  _width = int(sqrt(size));
-	  _height= int(size / _width);
-	}
+      /* 	VonNeuman(size_t size) : Base<PARTICLE>(size) */
+      /* 	{ */
+      /* 	  _width = int(sqrt(size)); */
+      /* 	  _height= int(size / _width); */
+      /* 	} */
 
-	void fillNeighborhoods(PARTICLE *particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
+      /* 	void fillNeighborhoods(PARTICLE *particles, */
+      /* 			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 			       std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
 
 
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[VonNeuman::size() * VonNeuman::size()];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
+      /* 	  // Generate the connection matrix */
+      /* 	  int *who_informs_whom = new int[VonNeuman::size() * VonNeuman::size()]; */
+      /* 	  // Column j indicates which particle informs particle j */
+      /* 	  // therefore, line i indicates which particles the particle i informs */
 
-	  // Set the connection matrix to 0 everywhere
-	  for(int i = 0 ; i < VonNeuman::size()*VonNeuman::size() ; ++i)
-	    who_informs_whom[i] = 0.0;
+      /* 	  // Set the connection matrix to 0 everywhere */
+      /* 	  for(int i = 0 ; i < VonNeuman::size()*VonNeuman::size() ; ++i) */
+      /* 	    who_informs_whom[i] = 0.0; */
 
-	  // A particle informs itself?
-	  if(SELF)
-	    for(int i = 0 ; i < VonNeuman::size() ; ++i)
-	      who_informs_whom[i*VonNeuman::size() + i] = 1.0;
+      /* 	  // A particle informs itself? */
+      /* 	  if(SELF) */
+      /* 	    for(int i = 0 ; i < VonNeuman::size() ; ++i) */
+      /* 	      who_informs_whom[i*VonNeuman::size() + i] = 1.0; */
 
-	  int i_neigh, j_neigh;
-	  int index_part, index_neigh;
-	  for(int i = 0 ; i < _height ; ++i)
-	    {
-	      for(int j = 0 ; j < _width ; ++j)
-		{
+      /* 	  int i_neigh, j_neigh; */
+      /* 	  int index_part, index_neigh; */
+      /* 	  for(int i = 0 ; i < _height ; ++i) */
+      /* 	    { */
+      /* 	      for(int j = 0 ; j < _width ; ++j) */
+      /* 		{ */
 
-		  index_part = i*_width + j;
+      /* 		  index_part = i*_width + j; */
 
-		  // Add the 4 closest neighboors that are informing particle index_part
-		  i_neigh = i - 1;
-		  j_neigh = j;
-		  if(i_neigh < 0)
-		    i_neigh = _height - 1;
-		  index_neigh = i_neigh * _width + j_neigh;
-		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0;
+      /* 		  // Add the 4 closest neighboors that are informing particle index_part */
+      /* 		  i_neigh = i - 1; */
+      /* 		  j_neigh = j; */
+      /* 		  if(i_neigh < 0) */
+      /* 		    i_neigh = _height - 1; */
+      /* 		  index_neigh = i_neigh * _width + j_neigh; */
+      /* 		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0; */
 
-		  i_neigh = i + 1;
-		  j_neigh = j;
-		  if(i_neigh >= _height)
-		    i_neigh = 0;
-		  index_neigh = i_neigh * _width + j_neigh;
-		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0;
+      /* 		  i_neigh = i + 1; */
+      /* 		  j_neigh = j; */
+      /* 		  if(i_neigh >= _height) */
+      /* 		    i_neigh = 0; */
+      /* 		  index_neigh = i_neigh * _width + j_neigh; */
+      /* 		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0; */
 
-		  i_neigh = i;
-		  j_neigh = j - 1;
-		  if(j_neigh < 0)
-		    j_neigh = _width - 1;
-		  index_neigh = i_neigh * _width + j_neigh;
-		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0;
+      /* 		  i_neigh = i; */
+      /* 		  j_neigh = j - 1; */
+      /* 		  if(j_neigh < 0) */
+      /* 		    j_neigh = _width - 1; */
+      /* 		  index_neigh = i_neigh * _width + j_neigh; */
+      /* 		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0; */
 
-		  i_neigh = i;
-		  j_neigh = j + 1;
-		  if(j_neigh >= _width)
-		    j_neigh = 0;
-		  index_neigh = i_neigh * _width + j_neigh;
-		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0;
+      /* 		  i_neigh = i; */
+      /* 		  j_neigh = j + 1; */
+      /* 		  if(j_neigh >= _width) */
+      /* 		    j_neigh = 0; */
+      /* 		  index_neigh = i_neigh * _width + j_neigh; */
+      /* 		  who_informs_whom[index_neigh*VonNeuman::size() + index_part] = 1.0; */
 
-		  if(SELF)
-		    who_informs_whom[i*this->_size + i] = 1.0;
-		}
-	    }
+      /* 		  if(SELF) */
+      /* 		    who_informs_whom[i*this->_size + i] = 1.0; */
+      /* 		} */
+      /* 	    } */
 	
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
+      /* 	  // Given the connectivity matrix, we now connect the particles */
+      /* 	  this->getNeighborhoodList(particles, neighborhoods); */
+      /* 	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom); */
 
-	  delete[] who_informs_whom;
-	}
-	};
-
-
-
-      /**
-       * Random topology
-       * @short Some probabilistic connectivity so that most of the particles will have K informants
-       */
-      template<int K, typename PARTICLE, bool SELF=true>
-        class RandomInformants : public Base<PARTICLE>
-	{
-	public:
-	RandomInformants(size_t size) : Base<PARTICLE>(size)
-	{}
-
-	void fillNeighborhoods(PARTICLE * particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[this->_size * this->_size];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
+      /* 	  delete[] who_informs_whom; */
+      /* 	} */
+      /* 	}; */
 
 
-	  // Set the connection matrix to 0 everywhere
-	  for(int i = 0 ; i < this->_size*this->_size ; ++i)
-	    who_informs_whom[i] = 0.0;
 
-	  // A particle informs itself
-	  if(SELF)
-	    for(int i = 0 ; i < this->_size ; ++i)
-	      who_informs_whom[i*this->_size + i] = 1.0;
+      /* /\** */
+      /*  * Random topology */
+      /*  * @short Some probabilistic connectivity so that most of the particles will have K informants */
+      /*  *\/ */
+      /* template<int K, typename PARTICLE, bool SELF=true> */
+      /*   class RandomInformants : public Base<PARTICLE> */
+      /* 	{ */
+      /* 	public: */
+      /* 	RandomInformants(size_t size) : Base<PARTICLE>(size) */
+      /* 	{} */
 
-	  for(int i = 0 ; i < this->_size ; ++i)
-	    {
-	      // For line i, we draw uniformely with replacement K-1 particles this particle will inform
-	      for(int k = 0 ; k < K-1 ; ++k)
-		who_informs_whom[i*this->_size + popot::math::uniform_integer(0, this->_size-1)] = 1.0; 
-	    }
-
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
-
-	  delete[] who_informs_whom;
-	}
-
-	void regenerateNeighborhoods( PARTICLE *particles,
-				      std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-				      std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  fillNeighborhoods(particles,neighborhoods,neighbordhood_membership);
-	}
-	};
-
-      template<int K, typename PARTICLE, bool SELF=true>
-        class FixedRandomInformants : public Base<PARTICLE>
-	{
-	public:
-	FixedRandomInformants(size_t size): Base<PARTICLE>(size)
-	{}
-
-	void fillNeighborhoods(PARTICLE * particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[this->_size * this->_size];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
-
-	  // Set the connection matrix to 0 everywhere
-	  for(int i = 0 ; i < this->_size*this->_size ; ++i)
-	    who_informs_whom[i] = 0.0;
-
-	  // A particle informs itself
-	  if(SELF)
-	    for(int i = 0 ; i < this->_size ; ++i)
-	      who_informs_whom[i*this->_size + i] = 1.0;
-
-	  for(int i = 0 ; i < this->_size ; ++i)
-	    {
-	      // For line i, we draw uniformely with replacement K-1 particles this particle will inform
-	      for(int k = 0 ; k < K-1 ; ++k)
-		who_informs_whom[i*this->_size + popot::math::uniform_integer(0, this->_size-1)] = 1.0; 
-	    }
-
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
-
-	  delete[] who_informs_whom;
-	}
-
-	void regenerateNeighborhoods( PARTICLE *particles,
-				      std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-				      std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	}
-	};
+      /* 	void fillNeighborhoods(PARTICLE * particles, */
+      /* 			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 			       std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	  // Generate the connection matrix */
+      /* 	  int *who_informs_whom = new int[this->_size * this->_size]; */
+      /* 	  // Column j indicates which particle informs particle j */
+      /* 	  // therefore, line i indicates which particles the particle i informs */
 
 
-      /**
-       * Adaptive random topology
-       * @short Some probabilistic connectivity so that most of the particles will have K informants
-       *        the topology is regenerated at each unsucessful step
-       */
-      template<int K, typename PARTICLE, bool SELF=true>
-        class AdaptiveRandom : public Base<PARTICLE>
-	{
-	public:
-	AdaptiveRandom(size_t size) : Base<PARTICLE>(size)
-	{}
+      /* 	  // Set the connection matrix to 0 everywhere */
+      /* 	  for(int i = 0 ; i < this->_size*this->_size ; ++i) */
+      /* 	    who_informs_whom[i] = 0.0; */
 
-	void fillNeighborhoods(PARTICLE * particles,
-			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-			       std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  double p = 1.0 - pow(1.0 - 1.0/this->_size,K);
+      /* 	  // A particle informs itself */
+      /* 	  if(SELF) */
+      /* 	    for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	      who_informs_whom[i*this->_size + i] = 1.0; */
 
-	  // Generate the connection matrix
-	  int *who_informs_whom = new int[this->_size * this->_size];
-	  // Column j indicates which particle informs particle j
-	  // therefore, line i indicates which particles the particle i informs
+      /* 	  for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	    { */
+      /* 	      // For line i, we draw uniformely with replacement K-1 particles this particle will inform */
+      /* 	      for(int k = 0 ; k < K-1 ; ++k) */
+      /* 		who_informs_whom[i*this->_size + popot::math::uniform_integer(0, this->_size-1)] = 1.0;  */
+      /* 	    } */
 
-	  // A particle informs itself
-	  if(SELF)
-	    for(int i = 0 ; i < this->_size ; ++i)
-	      who_informs_whom[i*this->_size + i] = 1.0;
+      /* 	  // Given the connectivity matrix, we now connect the particles */
+      /* 	  this->getNeighborhoodList(particles, neighborhoods); */
+      /* 	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom); */
 
-	  for(int i = 0 ; i < this->_size ; ++i)
-	    {
-	      for(int k = 0 ; k < this->_size ; ++k)
-		if( k != i)
-		  {
-		    if(popot::math::uniform_random(0.0,1.0) < p)
-		      who_informs_whom[k*this->_size + i] = 1.0; // k informs i
-		    else
-		      who_informs_whom[k*this->_size + i] = 0.0;
-		  }
-	    }
+      /* 	  delete[] who_informs_whom; */
+      /* 	} */
 
-	  // Given the connectivity matrix, we now connect the particles
-	  this->getNeighborhoodList(particles, neighborhoods);
-	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom);
+      /* 	void regenerateNeighborhoods( PARTICLE *particles, */
+      /* 				      std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 				      std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	  fillNeighborhoods(particles,neighborhoods,neighbordhood_membership); */
+      /* 	} */
+      /* 	}; */
 
-	  delete[] who_informs_whom;
-	}
+      /* template<int K, typename PARTICLE, bool SELF=true> */
+      /*   class FixedRandomInformants : public Base<PARTICLE> */
+      /* 	{ */
+      /* 	public: */
+      /* 	FixedRandomInformants(size_t size): Base<PARTICLE>(size) */
+      /* 	{} */
 
-	void regenerateNeighborhoods(PARTICLE *particles,
-				     std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
-				     std::map< int, std::vector<int> > &neighbordhood_membership)
-	{
-	  fillNeighborhoods(particles,neighborhoods,neighbordhood_membership);
-	}
-	};
+      /* 	void fillNeighborhoods(PARTICLE * particles, */
+      /* 			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 			       std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	  // Generate the connection matrix */
+      /* 	  int *who_informs_whom = new int[this->_size * this->_size]; */
+      /* 	  // Column j indicates which particle informs particle j */
+      /* 	  // therefore, line i indicates which particles the particle i informs */
+
+      /* 	  // Set the connection matrix to 0 everywhere */
+      /* 	  for(int i = 0 ; i < this->_size*this->_size ; ++i) */
+      /* 	    who_informs_whom[i] = 0.0; */
+
+      /* 	  // A particle informs itself */
+      /* 	  if(SELF) */
+      /* 	    for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	      who_informs_whom[i*this->_size + i] = 1.0; */
+
+      /* 	  for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	    { */
+      /* 	      // For line i, we draw uniformely with replacement K-1 particles this particle will inform */
+      /* 	      for(int k = 0 ; k < K-1 ; ++k) */
+      /* 		who_informs_whom[i*this->_size + popot::math::uniform_integer(0, this->_size-1)] = 1.0;  */
+      /* 	    } */
+
+      /* 	  // Given the connectivity matrix, we now connect the particles */
+      /* 	  this->getNeighborhoodList(particles, neighborhoods); */
+      /* 	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom); */
+
+      /* 	  delete[] who_informs_whom; */
+      /* 	} */
+
+      /* 	void regenerateNeighborhoods( PARTICLE *particles, */
+      /* 				      std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 				      std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	} */
+      /* 	}; */
+
+
+      /* /\** */
+      /*  * Adaptive random topology */
+      /*  * @short Some probabilistic connectivity so that most of the particles will have K informants */
+      /*  *        the topology is regenerated at each unsucessful step */
+      /*  *\/ */
+      /* template<int K, typename PARTICLE, bool SELF=true> */
+      /*   class AdaptiveRandom : public Base<PARTICLE> */
+      /* 	{ */
+      /* 	public: */
+      /* 	AdaptiveRandom(size_t size) : Base<PARTICLE>(size) */
+      /* 	{} */
+
+      /* 	void fillNeighborhoods(PARTICLE * particles, */
+      /* 			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 			       std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	  double p = 1.0 - pow(1.0 - 1.0/this->_size,K); */
+
+      /* 	  // Generate the connection matrix */
+      /* 	  int *who_informs_whom = new int[this->_size * this->_size]; */
+      /* 	  // Column j indicates which particle informs particle j */
+      /* 	  // therefore, line i indicates which particles the particle i informs */
+
+      /* 	  // A particle informs itself */
+      /* 	  if(SELF) */
+      /* 	    for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	      who_informs_whom[i*this->_size + i] = 1.0; */
+
+      /* 	  for(int i = 0 ; i < this->_size ; ++i) */
+      /* 	    { */
+      /* 	      for(int k = 0 ; k < this->_size ; ++k) */
+      /* 		if( k != i) */
+      /* 		  { */
+      /* 		    if(popot::math::uniform_random(0.0,1.0) < p) */
+      /* 		      who_informs_whom[k*this->_size + i] = 1.0; // k informs i */
+      /* 		    else */
+      /* 		      who_informs_whom[k*this->_size + i] = 0.0; */
+      /* 		  } */
+      /* 	    } */
+
+      /* 	  // Given the connectivity matrix, we now connect the particles */
+      /* 	  this->getNeighborhoodList(particles, neighborhoods); */
+      /* 	  this->connectParticles(particles, neighbordhood_membership, who_informs_whom); */
+
+      /* 	  delete[] who_informs_whom; */
+      /* 	} */
+
+      /* 	void regenerateNeighborhoods(PARTICLE *particles, */
+      /* 				     std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods, */
+      /* 				     std::map< int, std::vector<int> > &neighbordhood_membership) */
+      /* 	{ */
+      /* 	  fillNeighborhoods(particles,neighborhoods,neighbordhood_membership); */
+      /* 	} */
+      /* 	}; */
 
 
     } // topology

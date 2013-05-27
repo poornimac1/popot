@@ -7,42 +7,40 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 
 double evaluate(double * x)
 {
-  return -1.0;
+  return x[0]*x[0] + x[1]*x[1];
+}
+
+bool stop(double f, int epoch)
+{
+  return (f <= 1e-2) || (epoch >= 10000);
 }
 
 int main(int argc, char * argv[])
 {
   RNG_GENERATOR::rng_srand();
 
-  int dim = 10;
+  typedef popot::PSO::particle::Particle<> PARTICLE_TYPE ;
+  PARTICLE_TYPE b(10);
+
+  std::cout << b << std::endl;
   
-    /*
+  auto lbound = [] (size_t index) -> double { return -10; };
+  auto ubound = [] (size_t index) -> double { return  10; };
+  auto init_func = [lbound, ubound] (PARTICLE_TYPE& p) -> void { popot::initializer::position::uniform_random<PARTICLE_TYPE::VECTOR_TYPE>(p.getPosition(), lbound, ubound);};
 
-  auto b = popot::PSO::particle::make_base(dim,   
-					  &popot::initializer::position::uniform_random,
-					  [] (size_t index) -> double { return -10; },
-					  [] (size_t index) -> double { return  10; },
-					  &evaluate);
-  */
-  /*			       
-  auto b = popot::PSO::particle::make_particle(dim,   
-					  &popot::initializer::position::uniform_random,
-					  &popot::initializer::velocity::half_diff,
-					  [] (size_t index) -> double { return -10; },
-					  [] (size_t index) -> double { return  10; },
-					  &evaluate);
-  */
-  popot::PSO::particle::make_spso2006_particle(dim,
-					  [] (size_t index) -> double { return -10; },
-					  [] (size_t index) -> double { return  10; },
-							&evaluate, 0.7, 1.2);
-  /*
-  auto c = b;
-  c.setPosition(2,2);
+  //popot::initializer::position::zero(b.getPosition());
+  popot::initializer::position::zero(b.getPosition());
+  popot::initializer::position::zero(b.getBestPosition().getPosition());
+  //popot::PSO::particle::init_position(b, popot::initializer::position::zero<PARTICLE_TYPE::VECTOR_TYPE>);
+  init_func(b);
 
   std::cout << b << std::endl;
-  b.init();
-  std::cout << b << std::endl;
-  std::cout << c << std::endl;
-  */
+  
+  auto algo = popot::algorithm::spso2006(10,
+					 [] (size_t index) -> double { return -10; },
+					 [] (size_t index) -> double { return  10; },
+					 stop, evaluate);
+  
+  //decltype(popot::PSO::topology::ring_fillNeighborhoods<popot::PSO::particle::Particle<> >) titi = popot::PSO::topology::ring_fillNeighborhoods<PARTICLE_TYPE>;
+
 }
