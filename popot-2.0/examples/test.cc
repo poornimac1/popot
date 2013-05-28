@@ -24,10 +24,11 @@ int main(int argc, char * argv[])
   RNG_GENERATOR::rng_srand();
 
   auto algo = popot::algorithm::spso2006(50,
+					 popot::confine_2011(lbound, ubound), 
 					 [] (size_t index) -> double { return -10; },
 					 [] (size_t index) -> double { return  10; },
 					 stop, evaluate);
 
-  algo.run(1);
   algo.generateGraph("graph.dot");
+  algo.run(1);
 }

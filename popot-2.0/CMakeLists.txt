@@ -7,8 +7,8 @@ project (popot)
 set(POPOT_VERSION "2.0")
 set(PACKAGE_VERSION ${POPOT_VERSION})
 
-set( CMAKE_BUILD_TYPE Debug)
-#set( CMAKE_BUILD_TYPE Release)
+#set( CMAKE_BUILD_TYPE Debug)
+set( CMAKE_BUILD_TYPE Release)
 
 ###################################
 # Some prefix definitions

@@ -17,7 +17,7 @@
 
 // TODO
 // --- rendre init générique <-- mais comment ? les lambda fonction sont des types particuliers, je n'arrive pas à le
-//   mettre dans le decltype ou type de retour de mon spso2006(...)
+//   mettre dans le decltype ou type de retour de mon spso2006(...), et pour le coup les adapter en fonction de l'algo
 // --- paramétrer les fonctions de confinenemt : les confinements sont différents pour la 2006, 2007 et 2011
 
 namespace popot
@@ -123,6 +123,8 @@ namespace popot
 	      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	      // TODO :  This part must be added in the template !!!!
 	      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	      //_position_initializer(particles[i]);
+
 	      popot::initializer::position::uniform_random<typename PARTICLE::VECTOR_TYPE>(particles[i].getPosition(), lbound, ubound);
 	      popot::initializer::velocity::half_diff<typename PARTICLE::VECTOR_TYPE>(particles[i].getPosition(), particles[i].getVelocity(), lbound, ubound);
 				       
@@ -741,12 +743,12 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      /*
-	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+      
+      auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
 	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
 	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
-	};
-      */
+      };
+      
 
       // The rule to update the best position
       auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
@@ -868,7 +870,7 @@ namespace popot
       auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
 					      lbound, ubound, stop, cost_function, 
 					      topology, position_update, velocity_update, best_position_update, 
-					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, false);
       return algo;
     }
     
@@ -911,15 +913,15 @@ namespace popot
       // Topology
       //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
       //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
-      auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
       //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
-      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO, 3>;
+      auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO, 3>;
 
 
       auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
 					      lbound, ubound, stop, cost_function, 
 					      topology, position_update, velocity_update, best_position_update, 
-					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, false);
       return algo;
     }
 
@@ -958,23 +960,61 @@ namespace popot
       // The rule to update the best position
       auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
 
-
       // Topology
-      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
-      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
-      auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
-      //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
-      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO, 3>;
-
+      auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
 
       auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
 					      lbound, ubound, stop, cost_function, 
 					      topology, position_update, velocity_update, best_position_update, 
-					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, false);
       return algo;
     }
 
 
+    /**
+     * Builds the barebone algorithm
+     */
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+    popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
+					std::map< size_t, std::vector<size_t> > &),
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
+    modified_barebone(size_t dimension,
+			const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+			const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
+      size_t swarm_size = 40;
+
+      // Particle type
+      ParticleSPSO p;
+
+      // Position and velocity updates
+      auto position_update = popot::PSO::particle::updatePosition_barebone<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_modifiedBarebone<ParticleSPSO>;
+     
+      // Initialization functions
+      /*
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	};
+      */
+
+      // The rule to update the best position
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
+
+      // Topology
+      auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+
+      auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
+					      lbound, ubound, stop, cost_function, 
+					      topology, position_update, velocity_update, best_position_update, 
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, false);
+      return algo;
+    }
 
 } // namespace algorithm
 
