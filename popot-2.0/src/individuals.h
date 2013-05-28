@@ -90,6 +90,7 @@ namespace popot
      * @param index position
      * @param value value to set
      */
+    /*
     void setValueAt(size_t index, VALUE_TYPE value)
     {
       if(index >= 0 && index < _dimension)
@@ -97,11 +98,12 @@ namespace popot
       else
 	throw popot::Exception::IndexOutOfRange(index, _dimension);
     }
-
+    */
     /**
      * Returns a component of the vector
      * @param index position
      */
+    /*
     VALUE_TYPE getValueAt(size_t index) const
     {
       if(index >= 0 && index < _dimension)
@@ -109,10 +111,13 @@ namespace popot
       else
 	throw popot::Exception::IndexOutOfRange(index, _dimension);
     }
-
-    VALUE_TYPE operator[](size_t index) const 
+    */
+    VALUE_TYPE& operator[](size_t index) const 
     {
-      return getValueAt(index);
+      if(index >= 0 && index < _dimension)
+	return _values[index];
+      else
+	throw popot::Exception::IndexOutOfRange(index, _dimension);
     }
 
     /**
@@ -139,7 +144,7 @@ namespace popot
       os << "[";
       for(size_t i = 0 ; i < size() ; ++i)
 	{
-	  os << getValueAt(i);
+	  os << (*this)[i];
 	  if(i != size() - 1)
 	    os << ";";
 	}
@@ -401,13 +406,13 @@ namespace popot
 	    {
 	      if(pos[i] < lbound(i))
 		{
-		  pos.setValueAt(i, lbound(i));
-		  this->getVelocity().setValueAt(i, 0);
+		  pos[i] = lbound(i);
+		  this->getVelocity()[i] = 0;
 		}
 	      else if(pos[i] > ubound(i))
 		{
-		  pos.setValueAt(i, ubound(i));
-		  this->getVelocity().setValueAt(i, 0);
+		  pos[i] = ubound(i);
+		  this->getVelocity()[i] = 0;
 		}
 	    }
 	}
@@ -492,12 +497,10 @@ namespace popot
       template<typename PARTICLE>
       void updatePosition(PARTICLE& p)
       {
-	std::cout << "Update position " << std::endl;
-	std::cout << p.getPosition() << std::endl;
-	std::cout << p.getVelocity() << std::endl;
 	// Here it is simply : p_{k+1} = p_k + v_k      
 	for(size_t i = 0 ; i < p.getPosition().size() ; ++i)
-	  p.getPosition().setValueAt(i, p.getPosition().getValueAt(i) + p.getVelocity().getValueAt(i));
+	  p.getPosition()[i] = p.getPosition()[i] + p.getVelocity()[i];
+	
       }
 
       /**
@@ -506,7 +509,6 @@ namespace popot
       template<typename PARTICLE, typename PARAMS>
       void updateVelocity_spso2006(PARTICLE& p)
       {
-	std::cout << "Update velocity" << std::endl;
 	// The update of the velocity is done according to the equation :
 	// v = w * v + c r1 (best_p - p) + c r2 (best_g - p)
 	// with :
@@ -514,6 +516,7 @@ namespace popot
 	// w, c1, c2 : user defined parameters
 	// best_p : the best position the particle ever had
 	// best_g : the best position the neighborhood ever had
+	
 	double r1,r2;
         typename PARTICLE::VECTOR_TYPE& pos = p.getPosition();
 	typename PARTICLE::VECTOR_TYPE& vel = p.getVelocity();
@@ -522,9 +525,9 @@ namespace popot
 	  {
 	    r1 = popot::math::uniform_random(0.0, PARAMS::c());
 	    r2 = popot::math::uniform_random(0.0, PARAMS::c());
-	    vel.setValueAt(i, PARAMS::w() * vel.getValueAt(i)
-			   + r1 * (p.getBestPosition().getPosition().getValueAt(i) - pos.getValueAt(i))
-			   + r2 * (p.getNeighborhood().getBest()->getPosition().getValueAt(i) - pos.getValueAt(i)));
+	    vel[i] = PARAMS::w() * vel[i]
+	      + r1 * (p.getBestPosition().getPosition()[i] - pos[i])
+	      + r2 * (p.getNeighborhood().getBest()->getPosition()[i] - pos[i]);
 	  }
       }
 
@@ -983,7 +986,7 @@ namespace popot
 	void init(const LBOUND_FUNC& lbound, const UBOUND_FUNC &ubound, const COST_FUNCTION& cost_function)
 	{
 	  for(size_t i = 0 ; i < this->_dimension ; ++i)
-	    this->setValueAt(i, popot::math::uniform_random(lbound(i), ubound(i)));
+	    (*this)[i] = popot::math::uniform_random(lbound(i), ubound(i));
 
 	  computeFitness(cost_function);
 
@@ -1008,7 +1011,7 @@ namespace popot
 
 	  // Compute the new source
 	  new_source = *this;
-	  new_param_value = this->getValueAt(change_dim) + phi * (this->getValueAt(change_dim) - other_source.getValueAt(change_dim));
+	  new_param_value = (*this)[change_dim] + phi * ((*this)[change_dim] - other_source[change_dim]);
 
 	  // Bound the parameter value
 	  if(new_param_value < lbound(change_dim))
@@ -1016,7 +1019,7 @@ namespace popot
 	  else if(new_param_value > ubound(change_dim))
 	    new_param_value = ubound(change_dim);
 	  
-	  new_source.setValueAt(change_dim, new_param_value);
+	  new_source[change_dim] = new_param_value;
 
 	  // Evaluate the fitness of the new solution
 	  new_source.computeFitness(cost_function);

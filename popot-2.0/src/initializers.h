@@ -16,7 +16,7 @@ namespace popot
 	{
 	  // fills in with 0
 	  for(size_t i = 0 ; i < p.size() ; ++i)
-	    p.setValueAt(i, 0.0);
+	    p[i] = 0.0;
 	};
 
       template<typename VECTOR, typename LBOUND_FUNC, typename UBOUND_FUNC>
@@ -24,7 +24,7 @@ namespace popot
       {
 	// fills in with Uniform[min, max]
 	for(size_t i = 0 ; i < p.size() ; ++i)
-	  p.setValueAt(i, popot::math::uniform_random(lbound(i),ubound(i)));
+	  p[i] = popot::math::uniform_random(lbound(i),ubound(i));
       };
     } // namespace position
 
@@ -35,7 +35,7 @@ namespace popot
       {
 	// fills in with 0
 	for(size_t i = 0 ; i < v.size() ; ++i)
-	  v.setValueAt(i, 0.0);
+	  v[i] = 0.0;
       };
 
       template<typename VECTOR, typename LBOUND_FUNC, typename UBOUND_FUNC>
@@ -43,7 +43,7 @@ namespace popot
       {
 	// returns (U(min,max) - xi)/2.0
 	for(size_t i = 0 ; i < v.size() ; ++i)
-	  v.setValueAt(i, 0.5*(popot::math::uniform_random(lbound(i), ubound(i))-p.getValueAt(i)));
+	  v[i] = 0.5*(popot::math::uniform_random(lbound(i), ubound(i))-p[i]);
       };
 
       template<typename VECTOR, typename LBOUND_FUNC, typename UBOUND_FUNC>
@@ -51,7 +51,7 @@ namespace popot
       {
 	// returns U(min,max) - xi
 	for(size_t i = 0 ; i < v.size() ; ++i)
-	  v.setValueAt(i, popot::math::uniform_random(lbound(i), ubound(i))-p.getValueAt(i));
+	  v[i] = popot::math::uniform_random(lbound(i), ubound(i))-p[i];
       };
     } // namespace velocity
   } // namespace initializer
