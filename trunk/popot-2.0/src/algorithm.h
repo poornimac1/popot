@@ -18,6 +18,7 @@
 // TODO
 // --- rendre init générique <-- mais comment ? les lambda fonction sont des types particuliers, je n'arrive pas à le
 //   mettre dans le decltype ou type de retour de mon spso2006(...)
+// --- paramétrer les fonctions de confinenemt : les confinements sont différents pour la 2006, 2007 et 2011
 
 namespace popot
 {
@@ -71,6 +72,8 @@ namespace popot
 	const UPDATE_VELOCITY_RULE _update_velocity_rule;
 	const UPDATE_BEST_POSITION_RULE _update_best_position_rule;
 
+	const bool _reevaluate_best_before_updating;
+
 	EvaluationMode _evaluation_mode;
       public:
 	int epoch;
@@ -88,7 +91,8 @@ namespace popot
 	     const UPDATE_VELOCITY_RULE update_velocity_rule,
 	     const UPDATE_BEST_POSITION_RULE update_best_position_rule,
 	     const PARTICLE& p,
-	     EvaluationMode evaluation_mode) 
+	     EvaluationMode evaluation_mode,
+	     bool reevaluate_best_before_updating) 
 	  : _best_particle(dimension),
 	    _dimension(dimension),
 	    _swarm_size(swarm_size),
@@ -100,6 +104,7 @@ namespace popot
 	    _update_position_rule(update_position_rule),
 	    _update_velocity_rule(update_velocity_rule),
 	    _update_best_position_rule(update_best_position_rule),
+	    _reevaluate_best_before_updating(reevaluate_best_before_updating),
 	    _evaluation_mode(evaluation_mode),
 	    epoch(0),
 	    nb_new_neigh(0)
@@ -119,7 +124,6 @@ namespace popot
 	      // TODO :  This part must be added in the template !!!!
 	      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	      popot::initializer::position::uniform_random<typename PARTICLE::VECTOR_TYPE>(particles[i].getPosition(), lbound, ubound);
-	      popot::initializer::position::uniform_random<typename PARTICLE::VECTOR_TYPE>(particles[i].getBestPosition().getPosition(), lbound, ubound);
 	      popot::initializer::velocity::half_diff<typename PARTICLE::VECTOR_TYPE>(particles[i].getPosition(), particles[i].getVelocity(), lbound, ubound);
 				       
 	      // Evaluate the initial fitnesses
@@ -201,11 +205,11 @@ namespace popot
 	   	  particles[particle_index].evaluateFitness(_cost_function);
 
 	   	  // And see if we update the personal best
-		  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		  // TODO :  This part must be added in the template !!!!
-		  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		  if(_reevaluate_best_before_updating)
+		    particles[i].getBestPosition().evaluateFitness(_cost_function);
+
 		  _update_best_position_rule(particles[particle_index]);
-		  //popot::PSO::particle::updateBestPosition<PARTICLE>(particles[particle_index]);
+
 
 	   	  if(VERBOSE_BENCH)
 	   	    std::cout << std::endl;
@@ -237,7 +241,11 @@ namespace popot
 	      // update their velocity, we must ensure that, for a synchronous evaluation
 	      // updating the best is done after all the positions updates
 	      for(size_t i = 0 ; i < _swarm_size ; ++i)
-		_update_best_position_rule(particles[i]);
+		{
+		  if(_reevaluate_best_before_updating)
+		    particles[i].getBestPosition().evaluateFitness(_cost_function);
+		  _update_best_position_rule(particles[i]);
+		}
 
 	      // We now update the best particle of all the neighborhoods
 	      for(size_t i = 0 ; i < neighborhoods.size() ; ++i)
@@ -472,12 +480,13 @@ namespace popot
 	   const UPDATE_VELOCITY_RULE& update_velocity_rule,
 	   const UPDATE_BEST_POSITION_RULE& update_best_position_rule,
 	   const PARTICLE& p,
-	   EvaluationMode evaluation_mode)
+	   EvaluationMode evaluation_mode,
+	   bool reevaluate_best_before_updating)
       {
 	return Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
 		    TOPOLOGY, UPDATE_POSITION_RULE, UPDATE_VELOCITY_RULE, UPDATE_BEST_POSITION_RULE, PARTICLE>
 	  (swarm_size, dimension, lbound, ubound, stop, cost_function, topology, 
-	   update_position_rule, update_velocity_rule, update_best_position_rule, p, evaluation_mode);
+	   update_position_rule, update_velocity_rule, update_best_position_rule, p, evaluation_mode, reevaluate_best_before_updating);
       }
 
 
@@ -699,65 +708,273 @@ namespace popot
     class SPSO2006_Params
     {
     public:
-      static double c(void) { return 0.5 + log(2.0);};
       static double w(void) { return 1.0/(2.0*log(2.0));};
+      static double c(void) { return 0.5 + log(2.0);};
     };
     
 
     // The particle type, shortcut simplifying the expression of the types in spso2006
-    typedef popot::PSO::particle::Particle<> ParticleSPSO2006;
+    typedef popot::PSO::particle::Particle<> ParticleSPSO;
 
     /**
      * Builds the SPSO2006 algorithm
      */
     template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
     popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
-				void(*)(std::vector<ParticleSPSO2006 >&, 
-					std::vector< typename ParticleSPSO2006::NeighborhoodType *> &, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
 					std::map< size_t, std::vector<size_t> > &),
-				void(*)(ParticleSPSO2006&),
-				void(*)(ParticleSPSO2006&), 
-				void(*)(ParticleSPSO2006&),
-				ParticleSPSO2006>
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
     spso2006(size_t dimension,
 	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
 	     const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
       size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
 
       // Particle type
-      ParticleSPSO2006 p;
+      ParticleSPSO p;
 
       // Position and velocity updates
-      auto position_update = popot::PSO::particle::updatePosition<ParticleSPSO2006>;
-      auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO2006, SPSO2006_Params>;
+      auto position_update = popot::PSO::particle::updatePosition<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
       /*
-	auto init_function = [lbound, ubound] (ParticleSPSO2006& p) -> void { 
-	popot::initializer::position::uniform_random<ParticleSPSO2006::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
-	popot::initializer::velocity::half_diff<ParticleSPSO2006::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
 	};
       */
 
       // The rule to update the best position
-      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO2006>;
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
 
 
       // Topology
-      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO2006>;
-      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO2006>;
-      //auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO2006>;
-      //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO2006>;
-      auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO2006>;
+      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO>;
 
 
       auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
 					      lbound, ubound, stop, cost_function, 
 					      topology, position_update, velocity_update, best_position_update, 
-					      p, popot::PSO::algorithm::SYNCHRONOUS_EVALUATION);
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_WITHOUT_SHUFFLE_EVALUATION, false); // This is the only difference from spso2006
+      return algo;
+    }
+
+
+    /**
+     * Builds the "stochastic" SPSO2006 algorithm : we just reevaluate the best position before updating it
+     */
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+    popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
+					std::map< size_t, std::vector<size_t> > &),
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
+    stochastic_spso2006(size_t dimension,
+			const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+			const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
+      size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
+
+      // Particle type
+      ParticleSPSO p;
+
+      // Position and velocity updates
+      auto position_update = popot::PSO::particle::updatePosition<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
+     
+      // Initialization functions
+      /*
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	};
+      */
+
+      // The rule to update the best position
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
+
+
+      // Topology
+      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO>;
+
+
+      auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
+					      lbound, ubound, stop, cost_function, 
+					      topology, position_update, velocity_update, best_position_update, 
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+      return algo;
+    }
+
+
+
+    /**
+     * Builds the SPSO2007 algorithm
+     */
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+    popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
+					std::map< size_t, std::vector<size_t> > &),
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
+    spso2007(size_t dimension,
+			const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+			const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
+      size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
+
+      // Particle type
+      ParticleSPSO p;
+
+      // Position and velocity updates
+      auto position_update = popot::PSO::particle::updatePosition<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_spso2007<ParticleSPSO, SPSO2006_Params>;
+     
+      // Initialization functions
+      /*
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	};
+      */
+
+      // The rule to update the best position
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
+
+
+      // Topology
+      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
+      auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO>;
+
+
+      auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
+					      lbound, ubound, stop, cost_function, 
+					      topology, position_update, velocity_update, best_position_update, 
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
       return algo;
     }
     
+    /**
+     * Builds the SPSO2011 algorithm
+     */
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+    popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
+					std::map< size_t, std::vector<size_t> > &),
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
+    spso2011(size_t dimension,
+			const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+			const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
+      size_t swarm_size = 40;
+
+      // Particle type
+      ParticleSPSO p;
+
+      // Position and velocity updates
+      auto position_update = popot::PSO::particle::updatePosition<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_spso2011<ParticleSPSO, SPSO2006_Params>;
+     
+      // Initialization functions
+      /*
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	};
+      */
+
+      // The rule to update the best position
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
+
+
+      // Topology
+      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
+      auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO, 3>;
+
+
+      auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
+					      lbound, ubound, stop, cost_function, 
+					      topology, position_update, velocity_update, best_position_update, 
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+      return algo;
+    }
+
+    /**
+     * Builds the barebone algorithm
+     */
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+    popot::PSO::algorithm::Base<LBOUND_FUNC, UBOUND_FUNC, STOP_CRITERIA, COST_FUNCTION, 
+				void(*)(std::vector<ParticleSPSO >&, 
+					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
+					std::map< size_t, std::vector<size_t> > &),
+				void(*)(ParticleSPSO&),
+				void(*)(ParticleSPSO&), 
+				void(*)(ParticleSPSO&),
+				ParticleSPSO>
+    barebone(size_t dimension,
+			const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+			const STOP_CRITERIA& stop, const COST_FUNCTION& cost_function) {
+      size_t swarm_size = 40;
+
+      // Particle type
+      ParticleSPSO p;
+
+      // Position and velocity updates
+      auto position_update = popot::PSO::particle::updatePosition_barebone<ParticleSPSO>;
+      auto velocity_update = popot::PSO::particle::updateVelocity_barebone<ParticleSPSO>;
+     
+      // Initialization functions
+      /*
+	auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
+	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
+	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
+	};
+      */
+
+      // The rule to update the best position
+      auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
+
+
+      // Topology
+      //auto topology = popot::PSO::topology::full_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::ring_fillNeighborhoods<ParticleSPSO>;
+      auto topology = popot::PSO::topology::vonNeuman_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::randomInformants_fillNeighborhoods<ParticleSPSO>;
+      //auto topology = popot::PSO::topology::adaptiveRandom_fillNeighborhoods<ParticleSPSO, 3>;
+
+
+      auto algo = popot::PSO::algorithm::base(swarm_size, dimension, 
+					      lbound, ubound, stop, cost_function, 
+					      topology, position_update, velocity_update, best_position_update, 
+					      p, popot::PSO::algorithm::ASYNCHRONOUS_EVALUATION, true);
+      return algo;
+    }
+
+
 
 } // namespace algorithm
 
