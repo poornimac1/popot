@@ -54,9 +54,7 @@ int main(int argc, char * argv[])
   algo.run();
 
   std::cout << "Best minimum found :" << algo.getBest().getFValue() << " in " << algo.getEpoch() << " steps " << std::endl;
-  std::cout << "Position of the optimum : " << std::endl;
-  for(size_t i = 0 ; i < dimension ; ++i)
-    std::cout << algo.getBest().getValueAt(i) << " ";
+  std::cout << "Position of the optimum : " << algo.getBest() << std::endl;
   std::cout << std::endl;
   std::cout << (int)count << " Function Evaluations" << std::endl;
   
