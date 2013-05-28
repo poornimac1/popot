@@ -597,8 +597,8 @@ namespace popot
     // 	/**
     // 	 * Bounds the velocity and position of the particle
     // 	 */
-	  
-    // 	virtual void confine(void)
+      // template<typename PARTICLE, typename LBOUND_FUNC, typename UBOUND_FUNC>
+    // 	virtual void confine(PARTICLE& p, LBOUND_FUNC& lbound, UBOUND_FUNC& ubound)
     // 	{
     // 	  // In case the position is out of the bounds
     // 	  // we reset the velocities

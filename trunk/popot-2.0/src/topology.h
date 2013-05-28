@@ -32,6 +32,8 @@ namespace popot
 	for(size_t i = 0 ; i < size ; ++i)
 	  neighbordhood_membership[i].clear();
 
+
+
 	for(size_t j = 0 ; j < size ; ++j)
 	  {
 	    particles[j].getNeighborhood().clear();
@@ -148,6 +150,13 @@ namespace popot
 	size_t size = particles.size();
 	size_t width = size_t(sqrt(size));
 	size_t height= size_t(size / width);
+
+	if(height * width != size)
+	  {
+	    std::cout << "WARNING : I was only able to set up a grid of " << height << " x " << width << ", not including all the " << size << " particles " << std::endl;
+	    std::cout << " this will fail ;) " << std::endl;
+	    
+	  }
 
 	// Generate the connection matrix
 	bool *who_informs_whom = new bool[size * size];
