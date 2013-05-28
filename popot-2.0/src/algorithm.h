@@ -20,6 +20,10 @@
 //   mettre dans le decltype ou type de retour de mon spso2006(...), et pour le coup les adapter en fonction de l'algo
 // --- paramétrer les fonctions de confinenemt : les confinements sont différents pour la 2006, 2007 et 2011
 
+// - Rendre encore plus générique les manipulations de vectors : tout vectoriel!
+//   et utiliser des itérateurs plutôt que [i]
+// - ajouter les options -ansi -pedantic
+
 namespace popot
 {
   namespace PSO
