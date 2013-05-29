@@ -342,34 +342,6 @@ namespace popot
 	}
 
 	/**
-	 * Bounds the velocity and position of the particle
-	 * If the position is out of the boundaries, set the position on the
-	 * boundaries and the velocity to zero
-	 */
-	
-	template<typename LBOUND_FUNC, typename UBOUND_FUNC>
-	void confine(const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
-	{
-	  // In case the position is out of the bounds
-	  // we reset the velocities
-	  TVECTOR_TYPE& pos = this->getPosition();
-	  for(size_t i = 0 ; i < pos.size() ; ++i)
-	    {
-	      if(pos[i] < lbound(i))
-		{
-		  pos[i] = lbound(i);
-		  this->getVelocity()[i] = 0;
-		}
-	      else if(pos[i] > ubound(i))
-		{
-		  pos[i] = ubound(i);
-		  this->getVelocity()[i] = 0;
-		}
-	    }
-	}
-
-
-	/**
 	 * Initialization of the best position to the current position
 	 */
 	void initBestPosition()
@@ -406,10 +378,8 @@ namespace popot
 
       };
 
+      // Generic utilitary functions used to templatify the particles
 
-
-
-      
       template<typename PARTICLE>
       void updateBestPosition(PARTICLE& p)
       {
