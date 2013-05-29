@@ -11,8 +11,8 @@ namespace popot
   {
     namespace position
     {
-      template<typename VECTOR>
-      void zero (VECTOR& p)
+      template<typename VECTOR, typename LBOUND_FUNC, typename UBOUND_FUNC>
+	void zero (VECTOR& p, const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
 	{
 	  // fills in with 0
 	  for(size_t i = 0 ; i < p.size() ; ++i)
@@ -30,8 +30,8 @@ namespace popot
 
     namespace velocity
     {
-      template<typename VECTOR>
-	void zero(VECTOR& p, VECTOR& v)
+      template<typename VECTOR, typename LBOUND_FUNC, typename UBOUND_FUNC>
+	void zero(VECTOR& p, VECTOR& v, const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound)
       {
 	// fills in with 0
 	for(size_t i = 0 ; i < v.size() ; ++i)
