@@ -17,9 +17,8 @@
 
 
 // TODO
-// --- rendre init générique <-- mais comment ? les lambda fonction sont des types particuliers, je n'arrive pas à le
-//   mettre dans le decltype ou type de retour de mon spso2006(...), et pour le coup les adapter en fonction de l'algo
-// --- paramétrer les fonctions de confinenemt : les confinements sont différents pour la 2006, 2007 et 2011
+
+// - ajoute rles références vers les confinements et init au constructeur
 
 // - Rendre encore plus générique les manipulations de vectors : tout vectoriel!
 //   et utiliser des itérateurs plutôt que [i]
@@ -750,11 +749,8 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      
-      auto init_function = [lbound, ubound] (ParticleSPSO& p) -> void { 
-	popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), lbound, ubound);
-	popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE>(p.getPosition(), p.getVelocity(), lbound, ubound);
-      };
+      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
+      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
       
       // The confinement method
       auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
