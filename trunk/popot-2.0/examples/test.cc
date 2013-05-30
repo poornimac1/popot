@@ -4,30 +4,23 @@ typedef popot::rng::JKissRNG RNG_GENERATOR;
 
 #include "popot.h"
 
-typedef popot::Vector<double> TVector;
 
-double evaluate(TVector& x)
-{
-  double sum = 0.0;
-  for(size_t i = 0 ; i < x.size() ; ++i)
-    sum += x[i] * x[i];
-  return sum;
-}
-
-bool stop(double f, int epoch)
-{
-  return (f <= 1e-10) || (epoch >= 2000);
-}
+typedef popot::algorithm::ParticleSPSO::VECTOR_TYPE TVector;
+typedef popot::problems::Ackley Problem;
 
 int main(int argc, char * argv[])
 {
   RNG_GENERATOR::rng_srand();
 
-  auto algo = popot::algorithm::spso2006(50,
-					 [] (size_t index) -> double { return -10; },
-					 [] (size_t index) -> double { return  10; },
-					 stop, evaluate);
+  size_t dimension = 10,
+  Problem prob(dimension);
+  
+  auto algo = popot::algorithm::spso2011(dimension,
+					 [&prob] (size_t index) -> double { return prob.get_lbound(index); },
+					 [&prob] (size_t index) -> double { return  prob.get_ubound(index); },
+					 [&prob] (double fitness, int epoch) -> bool { return prob.stop(fitness, epoch);},
+					 [&prob] (TVector &pos) -> double { return prob.evaluate(pos.getValuesPtr());});
 
-  algo.generateGraph("graph.dot");
   algo.run(1);
+  std::cout << "best particle " << algo.getBest() << std::endl;
 }
