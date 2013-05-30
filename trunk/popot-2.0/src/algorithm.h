@@ -739,24 +739,24 @@ namespace popot
     /**
      * Builds the SPSO2006 algorithm
      */
-    // template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
-    popot::PSO::algorithm::Base<double(*)(size_t), 
-				double(*)(size_t), 
-				bool(*)(double, int),  
-				double(*)(typename ParticleSPSO::VECTOR_TYPE&), 
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+      popot::PSO::algorithm::Base<LBOUND_FUNC, 
+				  UBOUND_FUNC, 
+				  STOP_CRITERIA,  
+				  COST_FUNCTION,
 				void(*)(std::vector<ParticleSPSO >&, 
 					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
 					std::map< size_t, std::vector<size_t> > &),
 				void(*)(ParticleSPSO&),
 				void(*)(ParticleSPSO&), 
 				void(*)(ParticleSPSO&),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, double(*const &)(size_t), double(* const&)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
+				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
 				ParticleSPSO>
     spso2006(size_t dimension,
-	     double(* const& lbound)(size_t), double(* const& ubound)(size_t),
-	     bool(*const & stop)(double, int), double(* const &cost_function)(typename ParticleSPSO::VECTOR_TYPE&)) {
+	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+	     const STOP_CRITERIA& stop, const COST_FUNCTION &cost_function) {
 
       size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
 
@@ -768,11 +768,11 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
-      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
+      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
       
       // The confinement method
-      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
 
       // The rule to update the best position
       auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
@@ -792,23 +792,24 @@ namespace popot
       return algo;
     }
 
-    popot::PSO::algorithm::Base<double(*)(size_t), 
-				double(*)(size_t), 
-				bool(*)(double, int),  
-				double(*)(typename ParticleSPSO::VECTOR_TYPE&), 
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+      popot::PSO::algorithm::Base<LBOUND_FUNC, 
+				  UBOUND_FUNC, 
+				  STOP_CRITERIA,  
+				  COST_FUNCTION,
 				void(*)(std::vector<ParticleSPSO >&, 
 					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
 					std::map< size_t, std::vector<size_t> > &),
 				void(*)(ParticleSPSO&),
 				void(*)(ParticleSPSO&), 
 				void(*)(ParticleSPSO&),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, double(*const &)(size_t), double(* const&)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
+				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
 				ParticleSPSO>
     stochastic_spso2006(size_t dimension,
-			double(* const& lbound)(size_t), double(* const& ubound)(size_t),
-			bool(*const & stop)(double, int), double(* const &cost_function)(typename ParticleSPSO::VECTOR_TYPE&)) {
+	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+	     const STOP_CRITERIA& stop, const COST_FUNCTION &cost_function) {
 
       size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
 
@@ -820,11 +821,11 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2006<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
-      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
+      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
       
       // The confinement method
-      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, UBOUND_FUNC, LBOUND_FUNC>;
 
       // The rule to update the best position
       auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
@@ -848,24 +849,24 @@ namespace popot
     /**
      * Builds the SPSO2007 algorithm
      */
-
-    popot::PSO::algorithm::Base<double(*)(size_t), 
-				double(*)(size_t), 
-				bool(*)(double, int),  
-				double(*)(typename ParticleSPSO::VECTOR_TYPE&), 
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+      popot::PSO::algorithm::Base<LBOUND_FUNC, 
+				  UBOUND_FUNC, 
+				  STOP_CRITERIA,  
+				  COST_FUNCTION,
 				void(*)(std::vector<ParticleSPSO >&, 
 					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
 					std::map< size_t, std::vector<size_t> > &),
 				void(*)(ParticleSPSO&),
 				void(*)(ParticleSPSO&), 
 				void(*)(ParticleSPSO&),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, double(*const &)(size_t), double(* const&)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
+				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
 				ParticleSPSO>
     spso2007(size_t dimension,
-	     double(* const& lbound)(size_t), double(* const& ubound)(size_t),
-	     bool(*const & stop)(double, int), double(* const &cost_function)(typename ParticleSPSO::VECTOR_TYPE&)) {
+	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+	     const STOP_CRITERIA& stop, const COST_FUNCTION &cost_function) {
 
       size_t swarm_size = 10 + int(2.0 * sqrt(dimension));
 
@@ -877,11 +878,11 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2007<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE&, double(*)(size_t), double(*)(size_t)>;
-      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
+      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
 
       // The confinement method
-      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto confine = popot::confinement::confine<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
 
       // The rule to update the best position
       auto best_position_update = popot::PSO::particle::updateBestPosition<ParticleSPSO>;
@@ -901,24 +902,25 @@ namespace popot
       return algo;
     }
     
-
-    popot::PSO::algorithm::Base<double(*)(size_t), 
-				double(*)(size_t), 
-				bool(*)(double, int),  
-				double(*)(typename ParticleSPSO::VECTOR_TYPE&), 
+    template< typename LBOUND_FUNC, typename UBOUND_FUNC, typename STOP_CRITERIA, typename COST_FUNCTION>
+      popot::PSO::algorithm::Base<LBOUND_FUNC, 
+				  UBOUND_FUNC, 
+				  STOP_CRITERIA,  
+				  COST_FUNCTION,
 				void(*)(std::vector<ParticleSPSO >&, 
 					std::vector< typename ParticleSPSO::NeighborhoodType *> &, 
 					std::map< size_t, std::vector<size_t> > &),
 				void(*)(ParticleSPSO&),
 				void(*)(ParticleSPSO&), 
 				void(*)(ParticleSPSO&),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, double(*const &)(size_t), double(* const&)(size_t)),
-				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, double(*const&)(size_t), double(*const &)(size_t)),
+				void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
+				  void(*)(typename ParticleSPSO::VECTOR_TYPE&, typename ParticleSPSO::VECTOR_TYPE&, const LBOUND_FUNC&, const UBOUND_FUNC&),
 				ParticleSPSO>
     spso2011(size_t dimension,
-	     double(* const& lbound)(size_t), double(* const& ubound)(size_t),
-	     bool(*const & stop)(double, int), double(* const &cost_function)(typename ParticleSPSO::VECTOR_TYPE&)) {
+	     const LBOUND_FUNC& lbound, const UBOUND_FUNC& ubound,
+	     const STOP_CRITERIA& stop, const COST_FUNCTION &cost_function) {
+
       size_t swarm_size = 40;
 
       // Particle type
@@ -929,11 +931,11 @@ namespace popot
       auto velocity_update = popot::PSO::particle::updateVelocity_spso2011<ParticleSPSO, SPSO2006_Params>;
      
       // Initialization functions
-      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
-      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto init_position_function = popot::initializer::position::uniform_random<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
+      auto init_velocity_function = popot::initializer::velocity::half_diff<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
 
       // The confinement method
-      auto confine = popot::confinement::confine_spso2011<ParticleSPSO::VECTOR_TYPE, double(*)(size_t), double(*)(size_t)>;
+      auto confine = popot::confinement::confine_spso2011<ParticleSPSO::VECTOR_TYPE, LBOUND_FUNC, UBOUND_FUNC>;
     
 
       // The rule to update the best position
