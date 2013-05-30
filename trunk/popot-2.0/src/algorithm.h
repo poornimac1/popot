@@ -17,9 +17,6 @@
 
 
 // TODO
-
-// - ajoute rles références vers les confinements et init au constructeur
-
 // - Rendre encore plus générique les manipulations de vectors : tout vectoriel!
 //   et utiliser des itérateurs plutôt que [i]
 // - ajouter les options -ansi -pedantic
