@@ -65,7 +65,7 @@ namespace popot
        * Full toplogy
        * @short Each of the N particles receives information from the N others
        */
-      template<typename PARTICLE, bool SELF=false>
+      template<typename PARTICLE, bool SELF>
       void full_fillNeighborhoods(std::vector<PARTICLE> &particles,
 				  std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
 				  std::map< size_t, std::vector<size_t> > &neighbordhood_membership)
@@ -94,7 +94,7 @@ namespace popot
        * Ring toplogy
        * @short A ring topology connects the particles on a ring plus a connection to itself
        */
-      template<typename PARTICLE, bool SELF=false>
+      template<typename PARTICLE, bool SELF>
       void ring_fillNeighborhoods(std::vector<PARTICLE>& particles,
 				  std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
 				  std::map< size_t, std::vector<size_t> > &neighbordhood_membership)
@@ -142,7 +142,7 @@ namespace popot
        * @short The von Neuman topology connects the particles on a 2D toric grid
        *        with the nearest four neighbours plus itself
        */
-      template<typename PARTICLE, bool SELF=false>
+      template<typename PARTICLE, bool SELF>
       void vonNeuman_fillNeighborhoods(std::vector<PARTICLE>& particles,
 				       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
 				       std::map< size_t, std::vector<size_t> > &neighbordhood_membership)
@@ -232,7 +232,7 @@ namespace popot
        * Random topology
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        */
-      template<typename PARTICLE, int K=3, bool SELF=true>
+      template<typename PARTICLE, int K, bool SELF>
       void randomInformants_fillNeighborhoods(std::vector<PARTICLE>& particles,
 					      std::vector< typename PARTICLE::NeighborhoodType *>& neighborhoods,
 					      std::map< size_t, std::vector<size_t> >& neighbordhood_membership)
@@ -272,7 +272,7 @@ namespace popot
        * Adaptive random topology
        * @short Some probabilistic connectivity so that most of the particles will have K informants
        */
-      template<typename PARTICLE, int K=3, bool SELF=true>
+      template<typename PARTICLE, int K, bool SELF>
       void adaptiveRandom_fillNeighborhoods(std::vector<PARTICLE>& particles,
       			       std::vector< typename PARTICLE::NeighborhoodType *> &neighborhoods,
 			     std::map< size_t, std::vector<size_t> > &neighbordhood_membership)

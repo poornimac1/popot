@@ -3,51 +3,6 @@
 
 namespace popot
 {
-  /**
-   * Namespace where all the concepts are defined
-   */
-  namespace concept
-  {
-    /**
-     * A problem defines the cost function to minimize
-     * This class gives the required methods to implement 
-     * in your problem
-     * @brief
-     */
-    class Problem
-    {
-    public:     
-      /**
-       * Dimension of the parameter vector
-       */
-      size_t const dimension;
-
-      /**
-       * This gives the lower bound for a given parameter component
-       * @param index The index of the component you want to get the lower bound.
-       */
-      double get_lbound(size_t index);
-
-      /**
-       * This gives the upper bound for a given parameter component
-       * @param index The index of the component you want to get the upper bound.
-       */
-      double get_ubound(size_t index);
-
-      /**
-       * Determines if we should stop the optimization algorithm
-       */
-      bool stop(double fitness, size_t epoch);
-	  
-      /**
-       * Returns the value of the cost function for the given parameters
-       * @param params A vector of parameters.
-       */
-      double evaluate(void * params);
-
-    };
-
-  } // namespace concept
 
   /**
    * Definition of some benchmarking problems
