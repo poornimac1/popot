@@ -1,6 +1,9 @@
-#include <sys/time.h>
+// In this example, we show a basic usage of the SPSO algorithms, using the default ones
+// provided by the library
 
 // We first define the generator of random numbers
+// THIS is absolutely necessary to define RNG_GENERATOR before
+// including popot.h as some of the codes require it to be defined
 #include "rng_generators.h"
 typedef popot::rng::CRNG RNG_GENERATOR;
 
@@ -8,15 +11,9 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 // them after the definition of RNG_GENERATOR
 #include "popot.h"
 
-// Define our problem
-typedef popot::problems::Rosenbrock<30> Problem;
-
-// Define our algorithm, here SPSO 2011
-//typedef popot::PSO::SPSO2006::PSO<Problem>::Type PSO;
-//typedef popot::PSO::SPSO2007::PSO<Problem>::Type PSO;
-typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
-
-#define N_RUNS 1000
+// Define the vector type and the problem
+typedef popot::algorithm::ParticleSPSO::VECTOR_TYPE TVector;
+typedef popot::problems::Rosenbrock Problem;
 
 // **************************************** //
 // ************** Main ******************** //
@@ -28,17 +25,22 @@ int main(int argc, char* argv[]) {
   RNG_GENERATOR::rng_warm_up();
   
   // Some initialization of static fields
-  Problem::init();
+  size_t dimension = 50;
+  Problem p(50);
   
-  // Let's create our swarm
-  PSO* pso = new PSO();
-  
+  // Let's create a swarm 
+  // we might use spso2006, spso2007 or spso2011
+  auto algo = popot::algorithm::spso2011(dimension,
+  					 [&p] (size_t index) -> double { return p.get_lbound(index); },
+  					 [&p] (size_t index) -> double { return p.get_ubound(index); },
+  					 [&p] (double fitness, int epoch) -> bool { return p.stop(fitness, epoch);},
+  					 [&p] (TVector &pos) -> double { return p.evaluate(pos.getValuesPtr());}
+					 );
+
+
   // We now run our algorithm
-  pso->run(1);
+  algo.run(1);
 
-  std::cout << "Nb steps : " << pso->epoch << " ; nb neigh : " << pso->nb_new_neigh << std::endl;
-
-  delete pso;
-  Problem::free();
+  std::cout << "Nb steps : " << algo.epoch << " ; # of generated neighborhoods : " << algo.nb_new_neigh << std::endl;
 
 }

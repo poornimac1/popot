@@ -2,9 +2,7 @@
 include_directories (${CMAKE_SOURCE_DIR}/src)
 
 # Define our examples to compile
-#set(USAGE_EXAMPLES example-000 example-001 example-002 example-003
-#example-004 example-005)
-set(USAGE_EXAMPLES example-004 test)
+set(USAGE_EXAMPLES example-000 example-001 example-002 example-003)
 
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
