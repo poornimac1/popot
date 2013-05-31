@@ -40,16 +40,18 @@ typedef popot::rng::CRNG RNG_GENERATOR;
 class MLPClassifier
 {
 public:
-  static const int nb_inputs = 7;
-  static const int nb_outputs = 1;
-  static const int nb_hidden = 4;
-  static const int nb_digits = 10;
+  const size_t nb_inputs;
+  const size_t nb_outputs;
+  const size_t nb_hidden;
+  const size_t nb_digits;
 
-  static const int nb_parameters = (nb_inputs+1)*nb_hidden + (nb_hidden+1)*nb_outputs;
-  static int *hexa_codes;
-  static int *inputs_mlp;
+  const size_t nb_parameters;// = (nb_inputs+1)*nb_hidden + (nb_hidden+1)*nb_outputs;
+  int *hexa_codes;
+  int *inputs_mlp;
 
-  static void init(void)
+  MLPClassifier(void) : 
+    nb_inputs(7), nb_outputs(1), nb_hidden(4), nb_digits(10),
+    nb_parameters((nb_inputs+1)*nb_hidden + (nb_hidden+1)*nb_outputs)
   {
     hexa_codes = new int[nb_digits];
     hexa_codes[0] = 0x3F;
@@ -64,11 +66,11 @@ public:
     hexa_codes[9] = 0x6F;
 
     inputs_mlp = new int[nb_inputs*nb_digits];
-    int y;
-    for(int x = 0 ; x < nb_digits ; ++x)
+    size_t y;
+    for(size_t x = 0 ; x < nb_digits ; ++x)
       {
 	y = hexa_codes[x];
-	for(int i = 0 ; i < nb_inputs ; ++i)
+	for(size_t i = 0 ; i < nb_inputs ; ++i)
 	  {
 	    inputs_mlp[nb_inputs*x + i] = (y & 0x01);
 	    y = y >> 1;
@@ -76,17 +78,23 @@ public:
       }
   }
 
-  static double get_lbound(int index)
+  ~MLPClassifier(void)
+  {
+    delete[] hexa_codes;
+    delete[] inputs_mlp;
+  }
+
+  double get_lbound(size_t index)
   {  
     return -10;
   }
 
-  static double get_ubound(int index)
+  double get_ubound(size_t index)
   {    
     return 10;
   }
 
-  static void display_digits(std::vector<int> &list_digits)
+  void display_digits(std::vector<int> &list_digits)
   {
     if(list_digits.size() == 0)
       {
@@ -98,122 +106,118 @@ public:
 
     // Horizontal segments span 13 characters
     // Vertical segments span 3 characters
-    int span_horiz = 13;
-    int span_vert = 3;
-    int space_digit = 3;
+    size_t span_horiz = 13;
+    size_t span_vert = 3;
+    size_t space_digit = 3;
 
     // Segment 0
-    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
+    for(size_t i = 0 ; i < list_digits.size() ; ++i)
       {
-	for(int j = 0 ; j < span_horiz ; ++j)
+	for(size_t j = 0 ; j < span_horiz ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[i]*nb_inputs+0])
 	      printf("-");
 	    else
 	      printf(" ");
 	  }
-	for(int j = 0 ; j < space_digit ; ++j)
+	for(size_t j = 0 ; j < space_digit ; ++j)
 	  printf(" ");
       }
     printf("\n");
     // Segments 5 and 1
-    for(int i = 0 ; i < span_vert ; ++i)
+    for(size_t i = 0 ; i < span_vert ; ++i)
       {
-	for(unsigned int j = 0 ; j < list_digits.size() ; ++j)
+	for(size_t j = 0 ; j < list_digits.size() ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[j]*nb_inputs+5])
 	      printf("|");
 	    else
 	      printf(" ");
-	    for(int k = 0 ; k < span_horiz - 2 ; ++k)
+	    for(size_t k = 0 ; k < span_horiz - 2 ; ++k)
 	      printf(" ");
 	    if(inputs_mlp[list_digits[j]*nb_inputs+1])
 	      printf("|");
 	    else
 	      printf(" ");
-	    for(int k = 0 ; k < space_digit ; ++k)
+	    for(size_t k = 0 ; k < space_digit ; ++k)
 	      printf(" ");
 	  }
 	printf("\n");
       }
 
     // Segment 6
-    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
+    for(size_t i = 0 ; i < list_digits.size() ; ++i)
       {
-	for(int j = 0 ; j < span_horiz ; ++j)
+	for(size_t j = 0 ; j < span_horiz ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[i]*nb_inputs+6])
 	      printf("-");
 	    else
 	      printf(" ");
 	  }
-	for(int j = 0 ; j < space_digit ; ++j)
+	for(size_t j = 0 ; j < space_digit ; ++j)
 	  printf(" ");
       }
     printf("\n");
     // Segments 4 2
-    for(int i = 0 ; i < span_vert ; ++i)
+    for(size_t i = 0 ; i < span_vert ; ++i)
       {
-	for(unsigned int j = 0 ; j < list_digits.size() ; ++j)
+	for(size_t j = 0 ; j < list_digits.size() ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[j]*nb_inputs+4])
 	      printf("|");
 	    else
 	      printf(" ");
-	    for(int k = 0 ; k < span_horiz - 2 ; ++k)
+	    for(size_t k = 0 ; k < span_horiz - 2 ; ++k)
 	      printf(" ");
 	    if(inputs_mlp[list_digits[j]*nb_inputs+2])
 	      printf("|");
 	    else
 	      printf(" ");
-	    for(int k = 0 ; k < space_digit ; ++k)
+	    for(size_t k = 0 ; k < space_digit ; ++k)
 	      printf(" ");
 	  }
 	printf("\n");
       }
     // Segment 3
-    for(unsigned int i = 0 ; i < list_digits.size() ; ++i)
+    for(size_t i = 0 ; i < list_digits.size() ; ++i)
       {
-	for(int j = 0 ; j < span_horiz ; ++j)
+	for(size_t j = 0 ; j < span_horiz ; ++j)
 	  {
 	    if(inputs_mlp[list_digits[i]*nb_inputs+3])
 	      printf("-");
 	    else
 	      printf(" ");
 	  }
-	for(int j = 0 ; j < space_digit ; ++j)
+	for(size_t j = 0 ; j < space_digit ; ++j)
 	  printf(" ");
       }
 
     printf("\n");
   }
 
-  static void free(void)
-  {
-  }
-
-  static double transfer_function(double x)
+  double transfer_function(double x)
   {
     // We use a sigmoidal transfer function
     return 1.0 / (1.0 + exp(-x));
   }
 
-  static double compute_output(int input_index, double * params)
+  double compute_output(int input_index, double * params)
   {
     double act_input[nb_inputs];
     double act_hidden[nb_hidden];
     double act_output;
 
     // Set up the input
-    for(int i = 0 ; i < nb_inputs ; ++i)
+    for(size_t i = 0 ; i < nb_inputs ; ++i)
       act_input[i] = inputs_mlp[nb_inputs * input_index + i];
 
     // Compute the activity of the hidden nodes
-    int params_index = 0;
-    for(int i = 0 ; i < nb_hidden ; ++i)
+    size_t params_index = 0;
+    for(size_t i = 0 ; i < nb_hidden ; ++i)
       {
 	act_hidden[i] = params[params_index++];
-	for(int j = 0 ; j < nb_inputs ; ++j)
+	for(size_t j = 0 ; j < nb_inputs ; ++j)
 	  {
 	    act_hidden[i] += params[params_index++] * act_input[j];
 	  }
@@ -222,24 +226,24 @@ public:
       }
     // Compute the activity of the output node
     act_output = params[params_index++];
-    for(int j = 0 ; j < nb_hidden ; ++j)
+    for(size_t j = 0 ; j < nb_hidden ; ++j)
       act_output += params[params_index++] * act_hidden[j];
     act_output = transfer_function(act_output);
 
     return act_output;
   }
 
-  static bool stop(double fitness, int epoch)
+  bool stop(double fitness, int epoch)
   {
     return (fitness <= 1e-4) || (epoch >= 1000);
   }
 
-  static double evaluate(double * params)
+  double evaluate(double * params)
   {
     double fitness = 0.0;
     double act_output;
     // Test over all the inputs
-    for(int k = 0 ; k < nb_digits ; ++k)
+    for(size_t k = 0 ; k < nb_digits ; ++k)
       {
 	act_output = compute_output(k, params);
 
@@ -248,15 +252,10 @@ public:
     return fitness;
   }
 };
-int *MLPClassifier::hexa_codes;
-int *MLPClassifier::inputs_mlp;
 
 // Let's typedef the problem so that the following is identical to example-001
 typedef MLPClassifier Problem;
-
-// With the above definitions of the parameters, particles, topology and stopping criteria
-// we can now set up our PSO algorithm
-typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
+typedef popot::algorithm::ParticleSPSO::VECTOR_TYPE TVector;
 
 // **************************************** //
 // ************** Main ******************** //
@@ -265,63 +264,69 @@ typedef popot::PSO::SPSO2011::PSO<Problem>::Type PSO;
 int main(int argc, char* argv[]) {
 
   RNG_GENERATOR::rng_srand();
+  RNG_GENERATOR::rng_warm_up();
+
+  // Create an instance of the problem
+  Problem p;
 
   // For testing
   std::vector<int> odd_numbers;
   std::vector<int> even_numbers;
   std::vector<int> unclassified_numbers;
-  double * params = new double[Problem::nb_parameters];
-
-  // Initialize our problem
-  // this actually allocates memory and initializes the boundaries
-  Problem::init();
+  double * params = new double[p.nb_parameters];
 
   // Let's create our swarm
-  PSO pso;
+  std::cout << " Nb params :" << p.nb_parameters << std::endl;
+  auto algo = popot::algorithm::spso2011(p.nb_parameters,
+  					 [&p] (size_t index) -> double { return p.get_lbound(index); },
+  					 [&p] (size_t index) -> double { return p.get_ubound(index); },
+  					 [&p] (double fitness, int epoch) -> bool { return p.stop(fitness, epoch);},
+  					 [&p] (TVector &pos) -> double { return p.evaluate(pos.getValuesPtr());}
+					 );
 
   // Let's generate the graph of the connections within the swarm
-  pso.generateGraph("connections.dot");
+  algo.generateGraph("connections.dot");
 
 
   ////////////////////////////////////////:
   // Test before learning :
   printf("--------------------------------------------- \n Before learning : \n");
-  printf("Best fitness : %f \n", pso.getBest().getFitness());
+  printf("Best fitness : %f \n", algo.getBest().getFitness());
   
-  for(int i = 0 ; i < Problem::nb_parameters ; ++i)
-    params[i] = pso.getBest().getPosition(i);
+  for(size_t i = 0 ; i < p.nb_parameters ; ++i)
+    params[i] = algo.getBest().getPosition()[i];
 
-  for(int i = 0 ; i < Problem::nb_digits; ++i)
+  for(size_t i = 0 ; i < p.nb_digits; ++i)
     {
-      if(Problem::compute_output(i, params) >= 0.85)
-	even_numbers.push_back(i);
-      else if(Problem::compute_output(i, params) <= 0.15)
+      if(p.compute_output(i, params) >= 0.85)
 	odd_numbers.push_back(i);
+      else if(p.compute_output(i, params) <= 0.15)
+	even_numbers.push_back(i);
       else
 	unclassified_numbers.push_back(i);
     }
 
   printf("I classified %i numbers as EVEN : \n", even_numbers.size());
-  Problem::display_digits(even_numbers);
+  p.display_digits(even_numbers);
   printf("I classified %i numbers as ODD : \n", odd_numbers.size());
-  Problem::display_digits(odd_numbers);
+  p.display_digits(odd_numbers);
   printf("I was not able to classify %i numbers : \n", unclassified_numbers.size());
-  Problem::display_digits(unclassified_numbers);  
+  p.display_digits(unclassified_numbers);  
 
   ////////////////////////////////////////:
   // We now iterate the algorithm
-  pso.run();
-  std::cout << "epoch : " << pso.epoch << std::endl;
+  algo.run();
+  std::cout << "epoch : " << algo.epoch << std::endl;
   std::cout << "\n" << std::endl;
 
   ////////////////////////////////////////:
   // Test after learning :
   printf("--------------------------------------------- \n After learning : \n");
-  printf("Best fitness : %f \n", pso.getBest().getFitness());
+  printf("Best fitness : %f \n", algo.getBest().getFitness());
 
   // Get the best parameters
-  for(int i = 0 ; i < Problem::nb_parameters ; ++i)
-    params[i] = pso.getBest().getPosition(i);
+  for(size_t i = 0 ; i < p.nb_parameters ; ++i)
+    params[i] = algo.getBest().getPosition()[i];
 
   // And test them on our inputs
   odd_numbers.clear();
@@ -329,25 +334,21 @@ int main(int argc, char* argv[]) {
   unclassified_numbers.clear();
   //for(int i = 0 ; i < Problem::nb_digits ; ++i)
   //    printf("%i : %f \n", i, Problem::compute_output(i, params));
-  for(int i = 0 ; i < Problem::nb_digits; ++i)
+  for(size_t i = 0 ; i < p.nb_digits; ++i)
     {
-      if(Problem::compute_output(i, params) >= 0.85)
-	even_numbers.push_back(i);
-      else if(Problem::compute_output(i, params) <= 0.15)
+      if(p.compute_output(i, params) >= 0.85)
 	odd_numbers.push_back(i);
+      else if(p.compute_output(i, params) <= 0.15)
+	even_numbers.push_back(i);
       else
 	unclassified_numbers.push_back(i);
     }
 
   printf("I classified %i numbers as EVEN : \n", even_numbers.size());
-  Problem::display_digits(even_numbers);
+  p.display_digits(even_numbers);
   printf("I classified %i numbers as ODD : \n", odd_numbers.size());
-  Problem::display_digits(odd_numbers);
+  p.display_digits(odd_numbers);
   printf("I was not able to classify %i numbers : \n", unclassified_numbers.size());
-  Problem::display_digits(unclassified_numbers);
-
-  // Free the memory used by the problem (e.g. the bounds)
-  Problem::free();
-
+  p.display_digits(unclassified_numbers);
 }
 

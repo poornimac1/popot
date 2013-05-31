@@ -1,3 +1,6 @@
+// Example of how to make use of the ABC algorithm on a custom evaluate function
+
+
 // We first define the generator of random numbers
 #include "rng_generators.h"
 typedef popot::rng::CRNG RNG_GENERATOR;
@@ -38,17 +41,6 @@ int main(int argc, char * argv[])
 				    [] (size_t index) -> double { return  10; },
 				    stop,
 				    [&count,dimension] (double * params) -> double { return evaluate(params, dimension, count);});
-
-  
-  /*
-
-    typedef popot::problems::StaticRosenbrock Problem;
-  auto algo = popot::algorithm::abc(colony_size, dimension,
-				    Problem::get_lbound,
-				    Problem::get_ubound,
-				    Problem::stop,
-				    [&count,dimension] (double * x) -> double { return Problem::evaluate(x, dimension);});
-  */
 
   algo.init();
   algo.run();
