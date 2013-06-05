@@ -2,7 +2,7 @@
 // Using SPSO2011
 //       C random number
 //       F0 : Sphere in dimension 30
-//g++ -o bench bench.cc -DGCC_RNG=CRNG -DGCC_PB='F0<30>' -DGCC_ALGO='SPSO2011::PSO<Problem>::Type' `pkg-config --libs --cflags popot` -O3
+//g++ -o bench bench.cc -DGCC_RNG=CRNG -DGCC_PB='F0' -DGCC_DIM=10 -DGCC_ALGO='SPSO2011::PSO<Problem>::Type' `pkg-config --libs --cflags popot` -O3
 
 #include <sys/time.h>
 #include <typeinfo>
@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
   
   std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
 	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
+	    << "DIM=" << STRINGIZE_VALUE_OF(GCC_DIM) << ";"
 	    << "ALGO=" << GCC_ALGO_NAME << ";"
     	    << bm ;
   
