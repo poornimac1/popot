@@ -7,24 +7,6 @@ typedef popot::algorithm::ParticleSPSO::VECTOR_TYPE TVector;
 namespace BenchmarkProblems
 {
 
-  class F0
-  {
-  public:
-    int _count;
-    size_t _dimension;
-
-    F0(size_t dimension) : _dimension(dimension), _count(0)  {}
-    double get_lbound(int index)          { return ;            }
-    double get_ubound(int index)          { return ;             }	
-    std::string name(void)                { return "SPSO2011-";   }
-    bool has_failed(double fitness)       { return ;  }
-    bool stop(double fitness, int epoch)  { return    }
-
-    double evaluate(TVector &pos)
-    {
-    }
-  };
-
   /**
    * F0 : N-dimensional Sphere
    */
@@ -35,6 +17,7 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F0(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F0(const F0& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F0";   }
@@ -64,11 +47,12 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F1(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F1(const F1& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -600;            }
     double get_ubound(int index)          { return 600;             }	
     std::string name(void)                { return "SPSO2011-F1";   }
     bool has_failed(double fitness)       { return fitness > 0.05;  }
-    bool stop(double fitness, int epoch)  { return (fitness <= 0.05) || (count >= 75000);   }
+    bool stop(double fitness, int epoch)  { return (fitness <= 0.05) || (_count >= 75000);   }
 
     double evaluate(TVector &pos)
     {
@@ -100,11 +84,12 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F2(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F2(const F2& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -30;            }
     double get_ubound(int index)          { return 30;             }	
     std::string name(void)                { return "SPSO2011-F2";  }
     bool has_failed(double fitness)       { return fitness > 100;  }
-    bool stop(double fitness, int epoch)  { return (fitness <= 100) || (count >= 75000);  }
+    bool stop(double fitness, int epoch)  { return (fitness <= 100) || (_count >= 75000);  }
 
     double evaluate(TVector &pos)
     {
@@ -133,15 +118,16 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F3(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F3(const F3& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -5.12;         }
     double get_ubound(int index)          { return 5.12;          }	
     std::string name(void)                { return "SPSO2011-F3"; }
     bool has_failed(double fitness)       { return fitness > 50;  }
-    bool stop(double fitness, int epoch)  { return (fitness <= 50) || (count >= 75000);  }
+    bool stop(double fitness, int epoch)  { return (fitness <= 50) || (_count >= 75000);  }
 
     double evaluate(TVector &pos)
     {
-      count++;
+      _count++;
       double fit = 0.0;
       for(int i = 0 ; i < _dimension ; ++i)
 	fit += pos[i]*pos[i] - 10.0*cos(2.0*M_PI*pos[i]);
@@ -166,11 +152,12 @@ namespace BenchmarkProblems
       if(dimension != 2)
 	std::cerr << "Warning, Tripod is working in dimension 2 not " << dimension << " !! " << std::endl;
     }
+    F4(const F4& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F4";   }
     bool has_failed(double fitness)       { return fitness > 1e-4;  }
-    bool stop(double fitness, int epoch)  { return  (fitness <= 1e-4) || (count >= 1e4);  }
+    bool stop(double fitness, int epoch)  { return  (fitness <= 1e-4) || (_count >= 1e4);  }
 
     int sign(double x)
     {
@@ -193,8 +180,8 @@ namespace BenchmarkProblems
       f = s21 * (fabs (pos[0]) +fabs(pos[1]+50)); // Solution on (0,-50)  
       f = f + s22 * (s11 * (1 + fabs (pos[0] + 50) +
 			    fabs (pos[1] - 50)) + s12 * (2 +
-							    fabs (pos[0] - 50) +
-							    fabs (pos[1] - 50)));
+							 fabs (pos[0] - 50) +
+							 fabs (pos[1] - 50)));
       //std::cout << "Evaluatation at " << pos[0] << ";" << pos[1] << " -> " << f << std::endl;
 
       return fabs(f);
@@ -215,6 +202,7 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F5(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F5(const F5& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -30;            }
     double get_ubound(int index)          { return 30;             }	
     std::string name(void)                { return "SPSO2011-F5";  }
@@ -246,17 +234,18 @@ namespace BenchmarkProblems
   class F6
   {
   public:
-    const double fobg;
+    const double fobj;
     const double epsilon;
     int _count;
     size_t _dimension;
 
     F6(size_t dimension) : _dimension(dimension), _count(0), fobj(-12569.5), epsilon(2569.5)  {}
+    F6(const F6& p) : fobj(p.fobj), epsilon(p.epsilon),_dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -500;            }
     double get_ubound(int index)          { return 500;             }	
     std::string name(void)                { return "SPSO2011-F6";   }
-    bool has_failed(double fitness)       { return ;  }
-    bool stop(double fitness, int epoch)  { return    }
+    bool has_failed(double fitness)       { return fitness > epsilon;  }
+    bool stop(double fitness, int epoch)  { return (fitness <= epsilon) || (_count >= 300000);   }
 
     double evaluate(TVector &pos)
     {
@@ -279,6 +268,7 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F7(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F7(const F7& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F7";   }
@@ -313,6 +303,7 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F8(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F8(const F8& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -10;            }
     double get_ubound(int index)          { return 10;             }	
     std::string name(void)                { return "SPSO2011-F8";  }
@@ -344,11 +335,12 @@ namespace BenchmarkProblems
     size_t _dimension;
 
     F9(size_t dimension) : _dimension(dimension), _count(0)  {}
+    F9(const F9& p) : _dimension(p._dimension), _count(p._count) {}
     double get_lbound(int index)          { return -_dimension*_dimension;            }
     double get_ubound(int index)          { return _dimension*_dimension;             }	
     std::string name(void)                { return "SPSO2011-F9";   }
     bool has_failed(double fitness)       { return fitness > 0;     }
-    bool stop(double fitness, int epoch)  { return  return (fitness <= 0) || (_count >= 40000);   }
+    bool stop(double fitness, int epoch)  { return (fitness <= 0) || (_count >= 40000);   }
 
     double evaluate(TVector &pos)
     {
