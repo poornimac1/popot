@@ -356,10 +356,10 @@ namespace BenchmarkProblems
     {
       _count++;
       double fit = 0.0;
-      for(int i = 0 ; i < _dimension ; ++i)
+      for(size_t i = 0 ; i < _dimension ; ++i)
 	fit += (pos[i]-1)*(pos[i]-1);
-      for(int i = 1 ; i < _dimension ; ++i)
-	fit += (pos[i])*(pos[i-1]);  
+      for(size_t i = 1 ; i < _dimension ; ++i)
+	fit -= (pos[i])*(pos[i-1]);  
       return fit;
     }
   };

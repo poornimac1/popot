@@ -55,15 +55,15 @@ int main(int argc, char* argv[]) {
 					);
 
   auto bm = popot::benchmark::make_benchmark(algo, pb, N_RUNS);
-  bm.run(1);
+  bm.run();
 
   //
   
   std::cout << "RNG=" << STRINGIZE_VALUE_OF(GCC_RNG) << ";" 
 	    << "PB=" << STRINGIZE_VALUE_OF(GCC_PB) << ";"
-	    << "DIM=" << STRINGIZE_VALUE_OF(GCC_DIM) << ";";
-    //<< "ALGO=" << GCC_ALGO_NAME << ";"
-    //	    << bm ;
+	    << "DIM=" << STRINGIZE_VALUE_OF(GCC_DIM) << ";"
+	    << "ALGO=" << STRINGIZE_VALUE_OF(GCC_ALGO) << ";"
+	    << bm ;
   
 
 }
