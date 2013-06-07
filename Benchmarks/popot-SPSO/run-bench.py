@@ -2,17 +2,17 @@
 
 import os
 
+#g++ -o bench bench.cc -DGCC_ALGO=spso2011 -DGCC_RNG=CRNG -DGCC_PB=F0 -DGCC_DIM=10 `pkg-config --libs --cflags popot` -O3 -std=c++0x
 
+Algo= ['spso2006','spso2011']
+Pbs = ['F0', 'F1','F2', 'F3', 'F4','F5','F7','F8','F9']
+Dims = ['30', '30', '30', '30', '2', '30', '40', '30', '40']
 
-Algo= ['SPSO2006','SPSO2011']
-Pbs = ['F0<30>', 'F1<30>','F2<30>', 'F3<30>', 'F4','F5<30>','F7<40>','F8<30>','F9<40>'];
-rng = ['CRNG','MersenneRNG'] # KissRNG (only on 32 bits)
 for alg in Algo:
     os.system('rm -f res_'+alg+'.data; touch res_'+alg+'.data');
-    for rn in rng:
-        for pb in Pbs:
-            mystr = 'g++ -o bench bench.cc -D\'GCC_RNG='+rn+'\' -D\'GCC_PB='+pb+'\' -D\'GCC_ALGO='+alg+'::PSO<Problem>::Type\' -DGCC_ALGO_NAME=\\"'+alg+'\\" `pkg-config --libs --cflags popot` -O3'
-            print mystr
-            os.system(mystr)
-            os.system('./bench >> res_'+alg+'.data')
+    for pb, d in zip(Pbs, Dims):
+        mystr = 'g++ -o bench bench.cc -DGCC_ALGO='+alg+' -DGCC_RNG=CRNG -DGCC_PB='+pb+' -DGCC_DIM='+d+' `pkg-config --libs --cflags popot` -O3 -std=c++0x'
+        print mystr
+        os.system(mystr)
+        os.system('./bench >> res_'+alg+'.data')
 

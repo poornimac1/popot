@@ -27,8 +27,8 @@ latex_file.write('\\usepackage{graphics}\n')
 latex_file.write('\\setlength{\\headheight}{15.2pt}\n\n')
 latex_file.write('\\begin{document}\n')
 
-column_formats = ['%s','%s','%s','%d','%.2e','%.2e','%.2e','%.2e','%.2e','%s']
-column_names = ['RNG','Function', 'Algorithm', 'Nb trials', 'Error (mean)' ,'Error (std)', 'FE (mean)', 'Log progress','Best min','Success rate']
+column_formats = ['%s','%s','%s', '%s','%d','%.2e','%.2e','%.2e','%.2e','%.2e','%s']
+column_names = ['RNG','Function', 'Dim', 'Algorithm', 'Nb trials', 'Error (mean)' ,'Error (std)', 'FE (mean)', 'Log progress','Best min','Success rate']
 
 latex_file.write('\\begin{longtable}{')
 for i in range(len(column_names)):
