@@ -18,6 +18,7 @@ namespace BenchmarkProblems
 
     F0(size_t dimension) : _dimension(dimension), _count(0)  {}
     F0(const F0& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F0";   }
@@ -48,6 +49,7 @@ namespace BenchmarkProblems
 
     F1(size_t dimension) : _dimension(dimension), _count(0)  {}
     F1(const F1& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -600;            }
     double get_ubound(int index)          { return 600;             }	
     std::string name(void)                { return "SPSO2011-F1";   }
@@ -85,6 +87,7 @@ namespace BenchmarkProblems
 
     F2(size_t dimension) : _dimension(dimension), _count(0)  {}
     F2(const F2& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -30;            }
     double get_ubound(int index)          { return 30;             }	
     std::string name(void)                { return "SPSO2011-F2";  }
@@ -119,6 +122,7 @@ namespace BenchmarkProblems
 
     F3(size_t dimension) : _dimension(dimension), _count(0)  {}
     F3(const F3& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -5.12;         }
     double get_ubound(int index)          { return 5.12;          }	
     std::string name(void)                { return "SPSO2011-F3"; }
@@ -153,6 +157,7 @@ namespace BenchmarkProblems
 	std::cerr << "Warning, Tripod is working in dimension 2 not " << dimension << " !! " << std::endl;
     }
     F4(const F4& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F4";   }
@@ -203,6 +208,7 @@ namespace BenchmarkProblems
 
     F5(size_t dimension) : _dimension(dimension), _count(0)  {}
     F5(const F5& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -30;            }
     double get_ubound(int index)          { return 30;             }	
     std::string name(void)                { return "SPSO2011-F5";  }
@@ -241,6 +247,7 @@ namespace BenchmarkProblems
 
     F6(size_t dimension) : _dimension(dimension), _count(0), fobj(-12569.5), epsilon(2569.5)  {}
     F6(const F6& p) : fobj(p.fobj), epsilon(p.epsilon),_dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -500;            }
     double get_ubound(int index)          { return 500;             }	
     std::string name(void)                { return "SPSO2011-F6";   }
@@ -269,6 +276,7 @@ namespace BenchmarkProblems
 
     F7(size_t dimension) : _dimension(dimension), _count(0)  {}
     F7(const F7& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -100;            }
     double get_ubound(int index)          { return 100;             }	
     std::string name(void)                { return "SPSO2011-F7";   }
@@ -304,6 +312,7 @@ namespace BenchmarkProblems
 
     F8(size_t dimension) : _dimension(dimension), _count(0)  {}
     F8(const F8& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -10;            }
     double get_ubound(int index)          { return 10;             }	
     std::string name(void)                { return "SPSO2011-F8";  }
@@ -336,6 +345,7 @@ namespace BenchmarkProblems
 
     F9(size_t dimension) : _dimension(dimension), _count(0)  {}
     F9(const F9& p) : _dimension(p._dimension), _count(p._count) {}
+    void init(void) { _count = 0;}
     double get_lbound(int index)          { return -_dimension*_dimension;            }
     double get_ubound(int index)          { return _dimension*_dimension;             }	
     std::string name(void)                { return "SPSO2011-F9";   }

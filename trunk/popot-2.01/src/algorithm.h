@@ -103,7 +103,8 @@ namespace popot
 	     const PARTICLE& p,
 	     EvaluationMode evaluation_mode,
 	     bool reevaluate_best_before_updating) 
-	: _best_particle(dimension),
+	: particles_indexes(0),
+	  _best_particle(dimension),
 	  _dimension(dimension),
 	  _swarm_size(swarm_size),
 	  _lbound(lbound),
@@ -122,12 +123,25 @@ namespace popot
 	  epoch(0),
 	  nb_new_neigh(0)
 	{
+	  init();
+	}
+
+	virtual ~Base(void)
+	{
+	  delete[] particles_indexes;
+	}
+
+	void init(void)
+	{
+	
 	  //
-	  particles_indexes = new size_t[swarm_size];
+	  if(particles_indexes != 0)
+	    delete[] particles_indexes;
+	  particles_indexes = new size_t[_swarm_size];
 
 	  // Declare our particles
 	  particles.clear();
-	  for(size_t i = 0 ; i < swarm_size ; ++i)
+	  for(size_t i = 0 ; i < _swarm_size ; ++i)
 	    {
 	      // Create the particle
 	      particles.push_back(PARTICLE(_dimension));
@@ -157,11 +171,6 @@ namespace popot
 	  for(size_t i = 1 ; i < neighborhoods.size() ; ++i)
 	    if(neighborhoods[i]->findBest()->compare(_best_particle) < 0)
 	      _best_particle = *(neighborhoods[i]->getBest());
-	}
-
-	virtual ~Base(void)
-	{
-	  delete[] particles_indexes;
 	}
 
 

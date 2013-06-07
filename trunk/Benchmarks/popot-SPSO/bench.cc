@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
   					 [&pb] (TVector &pos) -> double { return pb.evaluate(pos);}
 					);
 
-  auto bm = popot::benchmark::make_benchmark(popot::algorithm::GCC_ALGO , algo, pb, N_RUNS);
-  bm.run(0);
+  auto bm = popot::benchmark::make_benchmark(algo, pb, N_RUNS);
+  bm.run(1);
 
   //
   
