@@ -350,5 +350,7 @@ int main(int argc, char* argv[]) {
   p.display_digits(odd_numbers);
   printf("I was not able to classify %i numbers : \n", unclassified_numbers.size());
   p.display_digits(unclassified_numbers);
+
+  delete[] params;
 }
 
