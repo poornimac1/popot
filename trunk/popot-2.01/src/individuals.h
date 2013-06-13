@@ -561,6 +561,11 @@ namespace popot
     	  for(i = 0 ; i < vel.size() ; ++i)
     	    vel[i] = PARAMS::w() * vel[i] + xpi[i] - pos[i];
 
+	  delete[] xpi;
+	  delete[] p1;
+	  delete[] p2;
+	  delete[] gr;
+
       }
       
       // 2011 !!!!!
